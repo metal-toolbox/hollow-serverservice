@@ -1,0 +1,10 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+.DS_Store
+*.test
+*.out
+/dist
+.dev-data/*
