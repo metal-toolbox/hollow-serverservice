@@ -1,0 +1,54 @@
+repository:
+  # See https://developer.github.com/v3/repos/#edit for all available settings.
+  name: hollow
+  description: description of repo
+  homepage: https://tinkerbell.org/
+  # private: false
+  visibility: internal
+  has_issues: true
+  has_wiki: true
+  has_downloads: true
+  default_branch: main
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+
+# Labels: define labels for Issues and Pull Requests
+# labels:
+#   - name: bug
+#     color: CC0000
+#   - name: feature
+#     color: 336699
+#   - name: first-timers-only
+#     # include the old name to rename and existing label
+#     oldname: Help Wanted
+
+collaborators:
+  - username: nicolerenee
+    permission: admin
+
+teams:
+  - name: delivery-engineering
+    permission: push
+
+branches:
+  - name: main
+    # https://developer.github.com/v3/repos/branches/#update-branch-protection
+    # Branch Protection settings. Set to null to disable
+    protection:
+      # Required. Require at least one approving review on a pull request, before merging. Set to null to disable.
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        dismissal_restrictions:
+          users: []
+          teams: []
+      required_status_checks:
+        strict: true
+        contexts: []
+      enforce_admins: true
+      restrictions:
+        apps: []
+        users: []
+        teams: []
