@@ -1,5 +1,5 @@
 all: lint test
-PHONY: test coverage lint golint clean vendor
+PHONY: test coverage lint golint clean vendor local-dev-databases
 GOOS=linux
 
 
@@ -25,3 +25,7 @@ clean:
 
 vendor:
 	@go mod download
+
+local-dev-databases:
+	@docker exec -ti hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_dev"
+	@docker exec -ti hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_test"

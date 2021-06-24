@@ -10,5 +10,11 @@ services:
     ports:
         - "26257:26257"
         - "8080:8080"
-  # server:
-    # build: Dockerfile.dev
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    links:
+      - db

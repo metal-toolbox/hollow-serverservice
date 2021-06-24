@@ -22,7 +22,7 @@ func init() {
 	serveCmd.Flags().String("listen", "0.0.0.0:8000", "address to listen on")
 	viperBindFlag("listen", serveCmd.Flags().Lookup("listen"))
 
-	serveCmd.Flags().String("db-uri", "postgresql://root@localhost:26257/hollow_dev?sslmode=disable", "URI for database connection")
+	serveCmd.Flags().String("db-uri", "postgresql://root@db:26257/hollow_dev?sslmode=disable", "URI for database connection")
 	viperBindFlag("db.uri", serveCmd.Flags().Lookup("db-uri"))
 }
 
