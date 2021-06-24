@@ -17,6 +17,7 @@ func String() string {
 	return fmt.Sprintf("%s (%s@%s by %s)", version, commit, date, builtBy)
 }
 
+// Version returns the release version without additional version information
 func Version() string {
 	return version
 }
