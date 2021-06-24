@@ -10,6 +10,7 @@ services:
     ports:
         - "26257:26257"
         - "8080:8080"
+    restart: unless-stopped
   server:
     build:
       context: .
@@ -18,3 +19,4 @@ services:
       - "8000:8000"
     links:
       - db
+    restart: unless-stopped

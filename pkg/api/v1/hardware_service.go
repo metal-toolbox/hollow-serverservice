@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 )
@@ -34,7 +33,7 @@ func (h *HardwareServiceClient) ListBIOSConfigs(ctx context.Context, hwUUID uuid
 		return nil, err
 	}
 
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := h.client.do(request)
 	if err != nil {
 		return nil, err
 	}

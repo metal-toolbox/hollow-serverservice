@@ -31,7 +31,7 @@ func init() {
 func client(ctx context.Context) {
 	uuid := uuid.New()
 
-	client, err := hollow.NewClient("superSecret", viper.GetString("api"))
+	client, err := hollow.NewClient("superSecret", viper.GetString("api"), nil)
 	if err != nil {
 		return
 	}

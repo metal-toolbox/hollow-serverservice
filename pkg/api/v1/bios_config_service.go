@@ -2,7 +2,6 @@ package hollow
 
 import (
 	"context"
-	"net/http"
 )
 
 const (
@@ -26,10 +25,10 @@ func (b *BIOSConfigServiceClient) CreateBIOSConfig(ctx context.Context, bc BIOSC
 		return err
 	}
 
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := b.client.do(request)
 	if err != nil {
 		return err
 	}
 
-	return checkResponse(resp)
+	return ensureValidServerResponse(resp)
 }

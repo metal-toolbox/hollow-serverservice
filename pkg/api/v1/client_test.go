@@ -40,7 +40,7 @@ func TestNewClient(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		c, err := hollow.NewClient(tt.authToken, tt.url)
+		c, err := hollow.NewClient(tt.authToken, tt.url, nil)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

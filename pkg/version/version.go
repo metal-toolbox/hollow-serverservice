@@ -16,3 +16,7 @@ var (
 func String() string {
 	return fmt.Sprintf("%s (%s@%s by %s)", version, commit, date, builtBy)
 }
+
+func Version() string {
+	return version
+}

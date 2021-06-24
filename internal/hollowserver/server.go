@@ -10,6 +10,7 @@ import (
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.uber.org/zap"
 
+	"go.metalkube.net/hollow/internal/db"
 	v1api "go.metalkube.net/hollow/pkg/api/v1"
 )
 
@@ -54,8 +55,10 @@ func (s *Server) setup() http.Handler {
 		v1api.RouteMap(v1)
 	}
 
-	// Add endpoints
-	// router.GET("/status", status)
+	// Health endpoints
+	r.GET("/healthz", livenessCheck)
+	r.GET("/healthz/liveness", livenessCheck)
+	r.GET("/healthz/readiness", readinessCheck)
 
 	return r
 }
@@ -67,5 +70,27 @@ func (s *Server) NewServer() *http.Server {
 		Addr:         s.Listen,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
+	}
+}
+
+// livenessCheck ensures that the server is up and responding
+func livenessCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status": "UP",
+	})
+}
+
+// readinessCheck ensures that the server is up and that we are able to process
+// requests. Currently our only dependency is the DB so we just ensure that is
+// responding.
+func readinessCheck(c *gin.Context) {
+	if db.Ping() {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "UP",
+		})
+	} else {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status": "DOWN",
+		})
 	}
 }

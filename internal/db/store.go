@@ -35,6 +35,16 @@ func NewPostgresStore(uri string, lg *zap.Logger) error {
 	return migrate()
 }
 
+// Ping checks to ensure that the database is available and processing queries
+func Ping() bool {
+	res := db.Exec("select 1 as result;")
+	if res.Error != nil {
+		return false
+	}
+
+	return res.RowsAffected == int64(1)
+}
+
 func migrate() error {
 	return db.AutoMigrate(
 		&BIOSConfig{},
