@@ -1,0 +1,50 @@
+project_name: hollow
+before:
+  hooks:
+    - go mod download
+
+builds:
+  -
+    id: hollow
+    binary: hollow
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    ldflags:
+      - -s -w
+      - -X go.metalkube.net/hollow/pkg/version.version={{.Version}}
+      - -X go.metalkube.net/hollow/pkg/version.commit={{.Commit}}
+      - -X go.metalkube.net/hollow/pkg/version.date={{.Date}}
+      - -X go.metalkube.net/hollow/pkg/version.builtBy=goreleaser
+
+archives:
+  -
+    id: "hollow"
+    format: tar.gz
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+    files:
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+dockers:
