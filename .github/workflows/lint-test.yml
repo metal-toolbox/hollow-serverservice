@@ -29,6 +29,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.16'
+
+      - name: Start test database
+        run: docker-compose up -d db
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
 
@@ -48,6 +52,9 @@ jobs:
 
       - name: Run go tests and generate coverage report
         run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+
+      - name: Stop test database
+        run: docker-compose down
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1
