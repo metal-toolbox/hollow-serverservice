@@ -49,5 +49,5 @@ changelog:
 dockers:
   -
     image_templates:
-      - "quay.io/packethost/{{.ProjectName}}:{{ .Tag }}"
+      - "quay.io/packet/{{.ProjectName}}:{{ .Tag }}"
     dockerfile: Dockerfile
