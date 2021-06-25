@@ -18,6 +18,7 @@ import (
 type Server struct {
 	Logger *zap.Logger
 	Listen string
+	Debug  bool
 }
 
 var (
@@ -65,6 +66,10 @@ func (s *Server) setup() http.Handler {
 
 // NewServer returns a configured server
 func (s *Server) NewServer() *http.Server {
+	if !s.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	return &http.Server{
 		Handler:      s.setup(),
 		Addr:         s.Listen,

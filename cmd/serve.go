@@ -35,11 +35,10 @@ func serve() {
 		"address", viper.GetString("listen"),
 	)
 
-	// gin.SetMode(gin.ReleaseMode)
-
 	hs := &hollowserver.Server{
 		Logger: logger.Desugar(),
 		Listen: viper.GetString("listen"),
+		Debug:  viper.GetBool("logging.debug"),
 	}
 	s := hs.NewServer()
 

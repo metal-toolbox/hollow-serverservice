@@ -28,7 +28,7 @@ func hardwareBIOSConfigList(c *gin.Context) {
 
 	bcl, err := db.BIOSConfigList(hwUUID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed fetching recrods from datastore", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed fetching records from datastore", "error": err.Error()})
 		return
 	}
 

@@ -18,6 +18,7 @@ func TestCreateHardware(t *testing.T) {
 		errorMsg    string
 	}{
 		{"missing name", db.Hardware{}, true, "validation failed: facility is a required hardware attribute"},
+		{"happy path", db.Hardware{FacilityCode: "TEST1"}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -41,7 +42,7 @@ func TestHardwareList(t *testing.T) {
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing name", []db.Hardware{fixtureHardware}, false, ""},
+		{"happy path", []db.Hardware{fixtureHardware}, false, ""},
 	}
 
 	for _, tt := range testCases {

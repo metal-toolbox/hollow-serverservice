@@ -15,7 +15,7 @@ type MockHTTPRequestDoer struct {
 	Error    error
 }
 
-// Do sends an mocks an HTTP request and response for use in testing the narwhal client
+// Do mocks a HTTP request and response for use in testing the client without a server
 func (md *MockHTTPRequestDoer) Do(req *http.Request) (*http.Response, error) {
 	// For tests to make sure context is passed through correctly
 	_, ok := req.Context().Deadline()
