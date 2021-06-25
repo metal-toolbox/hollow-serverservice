@@ -16,7 +16,6 @@ const (
 // HardwareService provides the ability to interact with hardware via Hollow
 type HardwareService interface {
 	ListBIOSConfigs(context.Context, uuid.UUID) ([]BIOSConfig, error)
-	CreateBIOSConfig(context.Context, uuid.UUID, BIOSConfig) error
 }
 
 // HardwareServiceClient implements HardwareService
@@ -38,6 +37,10 @@ func (h *HardwareServiceClient) ListBIOSConfigs(ctx context.Context, hwUUID uuid
 		return nil, err
 	}
 
+	if err := ensureValidServerResponse(resp); err != nil {
+		return nil, err
+	}
+
 	defer resp.Body.Close()
 
 	var bcl []BIOSConfig
@@ -46,9 +49,4 @@ func (h *HardwareServiceClient) ListBIOSConfigs(ctx context.Context, hwUUID uuid
 	}
 
 	return bcl, nil
-}
-
-// CreateBIOSConfig will create a new BIOS Config for a given piece of hardware
-func (h *HardwareServiceClient) CreateBIOSConfig(ctx context.Context, hwUUID uuid.UUID, bc BIOSConfig) error {
-	return nil
 }

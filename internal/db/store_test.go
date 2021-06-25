@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -50,6 +51,7 @@ func databaseTest(t *testing.T) {
 
 func cleanDB() {
 	d := testDB.Session(&gorm.Session{AllowGlobalUpdate: true})
+	d.Delete(&db.BIOSConfig{})
 	d.Delete(&db.Hardware{})
 }
 
@@ -65,4 +67,26 @@ func TestNewPostgresStore(t *testing.T) {
 func TestNewPostgresStoreFailure(t *testing.T) {
 	err := db.NewPostgresStore("invalid-uri", zap.NewNop())
 	assert.Error(t, err)
+}
+
+func TestPing(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping database test in short mode")
+	}
+
+	var testCases = []struct {
+		testName       string
+		dbURI          string
+		expectedResult bool
+	}{
+		{"happy path", testDBURI, true},
+	}
+
+	for _, tt := range testCases {
+		err := db.NewPostgresStore(tt.dbURI, zap.NewNop())
+		require.NoError(t, err)
+
+		res := db.Ping()
+		assert.Equal(t, tt.expectedResult, res, tt.testName)
+	}
 }

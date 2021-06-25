@@ -30,8 +30,8 @@ func NewTestStore(uri string, lg *zap.Logger) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := db.Exec("CREATE DATABASE hollow_test;").Error; err != nil {
-		fmt.Println("test database failed to create, it might already exist")
+	if err := db.Exec("CREATE DATABASE IF NOT EXISTS hollow_test;").Error; err != nil {
+		fmt.Println("test database failed to create")
 	}
 
 	err = migrate()

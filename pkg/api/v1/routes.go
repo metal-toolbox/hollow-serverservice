@@ -6,7 +6,7 @@ import (
 
 // RouteMap will add the routes for this API version to a router group
 func RouteMap(rg *gin.RouterGroup) {
-	rg.GET("/hardware", hardwareList)
+	rg.GET("/hardware")
 	rg.GET("/hardware/:uuid/bios-configs", hardwareBIOSConfigList)
 	rg.POST("/bios-config", biosConfigCreate)
 }

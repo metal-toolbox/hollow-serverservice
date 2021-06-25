@@ -10,11 +10,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
+func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 	ctx := context.Background()
 
 	d := time.Now().Add(1 * time.Millisecond)
@@ -23,18 +24,21 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 	defer cancel()
 
 	exampleBiosResults := `{
-    "open": {
-      "boot_mode": "Bios"
-    }
-  }`
+			"open": {
+				"boot_mode": "Bios"
+			}
+		}`
 
 	jsonBios, err := json.Marshal(exampleBiosResults)
 	if err != nil {
 		fmt.Println("failed to convert example bios to json")
 	}
 
+	testUUID := uuid.New()
+
 	var testCases = []struct {
 		testName     string
+		uuid         uuid.UUID
 		bios         hollow.BIOSConfig
 		ctx          context.Context
 		responseCode int
@@ -43,7 +47,8 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 	}{
 		{
 			"happy path",
-			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
+			testUUID,
+			hollow.BIOSConfig{HardwareUUID: testUUID, ConfigValues: jsonBios},
 			ctx,
 			http.StatusOK,
 			false,
@@ -51,14 +56,16 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 		},
 		{
 			"server returns an error",
+			testUUID,
 			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
 			ctx,
 			http.StatusUnauthorized,
 			true,
-			"server error: status_code: 401, message: response body",
+			"server error: status_code: 401, message:",
 		},
 		{
 			"fake timeout",
+			testUUID,
 			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
 			timeCtx,
 			http.StatusOK,
@@ -68,16 +75,19 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		c := mockClient("response body", tt.responseCode)
+		jsonResponse, err := json.Marshal([]hollow.BIOSConfig{tt.bios})
+		require.Nil(t, err)
 
-		err := c.BIOSConfig.CreateBIOSConfig(tt.ctx, tt.bios)
+		c := mockClient(string(jsonResponse), tt.responseCode)
+
+		res, err := c.Hardware.ListBIOSConfigs(tt.ctx, tt.uuid)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		} else {
 			assert.NoError(t, err, tt.testName)
-			assert.NotNil(t, c, tt.testName)
+			assert.NotNil(t, res, tt.testName)
 		}
 	}
 }

@@ -2,6 +2,7 @@ package hollow
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -12,7 +13,8 @@ type ClientError struct {
 
 // ServerError is returned when the client receives an error back from the server
 type ServerError struct {
-	Message string
+	Message    string
+	StatusCode int
 }
 
 // Error returns the ClientError in string format
@@ -22,7 +24,7 @@ func (e *ClientError) Error() string {
 
 // Error returns the ServerError in string format
 func (e *ServerError) Error() string {
-	return fmt.Sprintf("hollow client received a server error: %s", e.Message)
+	return fmt.Sprintf("hollow client received a server error: status_code: %d, message: %s", e.StatusCode, e.Message)
 }
 
 func newClientError(msg string) *ClientError {
@@ -33,8 +35,16 @@ func newClientError(msg string) *ClientError {
 
 func ensureValidServerResponse(resp *http.Response) error {
 	if resp.StatusCode >= http.StatusMultiStatus {
+		defer resp.Body.Close()
+
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			b = []byte("failed to read body")
+		}
+
 		return &ServerError{
-			Message: fmt.Sprintf("invalid response code: %d", resp.StatusCode),
+			StatusCode: resp.StatusCode,
+			Message:    string(b),
 		}
 	}
 
