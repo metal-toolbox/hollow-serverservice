@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 // Hardware represents a piece of hardware in a facility. These are the
@@ -16,17 +15,17 @@ type Hardware struct {
 	UpdatedAt    time.Time
 	DeletedAt    time.Time `gorm:"index"`
 	FacilityCode string
-	// BIOSConfigs  []BIOSConfig
+	BIOSConfigs  []BIOSConfig
 }
 
 // BeforeSave ensures that the hardware passes validation checks
-func (h *Hardware) BeforeSave(tx *gorm.DB) (err error) {
-	if h.FacilityCode == "" {
-		return requiredFieldMissing("hardware", "facility")
-	}
+// func (h *Hardware) BeforeSave(tx *gorm.DB) (err error) {
+// 	if h.FacilityCode == "" {
+// 		return requiredFieldMissing("hardware", "facility")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // CreateHardware will persist hardware into the backend datastore
 func CreateHardware(h Hardware) error {
@@ -41,4 +40,26 @@ func HardwareList() ([]Hardware, error) {
 	}
 
 	return hw, nil
+}
+
+// FindOrCreateHardwareByUUID will return an existing hardware instance if one
+// already exists for the given UUID, if one doesn't then it will create a new
+// instance in the database and return it.
+func FindOrCreateHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
+	var hw Hardware
+
+	if err := db.FirstOrCreate(&hw, Hardware{ID: hwUUID}).Error; err != nil {
+		return nil, err
+	}
+
+	return &hw, nil
+}
+
+// HardwareExists will return true or false based on if the UUID already exists
+func HardwareExists(hwUUID uuid.UUID) bool {
+	var count int64
+
+	db.Model(&Hardware{}).Where("id = ?", hwUUID).Count(&count)
+
+	return count == int64(1)
 }

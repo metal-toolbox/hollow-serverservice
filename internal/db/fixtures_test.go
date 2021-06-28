@@ -9,8 +9,8 @@ import (
 
 var (
 	fixtureHardware      = db.Hardware{ID: uuid.New(), FacilityCode: "TEST1"}
-	fixtureBIOSConfigOld = db.BIOSConfig{ID: uuid.New(), HardwareUUID: fixtureHardware.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "old"}`))}
-	fixtureBIOSConfigNew = db.BIOSConfig{ID: uuid.New(), HardwareUUID: fixtureHardware.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "new"}`))}
+	fixtureBIOSConfigOld = db.BIOSConfig{ID: uuid.New(), HardwareID: fixtureHardware.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "old"}`))}
+	fixtureBIOSConfigNew = db.BIOSConfig{ID: uuid.New(), HardwareID: fixtureHardware.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "new"}`))}
 )
 
 func setupTestData() error {
