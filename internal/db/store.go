@@ -57,5 +57,7 @@ func migrate() error {
 		&Attributes{},
 		&BIOSConfig{},
 		&Hardware{},
+		&HardwareComponent{},
+		&HardwareComponentType{},
 	)
 }

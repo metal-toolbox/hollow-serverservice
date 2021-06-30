@@ -72,7 +72,7 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 	}
 }
 
-func TestGetHardwareWithFilter(t *testing.T) {
+func TestGetHardware(t *testing.T) {
 	databaseTest(t)
 
 	var testCases = []struct {
@@ -202,6 +202,8 @@ func TestGetHardwareWithFilter(t *testing.T) {
 			var rIDs []uuid.UUID
 			for _, h := range r {
 				rIDs = append(rIDs, h.ID)
+				// Ensure preload works. All fixture data has 2 hardware components
+				assert.Len(t, h.HardwareComponents, 2, tt.testName)
 			}
 
 			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)

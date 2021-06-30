@@ -51,8 +51,11 @@ func databaseTest(t *testing.T) {
 
 func cleanDB() {
 	d := testDB.Session(&gorm.Session{AllowGlobalUpdate: true})
+	// Make sure the deletion goes in order so you don't break the databases foreign key constraints
 	d.Delete(&db.Attributes{})
 	d.Delete(&db.BIOSConfig{})
+	d.Delete(&db.HardwareComponent{})
+	d.Delete(&db.HardwareComponentType{})
 	d.Delete(&db.Hardware{})
 }
 

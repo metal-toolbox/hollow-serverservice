@@ -5,19 +5,21 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Hardware represents a piece of hardware in a facility. These are the
 // details of the physical hardware and are tracked separately from leases
 // which track an instance of hardware.
 type Hardware struct {
-	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    time.Time `gorm:"index"`
-	FacilityCode string
-	BIOSConfigs  []BIOSConfig
-	Attributes   []Attributes `gorm:"polymorphic:Entity;"`
+	ID                 uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	DeletedAt          time.Time `gorm:"index"`
+	FacilityCode       string
+	BIOSConfigs        []BIOSConfig
+	Attributes         []Attributes `gorm:"polymorphic:Entity;"`
+	HardwareComponents []HardwareComponent
 }
 
 // HardwareFilter provides the ability to filter to hardware that is returned for
@@ -57,7 +59,7 @@ func GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 		d = filter.apply(db)
 	}
 
-	if err := d.Find(&hw).Error; err != nil {
+	if err := d.Preload(clause.Associations).Find(&hw).Error; err != nil {
 		return nil, err
 	}
 
