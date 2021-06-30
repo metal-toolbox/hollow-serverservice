@@ -46,20 +46,18 @@ func CreateHardware(h Hardware) error {
 	return db.Create(&h).Error
 }
 
-// HardwareList will return a list of hardware with the requested params
-func HardwareList() ([]Hardware, error) {
+// GetHardware will return a list of hardware with the requested params, if no
+// filter is passed then it will return all hardware
+func GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 	var hw []Hardware
-	if err := db.Find(&hw).Error; err != nil {
-		return nil, err
+
+	d := db
+
+	if filter != nil {
+		d = filter.apply(db)
 	}
 
-	return hw, nil
-}
-
-// GetHardwareWithFilter will return a list of hardware with the requested params
-func GetHardwareWithFilter(filter *HardwareFilter) ([]Hardware, error) {
-	var hw []Hardware
-	if err := filter.apply(db).Find(&hw).Error; err != nil {
+	if err := d.Find(&hw).Error; err != nil {
 		return nil, err
 	}
 

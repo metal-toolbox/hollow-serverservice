@@ -34,43 +34,6 @@ func TestCreateHardware(t *testing.T) {
 	}
 }
 
-func TestHardwareList(t *testing.T) {
-	databaseTest(t)
-
-	var testCases = []struct {
-		testName    string
-		expectList  []db.Hardware
-		expectError bool
-		errorMsg    string
-	}{
-		{"happy path", []db.Hardware{fixtureHardwareNemo, fixtureHardwareDory, fixtureHardwareMarlin}, false, ""},
-	}
-
-	for _, tt := range testCases {
-		res, err := db.HardwareList()
-
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-		} else {
-			assert.NoError(t, err, tt.testName)
-
-			var resIDs []uuid.UUID
-			var expectedIDs []uuid.UUID
-
-			for _, h := range tt.expectList {
-				expectedIDs = append(expectedIDs, h.ID)
-			}
-
-			for _, h := range res {
-				resIDs = append(resIDs, h.ID)
-			}
-
-			assert.ElementsMatch(t, resIDs, expectedIDs)
-		}
-	}
-}
-
 func TestFindOrCreateHardwareByUUID(t *testing.T) {
 	databaseTest(t)
 
@@ -209,10 +172,26 @@ func TestGetHardwareWithFilter(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"empty search filter",
+			nil,
+			[]uuid.UUID{fixtureHardwareNemo.ID, fixtureHardwareDory.ID, fixtureHardwareMarlin.ID},
+			false,
+			"",
+		},
+		{
+			"facility filter that doesn't match",
+			&db.HardwareFilter{
+				FacilityCode: "Neverland",
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
-		r, err := db.GetHardwareWithFilter(tt.filter)
+		r, err := db.GetHardware(tt.filter)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
