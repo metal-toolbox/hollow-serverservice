@@ -50,7 +50,6 @@ func CreateAttributes(a Attributes) error {
 }
 
 func (f *AttributesFilter) apply(d *gorm.DB, i int) *gorm.DB {
-	d = d.Debug()
 	joinName := fmt.Sprintf("attributes_%d", i)
 	column := fmt.Sprintf("%s.values", joinName)
 
@@ -62,18 +61,18 @@ func (f *AttributesFilter) apply(d *gorm.DB, i int) *gorm.DB {
 
 	jsonKeys := jsonValueBuilder(column, f.Keys...)
 
-	s := make([]interface{}, len(f.Keys))
+	queryArgs := make([]interface{}, len(f.Keys))
 	for i, v := range f.Keys {
-		s[i] = v
+		queryArgs[i] = v
 	}
 
 	switch {
 	case f.LessThanValue != 0:
-		s = append(s, f.LessThanValue)
-		d = d.Where(fmt.Sprintf("(%s)::int < ?", jsonKeys), s...)
+		queryArgs = append(queryArgs, f.LessThanValue)
+		d = d.Where(fmt.Sprintf("(%s)::int < ?", jsonKeys), queryArgs...)
 	case f.GreaterThanValue != 0:
-		s = append(s, f.GreaterThanValue)
-		d = d.Where(fmt.Sprintf("(%s)::int > ?", jsonKeys), s...)
+		queryArgs = append(queryArgs, f.GreaterThanValue)
+		d = d.Where(fmt.Sprintf("(%s)::int > ?", jsonKeys), queryArgs...)
 	default:
 		d = d.Where(datatypes.JSONQuery(column).Equals(f.EqualValue, f.Keys...))
 	}
@@ -89,6 +88,9 @@ func jsonValueBuilder(column string, keys ...string) string {
 			r += " , "
 		}
 
+		// the actual key is represented as a "?" so that we can let GORM handle passing
+		// the value in. This helps protect against SQL injection since these strings
+		// could be passed in by the user.
 		r += "?"
 	}
 
