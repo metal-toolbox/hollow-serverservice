@@ -43,7 +43,7 @@ func TestHardwareList(t *testing.T) {
 		expectError bool
 		errorMsg    string
 	}{
-		{"happy path", []db.Hardware{fixtureHardware}, false, ""},
+		{"happy path", []db.Hardware{fixtureHardwareNemo, fixtureHardwareDory, fixtureHardwareMarlin}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -54,9 +54,19 @@ func TestHardwareList(t *testing.T) {
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		} else {
 			assert.NoError(t, err, tt.testName)
-			for i, h := range tt.expectList {
-				assert.Equal(t, h.ID, res[i].ID)
+
+			var resIDs []uuid.UUID
+			var expectedIDs []uuid.UUID
+
+			for _, h := range tt.expectList {
+				expectedIDs = append(expectedIDs, h.ID)
 			}
+
+			for _, h := range res {
+				resIDs = append(resIDs, h.ID)
+			}
+
+			assert.ElementsMatch(t, resIDs, expectedIDs)
 		}
 	}
 }
@@ -73,7 +83,7 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 	}{
 		{
 			"happy path - existing hardware",
-			fixtureHardware.ID,
+			fixtureHardwareDory.ID,
 			false,
 			"",
 		},
@@ -95,6 +105,127 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 			assert.NoError(t, err, tt.testName)
 			assert.NotNil(t, res, tt.testName)
 			assert.NotNil(t, res.CreatedAt, tt.testName)
+		}
+	}
+}
+
+func TestGetHardwareWithFilter(t *testing.T) {
+	databaseTest(t)
+
+	var testCases = []struct {
+		testName      string
+		filter        *db.HardwareFilter
+		expectedUUIDs []uuid.UUID
+		expectError   bool
+		errorMsg      string
+	}{
+		{
+			"search by age less than 7",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:     fixtureNamespaceMetadata,
+						Keys:          []string{"age"},
+						LessThanValue: 7,
+					},
+				},
+			},
+			[]uuid.UUID{fixtureHardwareNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by age greater than 1 and facility code",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:        fixtureNamespaceMetadata,
+						Keys:             []string{"age"},
+						GreaterThanValue: 1,
+					},
+				},
+				FacilityCode: "Dory",
+			},
+			[]uuid.UUID{fixtureHardwareDory.ID},
+			false,
+			"",
+		},
+		{
+			"search by facility",
+			&db.HardwareFilter{
+				FacilityCode: "Dory",
+			},
+			[]uuid.UUID{fixtureHardwareDory.ID},
+			false,
+			"",
+		},
+		{
+			"search by type and location from different attributes",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  fixtureNamespaceOtherdata,
+						Keys:       []string{"type"},
+						EqualValue: "blue-tang",
+					},
+					{
+						Namespace:  fixtureNamespaceMetadata,
+						Keys:       []string{"location"},
+						EqualValue: "East Austalian Current",
+					},
+				},
+			},
+			[]uuid.UUID{fixtureHardwareDory.ID},
+			false,
+			"",
+		},
+		{
+			"search by nested tag",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  fixtureNamespaceOtherdata,
+						Keys:       []string{"nested", "tag"},
+						EqualValue: "finding-nemo",
+					},
+				},
+			},
+			[]uuid.UUID{fixtureHardwareDory.ID, fixtureHardwareNemo.ID, fixtureHardwareMarlin.ID},
+			false,
+			"",
+		},
+		{
+			"search by nested number greater than 1",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:        fixtureNamespaceOtherdata,
+						Keys:             []string{"nested", "number"},
+						GreaterThanValue: 1,
+					},
+				},
+			},
+			[]uuid.UUID{fixtureHardwareDory.ID, fixtureHardwareMarlin.ID},
+			false,
+			"",
+		},
+	}
+
+	for _, tt := range testCases {
+		r, err := db.GetHardwareWithFilter(tt.filter)
+
+		if tt.expectError {
+			assert.Error(t, err, tt.testName)
+			assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
+		} else {
+			assert.NoError(t, err)
+
+			var rIDs []uuid.UUID
+			for _, h := range r {
+				rIDs = append(rIDs, h.ID)
+			}
+
+			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
 		}
 	}
 }

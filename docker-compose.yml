@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    image: cockroachdb/cockroach:latest
+    image: cockroachdb/cockroach:latest-v21.1
     hostname: 'db'
     volumes:
       - ./.dev-data/compose/db:/cockroach/cockroach-data

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Hardware represents a piece of hardware in a facility. These are the
@@ -16,6 +17,19 @@ type Hardware struct {
 	DeletedAt    time.Time `gorm:"index"`
 	FacilityCode string
 	BIOSConfigs  []BIOSConfig
+	Attributes   []Attributes `gorm:"polymorphic:Entity;"`
+}
+
+// HardwareFilter provides the ability to filter to hardware that is returned for
+// a query
+type HardwareFilter struct {
+	FacilityCode      string
+	AttributesFilters []AttributesFilter
+}
+
+// TableName overrides the table name used by Hardware to `hardware`
+func (Hardware) TableName() string {
+	return "hardware"
 }
 
 // BeforeSave ensures that the hardware passes validation checks
@@ -42,6 +56,16 @@ func HardwareList() ([]Hardware, error) {
 	return hw, nil
 }
 
+// GetHardwareWithFilter will return a list of hardware with the requested params
+func GetHardwareWithFilter(filter *HardwareFilter) ([]Hardware, error) {
+	var hw []Hardware
+	if err := filter.apply(db).Find(&hw).Error; err != nil {
+		return nil, err
+	}
+
+	return hw, nil
+}
+
 // FindOrCreateHardwareByUUID will return an existing hardware instance if one
 // already exists for the given UUID, if one doesn't then it will create a new
 // instance in the database and return it.
@@ -62,4 +86,18 @@ func HardwareExists(hwUUID uuid.UUID) bool {
 	db.Model(&Hardware{}).Where("id = ?", hwUUID).Count(&count)
 
 	return count == int64(1)
+}
+
+func (f *HardwareFilter) apply(d *gorm.DB) *gorm.DB {
+	if f.FacilityCode != "" {
+		d = d.Where("facility_code = ?", f.FacilityCode)
+	}
+
+	if f.AttributesFilters != nil {
+		for i, af := range f.AttributesFilters {
+			d = af.apply(d, i)
+		}
+	}
+
+	return d
 }

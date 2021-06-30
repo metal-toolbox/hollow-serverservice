@@ -51,6 +51,7 @@ func databaseTest(t *testing.T) {
 
 func cleanDB() {
 	d := testDB.Session(&gorm.Session{AllowGlobalUpdate: true})
+	d.Delete(&db.Attributes{})
 	d.Delete(&db.BIOSConfig{})
 	d.Delete(&db.Hardware{})
 }
