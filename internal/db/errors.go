@@ -10,6 +10,22 @@ var (
 	ErrNotFound = errors.New("record not found in datastore")
 )
 
+// NotFoundError is the error returned when a record is not found in the datastore
+type NotFoundError struct {
+	Message string
+}
+
+func newNotFoundError(notFound string) *NotFoundError {
+	return &NotFoundError{
+		Message: fmt.Sprintf("%s not found", notFound),
+	}
+}
+
+// Error returns a string showing the URI and the status code
+func (e *NotFoundError) Error() string {
+	return e.Message
+}
+
 // ValidationError is returned when an object fails Validation
 type ValidationError struct {
 	Message string

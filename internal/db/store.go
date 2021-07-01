@@ -10,6 +10,13 @@ import (
 
 var db *gorm.DB
 
+// Tabler provides an interface for GORM that allows use to change the name a table
+// uses. For example by default Hardware gets stored in a table called "hardwares"
+// but we want to store it in one called "hardware".
+type Tabler interface {
+	TableName() string
+}
+
 // NewPostgresStore creates a new PostgeSQL store instance, opening a connection and
 // applying any db migrations available.
 func NewPostgresStore(uri string, lg *zap.Logger) error {
@@ -47,7 +54,10 @@ func Ping() bool {
 
 func migrate() error {
 	return db.AutoMigrate(
+		&Attributes{},
 		&BIOSConfig{},
 		&Hardware{},
+		&HardwareComponent{},
+		&HardwareComponentType{},
 	)
 }

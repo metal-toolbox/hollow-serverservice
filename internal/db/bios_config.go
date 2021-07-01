@@ -11,8 +11,8 @@ import (
 // BIOSConfig represents the BIOS config of a given piece of hardware at a specific point in time
 type BIOSConfig struct {
 	ID           uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
-	HardwareUUID uuid.UUID `gorm:"index"`
-	// Hardware     Hardware
+	HardwareID   uuid.UUID `gorm:"type:uuid;index"`
+	Hardware     Hardware
 	ConfigValues datatypes.JSON
 	Timestamp    time.Time `json:"timestamp"`
 	CreatedAt    time.Time
@@ -21,7 +21,7 @@ type BIOSConfig struct {
 
 // BeforeSave ensures that the BIOS config passes validation checks
 func (bc *BIOSConfig) BeforeSave(tx *gorm.DB) (err error) {
-	if bc.HardwareUUID == uuid.Nil {
+	if bc.HardwareID == uuid.Nil {
 		return requiredFieldMissing("BIOSConfig", "hardware UUID")
 	}
 
@@ -30,6 +30,14 @@ func (bc *BIOSConfig) BeforeSave(tx *gorm.DB) (err error) {
 
 // CreateBIOSConfig will persist a BIOSConfig into the backend datastore
 func CreateBIOSConfig(bc BIOSConfig) error {
+	// if the hardware relation isn't already loaded ensure that the hardware does
+	// exist. Otherwise return an error.
+	if bc.HardwareID != uuid.Nil {
+		if !HardwareExists(bc.HardwareID) {
+			return newNotFoundError("hardware UUID")
+		}
+	}
+
 	return db.Create(&bc).Error
 }
 
@@ -37,7 +45,7 @@ func CreateBIOSConfig(bc BIOSConfig) error {
 // first
 func BIOSConfigList(hwUUID uuid.UUID) ([]BIOSConfig, error) {
 	var bcl []BIOSConfig
-	if err := db.Where(&BIOSConfig{HardwareUUID: hwUUID}).Order("created_at desc").Find(&bcl).Error; err != nil {
+	if err := db.Where(&BIOSConfig{HardwareID: hwUUID}).Order("created_at desc").Find(&bcl).Error; err != nil {
 		return nil, err
 	}
 

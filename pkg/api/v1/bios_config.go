@@ -68,7 +68,7 @@ func biosConfigCreate(c *gin.Context) {
 
 func (b *BIOSConfig) toDBModel() (*db.BIOSConfig, error) {
 	dbc := &db.BIOSConfig{
-		HardwareUUID: b.HardwareUUID,
+		HardwareID:   b.HardwareUUID,
 		ConfigValues: datatypes.JSON(b.ConfigValues),
 	}
 
@@ -76,7 +76,7 @@ func (b *BIOSConfig) toDBModel() (*db.BIOSConfig, error) {
 }
 
 func (b *BIOSConfig) fromDBModel(dbc *db.BIOSConfig) error {
-	b.HardwareUUID = dbc.HardwareUUID
+	b.HardwareUUID = dbc.HardwareID
 	b.CreatedAt = dbc.CreatedAt
 	b.ConfigValues = json.RawMessage(dbc.ConfigValues)
 
