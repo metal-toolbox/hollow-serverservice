@@ -1,3 +1,7 @@
+run:
+  build-tags:
+    - testtools
+
 linters-settings:
   goimports:
     local-prefixes: go.metalkube.net/hollow

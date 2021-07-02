@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateHardwareComponentType(t *testing.T) {
-	databaseTest(t)
+	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string

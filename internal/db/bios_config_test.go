@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateBIOSConfig(t *testing.T) {
-	databaseTest(t)
+	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -20,7 +20,7 @@ func TestCreateBIOSConfig(t *testing.T) {
 	}{
 		{"missing hardware id", db.BIOSConfig{}, true, "validation failed: hardware UUID is a required BIOSConfig attribute"},
 		{"hardware id that doesn't exist", db.BIOSConfig{HardwareID: uuid.New()}, true, "hardware UUID not found"},
-		{"happy path", db.BIOSConfig{HardwareID: fixtureHardwareNemo.ID}, false, ""},
+		{"happy path", db.BIOSConfig{HardwareID: db.FixtureHardwareNemo.ID}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -36,7 +36,7 @@ func TestCreateBIOSConfig(t *testing.T) {
 }
 
 func TestBIOSConfigList(t *testing.T) {
-	databaseTest(t)
+	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -46,7 +46,7 @@ func TestBIOSConfigList(t *testing.T) {
 		errorMsg    string
 	}{
 		{"no results, bad uuid", uuid.New(), []db.BIOSConfig{}, false, ""},
-		{"happy path", fixtureBIOSConfigNew.HardwareID, []db.BIOSConfig{fixtureBIOSConfigNew, fixtureBIOSConfig}, false, ""},
+		{"happy path", db.FixtureBIOSConfigNew.HardwareID, []db.BIOSConfig{db.FixtureBIOSConfigNew, db.FixtureBIOSConfig}, false, ""},
 	}
 
 	for _, tt := range testCases {

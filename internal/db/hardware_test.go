@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateHardware(t *testing.T) {
-	databaseTest(t)
+	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -35,7 +35,7 @@ func TestCreateHardware(t *testing.T) {
 }
 
 func TestFindOrCreateHardwareByUUID(t *testing.T) {
-	databaseTest(t)
+	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName   string
@@ -46,7 +46,7 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 	}{
 		{
 			"happy path - existing hardware",
-			fixtureHardwareDory.ID,
+			db.FixtureHardwareDory.ID,
 			false,
 			"",
 		},
@@ -73,7 +73,7 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 }
 
 func TestGetHardware(t *testing.T) {
-	databaseTest(t)
+	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
@@ -87,13 +87,13 @@ func TestGetHardware(t *testing.T) {
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
-						Namespace:     fixtureNamespaceMetadata,
+						Namespace:     db.FixtureNamespaceMetadata,
 						Keys:          []string{"age"},
 						LessThanValue: 7,
 					},
 				},
 			},
-			[]uuid.UUID{fixtureHardwareNemo.ID},
+			[]uuid.UUID{db.FixtureHardwareNemo.ID},
 			false,
 			"",
 		},
@@ -102,14 +102,14 @@ func TestGetHardware(t *testing.T) {
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
-						Namespace:        fixtureNamespaceMetadata,
+						Namespace:        db.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
 						GreaterThanValue: 1,
 					},
 				},
 				FacilityCode: "Dory",
 			},
-			[]uuid.UUID{fixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID},
 			false,
 			"",
 		},
@@ -118,7 +118,7 @@ func TestGetHardware(t *testing.T) {
 			&db.HardwareFilter{
 				FacilityCode: "Dory",
 			},
-			[]uuid.UUID{fixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID},
 			false,
 			"",
 		},
@@ -127,18 +127,18 @@ func TestGetHardware(t *testing.T) {
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
-						Namespace:  fixtureNamespaceOtherdata,
+						Namespace:  db.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "blue-tang",
 					},
 					{
-						Namespace:  fixtureNamespaceMetadata,
+						Namespace:  db.FixtureNamespaceMetadata,
 						Keys:       []string{"location"},
 						EqualValue: "East Austalian Current",
 					},
 				},
 			},
-			[]uuid.UUID{fixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID},
 			false,
 			"",
 		},
@@ -147,13 +147,13 @@ func TestGetHardware(t *testing.T) {
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
-						Namespace:  fixtureNamespaceOtherdata,
+						Namespace:  db.FixtureNamespaceOtherdata,
 						Keys:       []string{"nested", "tag"},
 						EqualValue: "finding-nemo",
 					},
 				},
 			},
-			[]uuid.UUID{fixtureHardwareDory.ID, fixtureHardwareNemo.ID, fixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareNemo.ID, db.FixtureHardwareMarlin.ID},
 			false,
 			"",
 		},
@@ -162,20 +162,20 @@ func TestGetHardware(t *testing.T) {
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
-						Namespace:        fixtureNamespaceOtherdata,
+						Namespace:        db.FixtureNamespaceOtherdata,
 						Keys:             []string{"nested", "number"},
 						GreaterThanValue: 1,
 					},
 				},
 			},
-			[]uuid.UUID{fixtureHardwareDory.ID, fixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"empty search filter",
 			nil,
-			[]uuid.UUID{fixtureHardwareNemo.ID, fixtureHardwareDory.ID, fixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureHardwareNemo.ID, db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
 			false,
 			"",
 		},
@@ -202,7 +202,7 @@ func TestGetHardware(t *testing.T) {
 			var rIDs []uuid.UUID
 			for _, h := range r {
 				rIDs = append(rIDs, h.ID)
-				// Ensure preload works. All fixture data has 2 hardware components
+				// Ensure preload works. All Fixture data has 2 hardware components
 				assert.Len(t, h.HardwareComponents, 2, tt.testName)
 			}
 
