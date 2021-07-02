@@ -34,10 +34,10 @@ vendor:
 	@go mod download
 
 docker-up:
-	@docker compose up -d db
+	@docker-compose up -d db
 
 docker-down:
-	@docker compose down
+	@docker-compose down
 
 local-dev-databases:
 	@docker exec -ti hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_dev"
