@@ -40,5 +40,5 @@ docker-down:
 	@docker-compose down
 
 local-dev-databases:
-	@docker exec -ti hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_dev"
-	@docker exec -ti hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_test"
+	@docker exec hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_dev"
+	@docker exec hollow_db_1 cockroach sql --insecure -e "create database if not exists hollow_test"
