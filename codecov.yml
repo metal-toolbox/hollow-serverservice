@@ -1,0 +1,10 @@
+# Allow the PRs code coverage to be 30% below the main branch, but only allow the overall project to drop by 10%
+---
+coverage:
+  status:
+    patch:
+      default:
+        threshold: 30%
+    project:
+      default:
+        threshold: 10%
