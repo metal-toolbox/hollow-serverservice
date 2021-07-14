@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
 	"go.metalkube.net/hollow/internal/db"
@@ -36,88 +34,12 @@ type HardwareListParams struct {
 	AttributeListParams []AttributeListParams `form:"attributes" query:"attributes"`
 }
 
-// AttributeListParams allow you to filter the results based on attributes
-type AttributeListParams struct {
-	Namespace        string   `form:"namespace" query:"namespace"`
-	Keys             []string `form:"keys" query:"keys"`
-	EqualValue       string   `form:"equals" query:"equals"`
-	LessThanValue    int      `form:"less-than" query:"less-than"`
-	GreaterThanValue int      `form:"greater-than" query:"greater-than"`
-}
-
 func (p *HardwareListParams) setQuery(q url.Values) {
 	if p.FacilityCode != "" {
 		q.Set("facility-code", p.FacilityCode)
 	}
 
-	for i, ap := range p.AttributeListParams {
-		keyPrefix := fmt.Sprintf("attributes_%d_", i)
-
-		q.Set(keyPrefix+"namespace", ap.Namespace)
-
-		for _, k := range ap.Keys {
-			q.Add(keyPrefix+"keys", k)
-		}
-
-		if ap.EqualValue != "" {
-			q.Set(keyPrefix+"equals", ap.EqualValue)
-		}
-
-		if ap.LessThanValue != 0 {
-			q.Set(keyPrefix+"less-than", fmt.Sprint(ap.LessThanValue))
-		}
-
-		if ap.GreaterThanValue != 0 {
-			q.Set(keyPrefix+"greater-than", fmt.Sprint(ap.GreaterThanValue))
-		}
-	}
-}
-
-func parseQueryAttributesListParams(c *gin.Context) ([]AttributeListParams, error) {
-	var err error
-
-	alp := []AttributeListParams{}
-	i := 0
-
-	for {
-		keyPrefix := fmt.Sprintf("attributes_%d_", i)
-
-		ns := c.Query(keyPrefix + "namespace")
-		if ns == "" {
-			break
-		}
-
-		a := AttributeListParams{
-			Namespace: ns,
-			Keys:      c.QueryArray(keyPrefix + "keys"),
-		}
-
-		equals := c.Query(keyPrefix + "equals")
-		if equals != "" {
-			a.EqualValue = equals
-		}
-
-		lt := c.Query(keyPrefix + "less-than")
-		if lt != "" {
-			a.LessThanValue, err = strconv.Atoi(lt)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		gt := c.Query(keyPrefix + "greater-than")
-		if gt != "" {
-			a.GreaterThanValue, err = strconv.Atoi(gt)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		alp = append(alp, a)
-		i++
-	}
-
-	return alp, nil
+	encodeAttributesListParams(p.AttributeListParams, q)
 }
 
 func (p *HardwareListParams) dbFilter() *db.HardwareFilter {
