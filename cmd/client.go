@@ -61,6 +61,7 @@ func client(ctx context.Context) {
 			if t.Name == name {
 				exists = true
 				typeMap[name] = t.UUID
+
 				break
 			}
 		}

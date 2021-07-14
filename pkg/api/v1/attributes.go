@@ -3,8 +3,9 @@ package hollow
 import (
 	"encoding/json"
 
-	"go.metalkube.net/hollow/internal/db"
 	"gorm.io/datatypes"
+
+	"go.metalkube.net/hollow/internal/db"
 )
 
 // Attributes provide the ability to apply namespaced settings to an entity.
