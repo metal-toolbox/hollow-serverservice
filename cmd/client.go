@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -28,8 +30,22 @@ func init() {
 	viperBindFlag("api", clientCmd.Flags().Lookup("api"))
 }
 
+var alpha = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = alpha[rand.Intn(len(alpha))]
+	}
+
+	return string(b)
+}
+
 func client(ctx context.Context) {
+	rand.Seed(time.Now().UnixNano())
+
 	hwUUID := uuid.New()
+	hwPlan := fmt.Sprintf("plan_%s", randSeq(6)) //nolint
 
 	client, err := hollow.NewClient("superSecret", viper.GetString("api"), nil)
 	if err != nil {
@@ -89,7 +105,7 @@ func client(ctx context.Context) {
 		Attributes: []hollow.Attributes{
 			{
 				Namespace: "hollow.client.test.api",
-				Values:    json.RawMessage([]byte(`{"plan_type": "plan_a"}`)),
+				Values:    json.RawMessage([]byte(fmt.Sprintf(`{"plan_type": "%s"}`, hwPlan))),
 			},
 		},
 		HardwareComponents: []hollow.HardwareComponent{
@@ -135,4 +151,29 @@ func client(ctx context.Context) {
 	}
 
 	fmt.Printf("Found %d BIOS Configs\n", len(lbc))
+
+	lhw, err := client.Hardware.List(ctx, &hollow.HardwareListParams{
+		FacilityCode: "TEST1",
+		AttributeListParams: []hollow.AttributeListParams{
+			{
+				Namespace:  "hollow.client.test.api",
+				Keys:       []string{"plan_type"},
+				EqualValue: hwPlan,
+			},
+		},
+	})
+	if err != nil {
+		fmt.Println("Failed to list hardware")
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d pieces of hardware filtered by plan type (%s)\n", len(lhw), hwPlan)
+
+	lhw, err = client.Hardware.List(ctx, nil)
+	if err != nil {
+		fmt.Println("Failed to list hardware")
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d pieces of hardware in total\n", len(lhw))
 }

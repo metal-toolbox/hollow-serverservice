@@ -8,7 +8,7 @@ import (
 func RouteMap(rg *gin.RouterGroup) {
 	rg.POST("/bios-config", biosConfigCreate)
 
-	rg.GET("/hardware")
+	rg.GET("/hardware", hardwareList)
 	rg.POST("/hardware", hardwareCreate)
 	rg.GET("/hardware/:uuid", hardwareGet)
 	rg.GET("/hardware/:uuid/bios-configs", hardwareBIOSConfigList)

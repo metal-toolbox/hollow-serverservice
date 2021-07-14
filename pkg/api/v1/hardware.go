@@ -22,7 +22,7 @@ type Hardware struct {
 	UpdatedAt          time.Time           `json:"updated_at"`
 }
 
-func (h *Hardware) fromDBModel(dbH *db.Hardware) error {
+func (h *Hardware) fromDBModel(dbH db.Hardware) error {
 	var err error
 
 	h.UUID = dbH.ID
@@ -68,21 +68,6 @@ func (h *Hardware) toDBModel() (*db.Hardware, error) {
 	return dbC, nil
 }
 
-// func convertDBHardware(d db.Hardware) (Hardware, error) {
-// 	var bc []BIOSConfig
-
-// 	for _, dbc := range d {
-// 		var b BIOSConfig
-// 		if err := b.fromDBModel(&dbc); err != nil {
-// 			return nil, err
-// 		}
-
-// 		bc = append(bc, b)
-// 	}
-
-// 	return bc, nil
-// }
-
 func hardwareGet(c *gin.Context) {
 	hwUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -104,7 +89,7 @@ func hardwareGet(c *gin.Context) {
 
 	hw := &Hardware{}
 
-	if err = hw.fromDBModel(dbHW); err != nil {
+	if err = hw.fromDBModel(*dbHW); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the results", err))
 		return
 	}
@@ -135,4 +120,45 @@ func hardwareCreate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, createdResponse())
+}
+
+func hardwareList(c *gin.Context) {
+	var params HardwareListParams
+	if err := c.ShouldBindQuery(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid filter",
+			"error":   err.Error(),
+		})
+	}
+
+	alp, err := parseQueryAttributesListParams(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid attributes list params",
+			"error":   err.Error(),
+		})
+	}
+
+	params.AttributeListParams = alp
+	dbFilter := params.dbFilter()
+
+	dbHW, err := db.GetHardware(dbFilter)
+	if err != nil {
+		dbQueryFailureResponse(c, err)
+		return
+	}
+
+	hw := []Hardware{}
+
+	for _, dbH := range dbHW {
+		h := Hardware{}
+		if err := h.fromDBModel(dbH); err != nil {
+			failedConvertingToVersioned(c, err)
+			return
+		}
+
+		hw = append(hw, h)
+	}
+
+	c.JSON(http.StatusOK, hw)
 }
