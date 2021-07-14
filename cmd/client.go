@@ -132,6 +132,12 @@ func client(ctx context.Context) {
 				Serial:                    "123456",
 				Name:                      "Intel Xeon Processor",
 				HardwareComponentTypeUUID: typeMap["CPU"],
+				Attributes: []hollow.Attributes{
+					{
+						Namespace: "hollow.client.test",
+						Values:    jsonAttrs,
+					},
+				},
 			},
 		},
 	}

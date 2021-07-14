@@ -1,7 +1,6 @@
 package hollow
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -23,37 +22,6 @@ type Hardware struct {
 	UpdatedAt          time.Time           `json:"updated_at"`
 }
 
-// Attributes provide the ability to apply namespaced settings to an entity.
-// For example hardware could have attributes in the `com.equinixmetal.api` namespace
-// that represents equinix metal specific attributes that are stored in the API.
-// The namespace is meant to define who owns the schema and values.
-type Attributes struct {
-	Namespace string          `json:"namespace"`
-	Values    json.RawMessage `json:"values"`
-}
-
-func (a *Attributes) fromDBModel(dbA db.Attributes) error {
-	a.Namespace = dbA.Namespace
-	a.Values = json.RawMessage(dbA.Values)
-
-	return nil
-}
-
-func convertDBAttributes(dbAttrs []db.Attributes) ([]Attributes, error) {
-	attrs := []Attributes{}
-
-	for _, dbA := range dbAttrs {
-		a := Attributes{}
-		if err := a.fromDBModel(dbA); err != nil {
-			return nil, err
-		}
-
-		attrs = append(attrs, a)
-	}
-
-	return attrs, nil
-}
-
 func (h *Hardware) fromDBModel(dbH *db.Hardware) error {
 	var err error
 
@@ -62,7 +30,7 @@ func (h *Hardware) fromDBModel(dbH *db.Hardware) error {
 	h.CreatedAt = dbH.CreatedAt
 	h.UpdatedAt = dbH.UpdatedAt
 
-	h.Attributes, err = convertDBAttributes(dbH.Attributes)
+	h.Attributes, err = convertFromDBAttributes(dbH.Attributes)
 	if err != nil {
 		return err
 	}
@@ -90,12 +58,12 @@ func (h *Hardware) toDBModel() (*db.Hardware, error) {
 		dbC.HardwareComponents = append(dbC.HardwareComponents, *c)
 	}
 
-	// attrs, err := convertDBAttributes(dbC.Attributes)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	attrs, err := convertToDBAttributes(h.Attributes)
+	if err != nil {
+		return nil, err
+	}
 
-	// c.Attributes = attrs
+	dbC.Attributes = attrs
 
 	return dbC, nil
 }

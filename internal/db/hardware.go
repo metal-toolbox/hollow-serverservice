@@ -60,7 +60,7 @@ func GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 		d = filter.apply(db)
 	}
 
-	if err := d.Preload(clause.Associations).Find(&hw).Error; err != nil {
+	if err := hardwarePreload(d).Find(&hw).Error; err != nil {
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 }
 
 func hardwarePreload(db *gorm.DB) *gorm.DB {
-	return db.Preload("HardwareComponents.HardwareComponentType").Preload(clause.Associations)
+	return db.Preload("HardwareComponents.HardwareComponentType").Preload("HardwareComponents.Attributes").Preload(clause.Associations)
 }
 
 // FindOrCreateHardwareByUUID will return an existing hardware instance if one

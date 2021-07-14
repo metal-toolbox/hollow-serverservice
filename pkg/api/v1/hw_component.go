@@ -48,8 +48,10 @@ func (c *HardwareComponent) fromDBModel(dbC db.HardwareComponent) error {
 	c.Serial = dbC.Serial
 	c.HardwareComponentTypeUUID = dbC.HardwareComponentType.ID
 	c.HardwareComponentTypeName = dbC.HardwareComponentType.Name
+	c.CreatedAt = dbC.CreatedAt
+	c.UpdatedAt = dbC.UpdatedAt
 
-	attrs, err := convertDBAttributes(dbC.Attributes)
+	attrs, err := convertFromDBAttributes(dbC.Attributes)
 	if err != nil {
 		return err
 	}
@@ -70,14 +72,12 @@ func (c *HardwareComponent) toDBModel() (*db.HardwareComponent, error) {
 		HardwareComponentTypeID: c.HardwareComponentTypeUUID,
 	}
 
-	// attrs, err := convertDBAttributes(dbC.Attributes)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	attrs, err := convertToDBAttributes(c.Attributes)
+	if err != nil {
+		return nil, err
+	}
 
-	// c.Attributes = attrs
-
-	// c.HardwareComponentType.fromDBModel(dbC.HardwareComponentType)
+	dbC.Attributes = attrs
 
 	return dbC, nil
 }
