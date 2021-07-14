@@ -10,7 +10,7 @@ const (
 
 // BIOSConfigService provides the ability to interact with bios configs via Hollow
 type BIOSConfigService interface {
-	CreateBIOSConfig(context.Context, BIOSConfig) error
+	Create(context.Context, BIOSConfig) error
 }
 
 // BIOSConfigServiceClient implements BIOSConfigService
@@ -18,8 +18,8 @@ type BIOSConfigServiceClient struct {
 	client *Client
 }
 
-// CreateBIOSConfig will create a new BIOS Config
-func (b *BIOSConfigServiceClient) CreateBIOSConfig(ctx context.Context, bc BIOSConfig) error {
+// Create will create a new BIOS Config
+func (b *BIOSConfigServiceClient) Create(ctx context.Context, bc BIOSConfig) error {
 	request, err := newPostRequest(ctx, b.client.url, biosConfigEndpoint, bc)
 	if err != nil {
 		return err

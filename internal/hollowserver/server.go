@@ -61,6 +61,10 @@ func (s *Server) setup() http.Handler {
 	r.GET("/healthz/liveness", livenessCheck)
 	r.GET("/healthz/readiness", readinessCheck)
 
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "invalid request - route not found"})
+	})
+
 	return r
 }
 

@@ -55,7 +55,7 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 			ctx,
 			http.StatusUnauthorized,
 			true,
-			"server error: status_code: 401, message: response body",
+			"server error - response code: 401, message: something something",
 		},
 		{
 			"fake timeout",
@@ -68,9 +68,9 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		c := mockClient("response body", tt.responseCode)
+		c := mockClient(`{"message": "something something"}`, tt.responseCode)
 
-		err := c.BIOSConfig.CreateBIOSConfig(tt.ctx, tt.bios)
+		err := c.BIOSConfig.Create(tt.ctx, tt.bios)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

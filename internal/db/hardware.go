@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -66,13 +67,32 @@ func GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 	return hw, nil
 }
 
+func hardwarePreload(db *gorm.DB) *gorm.DB {
+	return db.Preload("HardwareComponents.HardwareComponentType").Preload(clause.Associations)
+}
+
 // FindOrCreateHardwareByUUID will return an existing hardware instance if one
 // already exists for the given UUID, if one doesn't then it will create a new
 // instance in the database and return it.
 func FindOrCreateHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
 	var hw Hardware
 
-	if err := db.FirstOrCreate(&hw, Hardware{ID: hwUUID}).Error; err != nil {
+	if err := hardwarePreload(db).FirstOrCreate(&hw, Hardware{ID: hwUUID}).Error; err != nil {
+		return nil, err
+	}
+
+	return &hw, nil
+}
+
+// FindHardwareByUUID will return an existing hardware instance if one
+// already exists for the given UUID.
+func FindHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
+	var hw Hardware
+
+	err := hardwarePreload(db).First(&hw, Hardware{ID: hwUUID}).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrNotFound
+	} else if err != nil {
 		return nil, err
 	}
 

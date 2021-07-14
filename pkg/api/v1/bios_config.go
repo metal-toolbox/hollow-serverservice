@@ -58,8 +58,14 @@ func biosConfigCreate(c *gin.Context) {
 		return
 	}
 
+	// ensure the hardware for the UUID exist already
+	if _, err := db.FindOrCreateHardwareByUUID(dbc.HardwareID); err != nil {
+		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed ensuring hardware with UUID exists", err))
+		return
+	}
+
 	if err := db.CreateBIOSConfig(*dbc); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create BIOS Config", "error": err.Error})
+		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed to create BIOS Config", err))
 		return
 	}
 
