@@ -36,7 +36,7 @@ func client(ctx context.Context) {
 		return
 	}
 
-	exampleBiosResults := `{
+	jsonBios := json.RawMessage([]byte(`{
     "dell": {
       "boot_mode": "Bios",
       "cpu_min_sev_asid": 1,
@@ -44,33 +44,7 @@ func client(ctx context.Context) {
       "sriov_global_enable": "Enabled",
       "tpm_security": "On"
     }
-  }`
-
-	jsonBios, err := json.Marshal(exampleBiosResults)
-	if err != nil {
-		fmt.Println("failed to convert example bios to json")
-		log.Fatal(err)
-	}
-
-	// cpuType := hollow.HardwareComponentType{
-	// 	UUID: uuid.New(),
-	// 	Name: "CPU",
-	// }
-
-	// hdType := hollow.HardwareComponentType{
-	// 	UUID: uuid.New(),
-	// 	Name: "Hard Drive",
-	// }
-
-	// if err := client.HardwareComponentType.Create(ctx, cpuType); err != nil {
-	// 	fmt.Println("failed to create CPU hardware component type")
-	// 	log.Fatal(err)
-	// }
-
-	// if err := client.HardwareComponentType.Create(ctx, hdType); err != nil {
-	// 	fmt.Println("failed to create CPU hardware component type")
-	// 	log.Fatal(err)
-	// }
+  }`))
 
 	typeMap := make(map[string]uuid.UUID)
 
@@ -108,21 +82,13 @@ func client(ctx context.Context) {
 		typeMap[name] = t.UUID
 	}
 
-	attrs := `{"test": "data"}`
-
-	jsonAttrs, err := json.Marshal(attrs)
-	if err != nil {
-		fmt.Println("failed to convert example attrs to json")
-		log.Fatal(err)
-	}
-
 	hw := hollow.Hardware{
 		UUID:         hwUUID,
 		FacilityCode: "TEST1",
 		Attributes: []hollow.Attributes{
 			{
-				Namespace: "hollow.client.test",
-				Values:    jsonAttrs,
+				Namespace: "hollow.client.test.api",
+				Values:    json.RawMessage([]byte(`{"plan_type": "plan_a"}`)),
 			},
 		},
 		HardwareComponents: []hollow.HardwareComponent{
@@ -134,8 +100,12 @@ func client(ctx context.Context) {
 				HardwareComponentTypeUUID: typeMap["CPU"],
 				Attributes: []hollow.Attributes{
 					{
-						Namespace: "hollow.client.test",
-						Values:    jsonAttrs,
+						Namespace: "hollow.client.test.firmware",
+						Values:    json.RawMessage([]byte(`{"firmware_version": "1.2.2"}`)),
+					},
+					{
+						Namespace: "hollow.client.test.api",
+						Values:    json.RawMessage([]byte(`{"packet_api_uuid": "123-321"}`)),
 					},
 				},
 			},
