@@ -48,12 +48,12 @@ func Ping() bool {
 		return false
 	}
 
-	res := db.Exec("select 1 as result;")
-	if res.Error != nil {
+	sqlDB, err := db.DB()
+	if err != nil {
 		return false
 	}
 
-	return res.RowsAffected == int64(1)
+	return sqlDB.Ping() == nil
 }
 
 func migrate() error {
