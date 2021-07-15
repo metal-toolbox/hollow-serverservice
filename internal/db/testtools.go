@@ -5,7 +5,7 @@ package db
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -13,24 +13,20 @@ import (
 // TestDBURI is the URI for the test database
 var TestDBURI = "postgresql://root@localhost:26257/hollow_test?sslmode=disable"
 
-func testDatastore() {
-	var err error
-
+func testDatastore() error {
 	// don't setup the datastore if we already have one
 	if db != nil {
-		return
+		return nil
 	}
 
-	err = NewPostgresStore(TestDBURI, zap.NewNop())
+	err := NewPostgresStore(TestDBURI, zap.NewNop())
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	cleanDB()
 
-	if err := setupTestData(); err != nil {
-		panic(err)
-	}
+	return setupTestData()
 }
 
 // DatabaseTest allows you to run tests that interact with the database
@@ -42,10 +38,11 @@ func DatabaseTest(t *testing.T) {
 	t.Cleanup(func() {
 		cleanDB()
 		err := setupTestData()
-		assert.NoError(t, err, "Unexpected error setting up test data")
+		require.NoError(t, err, "Unexpected error setting up test data")
 	})
 
-	testDatastore()
+	err := testDatastore()
+	require.NoError(t, err, "Unexpected error setting up test datastore")
 }
 
 func cleanDB() {

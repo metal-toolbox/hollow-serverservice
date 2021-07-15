@@ -52,21 +52,23 @@ var (
 
 	FixtureBIOSConfig    = BIOSConfig{ID: uuid.New(), HardwareID: FixtureHardwareNemo.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "old"}`))}
 	FixtureBIOSConfigNew = BIOSConfig{ID: uuid.New(), HardwareID: FixtureHardwareNemo.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "new"}`))}
+
+	FixtureHardware = []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin}
 )
 
 func setupTestData() error {
-	if err := CreateHardwareComponentType(FixtureHCTFins); err != nil {
+	if err := CreateHardwareComponentType(&FixtureHCTFins); err != nil {
 		return err
 	}
 
-	for _, hw := range []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin} {
-		if err := CreateHardware(hw); err != nil {
+	for _, hw := range FixtureHardware {
+		if err := CreateHardware(&hw); err != nil {
 			return err
 		}
 	}
 
 	for _, bc := range []BIOSConfig{FixtureBIOSConfig, FixtureBIOSConfigNew} {
-		if err := CreateBIOSConfig(bc); err != nil {
+		if err := CreateBIOSConfig(&bc); err != nil {
 			return err
 		}
 	}

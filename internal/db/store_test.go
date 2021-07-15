@@ -24,6 +24,24 @@ func TestNewPostgresStoreFailure(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestPingNoDB(t *testing.T) {
+	var testCases = []struct {
+		testName       string
+		expectedResult bool
+	}{
+		{"no db configured, return false", false},
+	}
+
+	for _, tt := range testCases {
+		// fail to make a DB conn to close any open connection we might have
+		err := db.NewPostgresStore("invalid-uri", zap.NewNop())
+		require.Error(t, err)
+
+		res := db.Ping()
+		assert.Equal(t, tt.expectedResult, res, tt.testName)
+	}
+}
+
 func TestPing(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping database test in short mode")

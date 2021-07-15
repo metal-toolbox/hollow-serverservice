@@ -61,7 +61,7 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 			ctx,
 			http.StatusUnauthorized,
 			true,
-			"server error: status_code: 401, message:",
+			"server error - response code: 401, message:",
 		},
 		{
 			"fake timeout",
@@ -80,7 +80,7 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 
 		c := mockClient(string(jsonResponse), tt.responseCode)
 
-		res, err := c.Hardware.ListBIOSConfigs(tt.ctx, tt.uuid)
+		res, err := c.Hardware.GetBIOSConfigs(tt.ctx, tt.uuid)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

@@ -2,6 +2,9 @@ package hollow
 
 import (
 	"context"
+	"encoding/json"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -10,7 +13,7 @@ const (
 
 // BIOSConfigService provides the ability to interact with bios configs via Hollow
 type BIOSConfigService interface {
-	CreateBIOSConfig(context.Context, BIOSConfig) error
+	Create(context.Context, BIOSConfig) (*uuid.UUID, error)
 }
 
 // BIOSConfigServiceClient implements BIOSConfigService
@@ -18,17 +21,28 @@ type BIOSConfigServiceClient struct {
 	client *Client
 }
 
-// CreateBIOSConfig will create a new BIOS Config
-func (b *BIOSConfigServiceClient) CreateBIOSConfig(ctx context.Context, bc BIOSConfig) error {
+// Create will create a new BIOS Config
+func (b *BIOSConfigServiceClient) Create(ctx context.Context, bc BIOSConfig) (*uuid.UUID, error) {
 	request, err := newPostRequest(ctx, b.client.url, biosConfigEndpoint, bc)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := b.client.do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return ensureValidServerResponse(resp)
+	if err := ensureValidServerResponse(resp); err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var r serverResponse
+	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		return nil, err
+	}
+
+	return &r.UUID, nil
 }

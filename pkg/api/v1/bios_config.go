@@ -22,7 +22,7 @@ type BIOSConfig struct {
 func hardwareBIOSConfigList(c *gin.Context) {
 	hwUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid hardware UUID", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware uuid", "error": err.Error()})
 		return
 	}
 
@@ -45,7 +45,7 @@ func biosConfigCreate(c *gin.Context) {
 	var b BIOSConfig
 	if err := c.ShouldBindJSON(&b); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid BIOS Config",
+			"message": "invalid bios config",
 			"error":   err.Error(),
 		})
 
@@ -54,16 +54,22 @@ func biosConfigCreate(c *gin.Context) {
 
 	dbc, err := b.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid BIOS Config", "error": err.Error})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid bios config", "error": err.Error})
 		return
 	}
 
-	if err := db.CreateBIOSConfig(*dbc); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create BIOS Config", "error": err.Error})
+	// ensure the hardware for the UUID exist already
+	if _, err := db.FindOrCreateHardwareByUUID(dbc.HardwareID); err != nil {
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed ensuring hardware with uuid exists", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "created"})
+	if err := db.CreateBIOSConfig(dbc); err != nil {
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create bios config", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, createdResponse(dbc.ID))
 }
 
 func (b *BIOSConfig) toDBModel() (*db.BIOSConfig, error) {
