@@ -52,6 +52,8 @@ var (
 
 	FixtureBIOSConfig    = BIOSConfig{ID: uuid.New(), HardwareID: FixtureHardwareNemo.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "old"}`))}
 	FixtureBIOSConfigNew = BIOSConfig{ID: uuid.New(), HardwareID: FixtureHardwareNemo.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "new"}`))}
+
+	FixtureHardware = []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin}
 )
 
 func setupTestData() error {
@@ -59,7 +61,7 @@ func setupTestData() error {
 		return err
 	}
 
-	for _, hw := range []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin} {
+	for _, hw := range FixtureHardware {
 		if err := CreateHardware(hw); err != nil {
 			return err
 		}
