@@ -226,6 +226,50 @@ func TestGetHardware(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search by type from attributes and name from versioned attributes",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceOtherdata,
+						Keys:       []string{"type"},
+						EqualValue: "clown",
+					},
+				},
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by type from attributes and name from versioned attributes, using the not current value, so nothing should return",
+			&db.HardwareFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceOtherdata,
+						Keys:       []string{"type"},
+						EqualValue: "clown",
+					},
+				},
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "old",
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {

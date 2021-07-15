@@ -9,22 +9,21 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-func TestCreateBIOSConfig(t *testing.T) {
+func TestVersionedAttributesCreate(t *testing.T) {
 	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
-		bc          *db.BIOSConfig
+		a           *db.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing hardware id", &db.BIOSConfig{}, true, "validation failed: hardware UUID is a required BIOSConfig attribute"},
-		{"hardware id that doesn't exist", &db.BIOSConfig{HardwareID: uuid.New()}, true, "hardware UUID not found"},
-		{"happy path", &db.BIOSConfig{HardwareID: db.FixtureHardwareNemo.ID}, false, ""},
+		{"missing namespace", &db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttribute attribute"},
+		{"happy path", &db.VersionedAttributes{EntityType: "hardware", EntityID: db.FixtureHardwareNemo.ID, Namespace: db.FixtureNamespaceVersioned}, false, ""},
 	}
 
 	for _, tt := range testCases {
-		err := db.CreateBIOSConfig(tt.bc)
+		err := db.VersionedAttributesCreate(tt.a)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -35,22 +34,22 @@ func TestCreateBIOSConfig(t *testing.T) {
 	}
 }
 
-func TestBIOSConfigList(t *testing.T) {
+func TestVersionedAttributesList(t *testing.T) {
 	db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
 		searchUUID  uuid.UUID
-		expectList  []db.BIOSConfig
+		expectList  []db.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"no results, bad uuid", uuid.New(), []db.BIOSConfig{}, false, ""},
-		{"happy path", db.FixtureBIOSConfigNew.HardwareID, []db.BIOSConfig{db.FixtureBIOSConfigNew, db.FixtureBIOSConfig}, false, ""},
+		{"no results, bad uuid", uuid.New(), []db.VersionedAttributes{}, false, ""},
+		{"happy path", db.FixtureVersionedAttributesNew.EntityID, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
 	}
 
 	for _, tt := range testCases {
-		res, err := db.BIOSConfigList(tt.searchUUID)
+		res, err := db.VersionedAttributesList(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -59,7 +58,7 @@ func TestBIOSConfigList(t *testing.T) {
 			assert.NoError(t, err, tt.testName)
 			for i, bc := range tt.expectList {
 				assert.Equal(t, bc.ID, res[i].ID)
-				assert.Equal(t, bc.ConfigValues, res[i].ConfigValues)
+				assert.Equal(t, bc.Values, res[i].Values)
 			}
 		}
 	}

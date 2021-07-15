@@ -11,7 +11,7 @@ func RouteMap(rg *gin.RouterGroup) {
 	rg.GET("/hardware", hardwareList)
 	rg.POST("/hardware", hardwareCreate)
 	rg.GET("/hardware/:uuid", hardwareGet)
-	rg.GET("/hardware/:uuid/bios-configs", hardwareBIOSConfigList)
+	rg.GET("/hardware/:uuid/versioned-attributes", hardwareVersionedAttributesList)
 
 	rg.GET("/hardware-component-types", hardwareComponentTypeList)
 	rg.POST("/hardware-component-types", hardwareComponentTypeCreate)

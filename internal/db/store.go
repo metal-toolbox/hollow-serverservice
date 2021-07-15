@@ -59,7 +59,7 @@ func Ping() bool {
 func migrate() error {
 	return db.AutoMigrate(
 		&Attributes{},
-		&BIOSConfig{},
+		&VersionedAttributes{},
 		&Hardware{},
 		&HardwareComponent{},
 		&HardwareComponentType{},

@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	hardwareEndpoint           = "hardware"
-	hardwareBIOSConfigEndpoint = "bios-configs"
+	hardwareEndpoint                    = "hardware"
+	hardwareVersionedAttributesEndpoint = "versioned-attributes"
 )
 
 // HardwareService provides the ability to interact with hardware via Hollow
 type HardwareService interface {
 	Create(context.Context, Hardware) (*uuid.UUID, error)
-	GetBIOSConfigs(context.Context, uuid.UUID) ([]BIOSConfig, error)
 	Get(context.Context, uuid.UUID) (*Hardware, error)
 	List(context.Context, *HardwareListParams) ([]Hardware, error)
+	VersionedAttributesGet(context.Context, uuid.UUID) ([]VersionedAttributes, error)
 }
 
 // HardwareServiceClient implements HardwareService
@@ -31,8 +31,9 @@ type HardwareServiceClient struct {
 
 // HardwareListParams allows you to filter the results
 type HardwareListParams struct {
-	FacilityCode        string                `form:"facility-code" query:"facility-code"`
-	AttributeListParams []AttributeListParams `form:"attributes" query:"attributes"`
+	FacilityCode                 string `form:"facility-code"`
+	AttributeListParams          []AttributeListParams
+	VersionedAttributeListParams []AttributeListParams
 }
 
 func (p *HardwareListParams) setQuery(q url.Values) {
@@ -40,7 +41,8 @@ func (p *HardwareListParams) setQuery(q url.Values) {
 		q.Set("facility-code", p.FacilityCode)
 	}
 
-	encodeAttributesListParams(p.AttributeListParams, q)
+	encodeAttributesListParams(p.AttributeListParams, "attr", q)
+	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
 }
 
 func (p *HardwareListParams) dbFilter() *db.HardwareFilter {
@@ -59,12 +61,23 @@ func (p *HardwareListParams) dbFilter() *db.HardwareFilter {
 		dbF.AttributesFilters = append(dbF.AttributesFilters, a)
 	}
 
+	for _, aF := range p.VersionedAttributeListParams {
+		a := db.AttributesFilter{
+			Namespace:        aF.Namespace,
+			Keys:             aF.Keys,
+			EqualValue:       aF.EqualValue,
+			LessThanValue:    aF.LessThanValue,
+			GreaterThanValue: aF.GreaterThanValue,
+		}
+		dbF.VersionedAttributesFilters = append(dbF.VersionedAttributesFilters, a)
+	}
+
 	return dbF
 }
 
-// GetBIOSConfigs will return all the BIOS Configs for a given piece of hardware
-func (c *HardwareServiceClient) GetBIOSConfigs(ctx context.Context, hwUUID uuid.UUID) ([]BIOSConfig, error) {
-	path := fmt.Sprintf("%s/%s/%s", hardwareEndpoint, hwUUID, hardwareBIOSConfigEndpoint)
+// VersionedAttributesGet will return all the versioned attributes for a given piece of hardware
+func (c *HardwareServiceClient) VersionedAttributesGet(ctx context.Context, hwUUID uuid.UUID) ([]VersionedAttributes, error) {
+	path := fmt.Sprintf("%s/%s/%s", hardwareEndpoint, hwUUID, hardwareVersionedAttributesEndpoint)
 
 	request, err := newGetRequest(ctx, c.client.url, path)
 	if err != nil {
@@ -82,12 +95,12 @@ func (c *HardwareServiceClient) GetBIOSConfigs(ctx context.Context, hwUUID uuid.
 
 	defer resp.Body.Close()
 
-	var bcl []BIOSConfig
-	if err = json.NewDecoder(resp.Body).Decode(&bcl); err != nil {
+	var val []VersionedAttributes
+	if err = json.NewDecoder(resp.Body).Decode(&val); err != nil {
 		return nil, err
 	}
 
-	return bcl, nil
+	return val, nil
 }
 
 // Get will return a given piece of hardware by it's UUID

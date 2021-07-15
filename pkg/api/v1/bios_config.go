@@ -12,94 +12,91 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-// BIOSConfig represents the BIOS config settings of a server at a given time
-type BIOSConfig struct {
-	HardwareUUID uuid.UUID       `json:"hardware_uuid" binding:"required"`
-	ConfigValues json.RawMessage `json:"values" binding:"required"`
-	CreatedAt    time.Time       `json:"created_at"`
+// VersionedAttributes represents a set of attributes of an entity at a given time
+type VersionedAttributes struct {
+	EntityType string          `json:"entity_type" binding:"required"`
+	EntityUUID uuid.UUID       `json:"entity_uuid" binding:"required"`
+	Namespace  string          `json:"namespace" binding:"required"`
+	Values     json.RawMessage `json:"values" binding:"required"`
+	CreatedAt  time.Time       `json:"created_at"`
 }
 
-func hardwareBIOSConfigList(c *gin.Context) {
+func hardwareVersionedAttributesList(c *gin.Context) {
 	hwUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware uuid", "error": err.Error()})
 		return
 	}
 
-	bcl, err := db.BIOSConfigList(hwUUID)
+	dbVA, err := db.VersionedAttributesList(hwUUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed fetching records from datastore", "error": err.Error()})
 		return
 	}
 
-	l, err := dbSliceToBIOSConfig(bcl)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed parsing results", "error": err.Error()})
-		return
+	va := []VersionedAttributes{}
+
+	for _, dbA := range dbVA {
+		a := VersionedAttributes{}
+		if err := a.fromDBModel(dbA); err != nil {
+			failedConvertingToVersioned(c, err)
+			return
+		}
+
+		va = append(va, a)
 	}
 
-	c.JSON(http.StatusOK, l)
+	c.JSON(http.StatusOK, va)
 }
 
 func biosConfigCreate(c *gin.Context) {
-	var b BIOSConfig
-	if err := c.ShouldBindJSON(&b); err != nil {
+	var va VersionedAttributes
+	if err := c.ShouldBindJSON(&va); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid bios config",
+			"message": "invalid versioned attributes",
 			"error":   err.Error(),
 		})
 
 		return
 	}
 
-	dbc, err := b.toDBModel()
+	dbVA, err := va.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid bios config", "error": err.Error})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid versioned attributes", "error": err.Error})
 		return
 	}
 
 	// ensure the hardware for the UUID exist already
-	if _, err := db.FindOrCreateHardwareByUUID(dbc.HardwareID); err != nil {
+	if _, err := db.FindOrCreateHardwareByUUID(dbVA.EntityID); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrorResponse("failed ensuring hardware with uuid exists", err))
 		return
 	}
 
-	if err := db.CreateBIOSConfig(dbc); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create bios config", err))
+	if err := db.VersionedAttributesCreate(dbVA); err != nil {
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create versioned attributes", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, createdResponse(dbc.ID))
+	c.JSON(http.StatusOK, createdResponse(dbVA.ID))
 }
 
-func (b *BIOSConfig) toDBModel() (*db.BIOSConfig, error) {
-	dbc := &db.BIOSConfig{
-		HardwareID:   b.HardwareUUID,
-		ConfigValues: datatypes.JSON(b.ConfigValues),
+func (a *VersionedAttributes) toDBModel() (*db.VersionedAttributes, error) {
+	dbc := &db.VersionedAttributes{
+		EntityType: a.EntityType,
+		EntityID:   a.EntityUUID,
+		Namespace:  a.Namespace,
+		Values:     datatypes.JSON(a.Values),
 	}
 
 	return dbc, nil
 }
 
-func (b *BIOSConfig) fromDBModel(dbc *db.BIOSConfig) error {
-	b.HardwareUUID = dbc.HardwareID
-	b.CreatedAt = dbc.CreatedAt
-	b.ConfigValues = json.RawMessage(dbc.ConfigValues)
+func (a *VersionedAttributes) fromDBModel(dba db.VersionedAttributes) error {
+	a.EntityType = dba.EntityType
+	a.EntityUUID = dba.EntityID
+	a.CreatedAt = dba.CreatedAt
+	a.Namespace = dba.Namespace
+	a.Values = json.RawMessage(dba.Values)
 
 	return nil
-}
-
-func dbSliceToBIOSConfig(d []db.BIOSConfig) ([]BIOSConfig, error) {
-	var bc []BIOSConfig
-
-	for _, dbc := range d {
-		var b BIOSConfig
-		if err := b.fromDBModel(&dbc); err != nil {
-			return nil, err
-		}
-
-		bc = append(bc, b)
-	}
-
-	return bc, nil
 }

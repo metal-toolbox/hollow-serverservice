@@ -49,7 +49,7 @@ func cleanDB() {
 	d := db.Session(&gorm.Session{AllowGlobalUpdate: true})
 	// Make sure the deletion goes in order so you don't break the databases foreign key constraints
 	d.Delete(&Attributes{})
-	d.Delete(&BIOSConfig{})
+	d.Delete(&VersionedAttributes{})
 	d.Delete(&HardwareComponent{})
 	d.Delete(&HardwareComponentType{})
 	d.Delete(&Hardware{})

@@ -29,6 +29,7 @@ clean: docker-down
 	@echo Cleaning...
 	@rm -rf ./dist/
 	@rm -rf ./.dev-data/coverage.out
+	@rm -rf ./.dev-data/compose/db/*
 
 vendor:
 	@go mod download

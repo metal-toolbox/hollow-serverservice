@@ -131,7 +131,7 @@ func hardwareList(c *gin.Context) {
 		})
 	}
 
-	alp, err := parseQueryAttributesListParams(c)
+	alp, err := parseQueryAttributesListParams(c, "attr")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "invalid attributes list params",
@@ -140,6 +140,17 @@ func hardwareList(c *gin.Context) {
 	}
 
 	params.AttributeListParams = alp
+
+	valp, err := parseQueryAttributesListParams(c, "ver_attr")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid versioned attributes list params",
+			"error":   err.Error(),
+		})
+	}
+
+	params.VersionedAttributeListParams = valp
+
 	dbFilter := params.dbFilter()
 
 	dbHW, err := db.GetHardware(dbFilter)

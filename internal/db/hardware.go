@@ -13,21 +13,22 @@ import (
 // details of the physical hardware and are tracked separately from leases
 // which track an instance of hardware.
 type Hardware struct {
-	ID                 uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	DeletedAt          time.Time `gorm:"index"`
-	FacilityCode       string
-	BIOSConfigs        []BIOSConfig
-	Attributes         []Attributes `gorm:"polymorphic:Entity;"`
-	HardwareComponents []HardwareComponent
+	ID                  uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	DeletedAt           time.Time `gorm:"index"`
+	FacilityCode        string
+	Attributes          []Attributes `gorm:"polymorphic:Entity;"`
+	HardwareComponents  []HardwareComponent
+	VersionedAttributes []VersionedAttributes `gorm:"polymorphic:Entity;"`
 }
 
 // HardwareFilter provides the ability to filter to hardware that is returned for
 // a query
 type HardwareFilter struct {
-	FacilityCode      string
-	AttributesFilters []AttributesFilter
+	FacilityCode               string
+	AttributesFilters          []AttributesFilter
+	VersionedAttributesFilters []AttributesFilter
 }
 
 // TableName overrides the table name used by Hardware to `hardware`
@@ -118,6 +119,12 @@ func (f *HardwareFilter) apply(d *gorm.DB) *gorm.DB {
 	if f.AttributesFilters != nil {
 		for i, af := range f.AttributesFilters {
 			d = af.apply(d, i)
+		}
+	}
+
+	if f.VersionedAttributesFilters != nil {
+		for i, af := range f.VersionedAttributesFilters {
+			d = af.applyVersioned(d, i)
 		}
 	}
 
