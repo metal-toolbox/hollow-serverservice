@@ -114,12 +114,12 @@ func hardwareCreate(c *gin.Context) {
 		return
 	}
 
-	if err := db.CreateHardware(*dbHW); err != nil {
+	if err := db.CreateHardware(dbHW); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed to create Hardware", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, createdResponse())
+	c.JSON(http.StatusOK, createdResponse(dbHW.ID))
 }
 
 func hardwareList(c *gin.Context) {

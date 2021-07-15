@@ -57,18 +57,18 @@ var (
 )
 
 func setupTestData() error {
-	if err := CreateHardwareComponentType(FixtureHCTFins); err != nil {
+	if err := CreateHardwareComponentType(&FixtureHCTFins); err != nil {
 		return err
 	}
 
 	for _, hw := range FixtureHardware {
-		if err := CreateHardware(hw); err != nil {
+		if err := CreateHardware(&hw); err != nil {
 			return err
 		}
 	}
 
 	for _, bc := range []BIOSConfig{FixtureBIOSConfig, FixtureBIOSConfigNew} {
-		if err := CreateBIOSConfig(bc); err != nil {
+		if err := CreateBIOSConfig(&bc); err != nil {
 			return err
 		}
 	}

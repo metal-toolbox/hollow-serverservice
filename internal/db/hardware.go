@@ -45,8 +45,8 @@ func (Hardware) TableName() string {
 // }
 
 // CreateHardware will persist hardware into the backend datastore
-func CreateHardware(h Hardware) error {
-	return db.Create(&h).Error
+func CreateHardware(h *Hardware) error {
+	return db.Create(h).Error
 }
 
 // GetHardware will return a list of hardware with the requested params, if no

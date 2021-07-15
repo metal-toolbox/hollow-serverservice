@@ -23,7 +23,7 @@ func TestCreateHardware(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := db.CreateHardware(tt.hw)
+		err := db.CreateHardware(&tt.hw)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

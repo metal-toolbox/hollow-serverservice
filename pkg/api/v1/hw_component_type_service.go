@@ -3,6 +3,8 @@ package hollow
 import (
 	"context"
 	"encoding/json"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -11,7 +13,7 @@ const (
 
 // HardwareComponentTypeService provides the ability to interact with hardware component types via Hollow
 type HardwareComponentTypeService interface {
-	Create(context.Context, HardwareComponentType) error
+	Create(context.Context, HardwareComponentType) (*uuid.UUID, error)
 	List(context.Context, *HardwareComponentTypeListParams) ([]HardwareComponentType, error)
 }
 
@@ -36,18 +38,29 @@ func (f *HardwareComponentTypeListParams) queryMap() map[string]string {
 }
 
 // Create will attempt to create a hardware component type in Hollow
-func (c *HardwareComponentTypeServiceClient) Create(ctx context.Context, t HardwareComponentType) error {
+func (c *HardwareComponentTypeServiceClient) Create(ctx context.Context, t HardwareComponentType) (*uuid.UUID, error) {
 	request, err := newPostRequest(ctx, c.client.url, hardwareComponentTypeEndpoint, t)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.client.do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return ensureValidServerResponse(resp)
+	if err := ensureValidServerResponse(resp); err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var r serverResponse
+	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		return nil, err
+	}
+
+	return &r.UUID, nil
 }
 
 // List will return the hardware component types with optional params

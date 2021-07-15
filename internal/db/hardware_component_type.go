@@ -31,7 +31,7 @@ func (t *HardwareComponentType) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 // CreateHardwareComponentType will persist a hardware component type into the backend datastore
-func CreateHardwareComponentType(t HardwareComponentType) error {
+func CreateHardwareComponentType(t *HardwareComponentType) error {
 	return db.Create(&t).Error
 }
 

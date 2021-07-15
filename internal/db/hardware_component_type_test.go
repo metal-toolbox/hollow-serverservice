@@ -14,12 +14,12 @@ func TestCreateHardwareComponentType(t *testing.T) {
 
 	var testCases = []struct {
 		testName    string
-		hct         db.HardwareComponentType
+		hct         *db.HardwareComponentType
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing name", db.HardwareComponentType{}, true, "validation failed: name is a required hardware component type attribute"},
-		{"happy path", db.HardwareComponentType{Name: "Test-Type"}, false, ""},
+		{"missing name", &db.HardwareComponentType{}, true, "validation failed: name is a required hardware component type attribute"},
+		{"happy path", &db.HardwareComponentType{Name: "Test-Type"}, false, ""},
 	}
 
 	for _, tt := range testCases {

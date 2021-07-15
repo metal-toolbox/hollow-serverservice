@@ -18,7 +18,7 @@ const (
 
 // HardwareService provides the ability to interact with hardware via Hollow
 type HardwareService interface {
-	Create(context.Context, Hardware) error
+	Create(context.Context, Hardware) (*uuid.UUID, error)
 	GetBIOSConfigs(context.Context, uuid.UUID) ([]BIOSConfig, error)
 	Get(context.Context, uuid.UUID) (*Hardware, error)
 	List(context.Context, *HardwareListParams) ([]Hardware, error)
@@ -118,19 +118,30 @@ func (c *HardwareServiceClient) Get(ctx context.Context, hwUUID uuid.UUID) (*Har
 	return &hw, nil
 }
 
-// Create will attempt to create hardware in Hollow
-func (c *HardwareServiceClient) Create(ctx context.Context, hw Hardware) error {
+// Create will attempt to create hardware in Hollow and return the new hardware UUID
+func (c *HardwareServiceClient) Create(ctx context.Context, hw Hardware) (*uuid.UUID, error) {
 	request, err := newPostRequest(ctx, c.client.url, hardwareEndpoint, hw)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.client.do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return ensureValidServerResponse(resp)
+	if err := ensureValidServerResponse(resp); err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var r serverResponse
+	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		return nil, err
+	}
+
+	return &r.UUID, nil
 }
 
 // List will return all hardware with optional params to filter the results

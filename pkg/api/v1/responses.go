@@ -4,11 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type serverResponse struct {
-	Message      string `json:"message"`
-	ErrorDetails string `json:"error_details,omitempty"`
+	Message      string    `json:"message"`
+	UUID         uuid.UUID `json:"uuid,omitempty"`
+	ErrorDetails string    `json:"error_details,omitempty"`
 }
 
 func newErrorResponse(m string, err error) *serverResponse {
@@ -24,9 +26,10 @@ func notFoundResponse() *serverResponse {
 	}
 }
 
-func createdResponse() *serverResponse {
+func createdResponse(u uuid.UUID) *serverResponse {
 	return &serverResponse{
 		Message: "created",
+		UUID:    u,
 	}
 }
 

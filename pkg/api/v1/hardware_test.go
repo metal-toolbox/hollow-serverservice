@@ -178,12 +178,14 @@ func TestIntegrationHardwareCreate(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			err := s.Client.Hardware.Create(context.TODO(), *tt.hw)
+			r, err := s.Client.Hardware.Create(context.TODO(), *tt.hw)
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 			} else {
 				assert.NoError(t, err)
+				assert.NotNil(t, r)
+				assert.NotEqual(t, uuid.Nil.String(), r.String())
 			}
 		})
 	}
@@ -224,7 +226,7 @@ func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
 		},
 	}
 
-	err = s.Client.Hardware.Create(context.TODO(), *hw)
+	_, err = s.Client.Hardware.Create(context.TODO(), *hw)
 	assert.NoError(t, err)
 
 	// Get the hardware back and ensure all the things we set are returned

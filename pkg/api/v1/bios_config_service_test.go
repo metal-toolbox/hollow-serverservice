@@ -68,9 +68,9 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		c := mockClient(`{"message": "something something"}`, tt.responseCode)
+		c := mockClient(`{"message": "something something", "uuid":"00000000-0000-0000-0000-000000001234"}`, tt.responseCode)
 
-		err := c.BIOSConfig.Create(tt.ctx, tt.bios)
+		r, err := c.BIOSConfig.Create(tt.ctx, tt.bios)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -78,6 +78,8 @@ func TestBiosConfigServiceCreateBIOSConfig(t *testing.T) {
 		} else {
 			assert.NoError(t, err, tt.testName)
 			assert.NotNil(t, c, tt.testName)
+			assert.NotNil(t, r)
+			assert.Equal(t, "00000000-0000-0000-0000-000000001234", r.String())
 		}
 	}
 }

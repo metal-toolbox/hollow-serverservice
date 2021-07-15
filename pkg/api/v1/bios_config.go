@@ -64,12 +64,12 @@ func biosConfigCreate(c *gin.Context) {
 		return
 	}
 
-	if err := db.CreateBIOSConfig(*dbc); err != nil {
+	if err := db.CreateBIOSConfig(dbc); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed to create BIOS Config", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "created"})
+	c.JSON(http.StatusOK, createdResponse(dbc.ID))
 }
 
 func (b *BIOSConfig) toDBModel() (*db.BIOSConfig, error) {

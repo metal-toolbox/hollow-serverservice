@@ -29,7 +29,7 @@ func (bc *BIOSConfig) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 // CreateBIOSConfig will persist a BIOSConfig into the backend datastore
-func CreateBIOSConfig(bc BIOSConfig) error {
+func CreateBIOSConfig(bc *BIOSConfig) error {
 	// if the hardware relation isn't already loaded ensure that the hardware does
 	// exist. Otherwise return an error.
 	if bc.HardwareID != uuid.Nil {
@@ -38,7 +38,7 @@ func CreateBIOSConfig(bc BIOSConfig) error {
 		}
 	}
 
-	return db.Create(&bc).Error
+	return db.Create(bc).Error
 }
 
 // BIOSConfigList will return all the BIOSConfigs for a given Hardware UUID, the list will be sorted with the newest one

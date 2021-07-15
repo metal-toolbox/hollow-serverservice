@@ -48,12 +48,12 @@ func hardwareComponentTypeCreate(c *gin.Context) {
 		return
 	}
 
-	if err := db.CreateHardwareComponentType(*dbT); err != nil {
+	if err := db.CreateHardwareComponentType(dbT); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed to create Hardware Component Type", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, createdResponse())
+	c.JSON(http.StatusOK, createdResponse(dbT.ID))
 }
 
 func hardwareComponentTypeList(c *gin.Context) {

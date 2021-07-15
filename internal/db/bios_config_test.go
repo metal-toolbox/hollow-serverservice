@@ -14,13 +14,13 @@ func TestCreateBIOSConfig(t *testing.T) {
 
 	var testCases = []struct {
 		testName    string
-		bc          db.BIOSConfig
+		bc          *db.BIOSConfig
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing hardware id", db.BIOSConfig{}, true, "validation failed: hardware UUID is a required BIOSConfig attribute"},
-		{"hardware id that doesn't exist", db.BIOSConfig{HardwareID: uuid.New()}, true, "hardware UUID not found"},
-		{"happy path", db.BIOSConfig{HardwareID: db.FixtureHardwareNemo.ID}, false, ""},
+		{"missing hardware id", &db.BIOSConfig{}, true, "validation failed: hardware UUID is a required BIOSConfig attribute"},
+		{"hardware id that doesn't exist", &db.BIOSConfig{HardwareID: uuid.New()}, true, "hardware UUID not found"},
+		{"happy path", &db.BIOSConfig{HardwareID: db.FixtureHardwareNemo.ID}, false, ""},
 	}
 
 	for _, tt := range testCases {

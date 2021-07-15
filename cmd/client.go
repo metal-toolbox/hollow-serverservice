@@ -91,7 +91,7 @@ func client(ctx context.Context) {
 			Name: name,
 		}
 
-		if err := client.HardwareComponentType.Create(ctx, t); err != nil {
+		if _, err := client.HardwareComponentType.Create(ctx, t); err != nil {
 			fmt.Printf("failed to create %s hardware component type\n", name)
 			log.Fatal(err)
 		}
@@ -129,7 +129,7 @@ func client(ctx context.Context) {
 		},
 	}
 
-	if err := client.Hardware.Create(ctx, hw); err != nil {
+	if _, err := client.Hardware.Create(ctx, hw); err != nil {
 		fmt.Println("failed to create hardware")
 		log.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func client(ctx context.Context) {
 		ConfigValues: jsonBios,
 	}
 
-	if err := client.BIOSConfig.Create(ctx, bc); err != nil {
+	if _, err := client.BIOSConfig.Create(ctx, bc); err != nil {
 		fmt.Println("failed to create bios config")
 		log.Fatal(err)
 	}
