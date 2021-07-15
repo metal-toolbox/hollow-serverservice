@@ -35,7 +35,7 @@ func hardwareComponentTypeCreate(c *gin.Context) {
 	var t HardwareComponentType
 	if err := c.ShouldBindJSON(&t); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid hardware component type",
+			"message": "invalid hardware component type",
 			"error":   err.Error(),
 		})
 
@@ -44,12 +44,12 @@ func hardwareComponentTypeCreate(c *gin.Context) {
 
 	dbT, err := t.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Hardware Component Type", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware component type", "error": err.Error()})
 		return
 	}
 
 	if err := db.CreateHardwareComponentType(dbT); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed to create Hardware Component Type", err))
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create hardware component type", err))
 		return
 	}
 

@@ -71,7 +71,7 @@ func (h *Hardware) toDBModel() (*db.Hardware, error) {
 func hardwareGet(c *gin.Context) {
 	hwUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, newErrorResponse("Invalid hardware UUID", err))
+		c.JSON(http.StatusBadRequest, newErrorResponse("invalid hardware UUID", err))
 		return
 	}
 
@@ -110,12 +110,12 @@ func hardwareCreate(c *gin.Context) {
 
 	dbHW, err := hw.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Hardware", "error": err.Error})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware", "error": err.Error})
 		return
 	}
 
 	if err := db.CreateHardware(dbHW); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("Failed to create Hardware", err))
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create hardware", err))
 		return
 	}
 
@@ -134,7 +134,7 @@ func hardwareList(c *gin.Context) {
 	alp, err := parseQueryAttributesListParams(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid attributes list params",
+			"message": "invalid attributes list params",
 			"error":   err.Error(),
 		})
 	}

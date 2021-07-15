@@ -90,9 +90,11 @@ func FindHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
 	var hw Hardware
 
 	err := hardwarePreload(db).First(&hw, Hardware{ID: hwUUID}).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, ErrNotFound
-	} else if err != nil {
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+
 		return nil, err
 	}
 

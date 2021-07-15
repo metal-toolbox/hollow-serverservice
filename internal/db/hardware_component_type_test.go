@@ -41,29 +41,21 @@ func TestGetHardwareComponentType(t *testing.T) {
 		testName      string
 		filter        *db.HardwareComponentTypeFilter
 		expectedUUIDs []uuid.UUID
-		expectError   bool
-		errorMsg      string
 	}{
-		{"happy path - filter doesn't match", &db.HardwareComponentTypeFilter{Name: "DoesntExist"}, []uuid.UUID{}, false, ""},
-		{"happy path - filter match", &db.HardwareComponentTypeFilter{Name: db.FixtureHCTFins.Name}, []uuid.UUID{db.FixtureHCTFins.ID}, false, ""},
-		{"happy path - no filter", nil, []uuid.UUID{db.FixtureHCTFins.ID}, false, ""},
+		{"happy path - filter doesn't match", &db.HardwareComponentTypeFilter{Name: "DoesntExist"}, []uuid.UUID{}},
+		{"happy path - filter match", &db.HardwareComponentTypeFilter{Name: db.FixtureHCTFins.Name}, []uuid.UUID{db.FixtureHCTFins.ID}},
+		{"happy path - no filter", nil, []uuid.UUID{db.FixtureHCTFins.ID}},
 	}
 
 	for _, tt := range testCases {
 		r, err := db.GetHardwareComponentTypes(tt.filter)
+		assert.NoError(t, err, tt.testName)
 
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-		} else {
-			assert.NoError(t, err, tt.testName)
-
-			var rIDs []uuid.UUID
-			for _, h := range r {
-				rIDs = append(rIDs, h.ID)
-			}
-
-			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
+		var rIDs []uuid.UUID
+		for _, h := range r {
+			rIDs = append(rIDs, h.ID)
 		}
+
+		assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
 	}
 }
