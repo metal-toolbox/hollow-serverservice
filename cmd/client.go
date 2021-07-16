@@ -145,30 +145,36 @@ func client(ctx context.Context) {
 	}
 
 	bc := hollow.VersionedAttributes{
-		EntityType: "hardware",
-		EntityUUID: hwUUID,
-		Namespace:  "net.equinixplatform.bios",
-		Values:     jsonBios,
+		Namespace: "net.equinixplatform.bios",
+		Values:    jsonBios,
 	}
 
-	if _, err := client.BIOSConfig.Create(ctx, bc); err != nil {
+	if _, err := client.Hardware.CreateVersionedAttributes(ctx, hwUUID, bc); err != nil {
 		fmt.Println("failed to create bios config")
 		log.Fatal(err)
 	}
 
 	bcNew := hollow.VersionedAttributes{
-		EntityType: "hardware",
-		EntityUUID: hwUUID,
-		Namespace:  "net.equinixplatform.bios",
-		Values:     newJSONBios,
+		Namespace: "net.equinixplatform.bios",
+		Values:    newJSONBios,
 	}
 
-	if _, err := client.BIOSConfig.Create(ctx, bcNew); err != nil {
+	if _, err := client.Hardware.CreateVersionedAttributes(ctx, hwUUID, bcNew); err != nil {
 		fmt.Println("failed to create bios config")
 		log.Fatal(err)
 	}
 
-	lbc, err := client.Hardware.VersionedAttributesGet(ctx, hwUUID)
+	bcNew2 := hollow.VersionedAttributes{
+		Namespace: "net.hollow.test",
+		Values:    jsonBios,
+	}
+
+	if _, err := client.Hardware.CreateVersionedAttributes(ctx, hwUUID, bcNew2); err != nil {
+		fmt.Println("failed to create bios config")
+		log.Fatal(err)
+	}
+
+	lbc, err := client.Hardware.GetVersionedAttributes(ctx, hwUUID)
 	if err != nil {
 		fmt.Println("Failed to get bios configs")
 		log.Fatal(err)

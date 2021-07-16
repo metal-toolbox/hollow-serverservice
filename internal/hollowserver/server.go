@@ -19,6 +19,7 @@ type Server struct {
 	Logger *zap.Logger
 	Listen string
 	Debug  bool
+	Store  *db.Store
 }
 
 var (
@@ -29,8 +30,8 @@ var (
 func (s *Server) setup() http.Handler {
 	// Setup default gin router
 	r := gin.New()
-
 	p := ginprometheus.NewPrometheus("gin")
+	v1Rtr := v1api.Router{Store: s.Store}
 
 	// Remove any params from the URL string to keep the number of labels down
 	p.ReqCntURLLabelMappingFn = func(c *gin.Context) string {
@@ -53,13 +54,13 @@ func (s *Server) setup() http.Handler {
 
 	v1 := r.Group("/api/v1")
 	{
-		v1api.RouteMap(v1)
+		v1Rtr.Routes(v1)
 	}
 
 	// Health endpoints
-	r.GET("/healthz", livenessCheck)
-	r.GET("/healthz/liveness", livenessCheck)
-	r.GET("/healthz/readiness", readinessCheck)
+	r.GET("/healthz", s.livenessCheck)
+	r.GET("/healthz/liveness", s.livenessCheck)
+	r.GET("/healthz/readiness", s.readinessCheck)
 
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "invalid request - route not found"})
@@ -83,7 +84,7 @@ func (s *Server) NewServer() *http.Server {
 }
 
 // livenessCheck ensures that the server is up and responding
-func livenessCheck(c *gin.Context) {
+func (s *Server) livenessCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "UP",
 	})
@@ -92,8 +93,8 @@ func livenessCheck(c *gin.Context) {
 // readinessCheck ensures that the server is up and that we are able to process
 // requests. Currently our only dependency is the DB so we just ensure that is
 // responding.
-func readinessCheck(c *gin.Context) {
-	if db.Ping() {
+func (s *Server) readinessCheck(c *gin.Context) {
+	if s.Store.Ping() {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "UP",
 		})

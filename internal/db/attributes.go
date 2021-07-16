@@ -34,6 +34,6 @@ func (a *Attributes) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 // CreateAttributes will persist attributes into the backend datastore
-func CreateAttributes(a *Attributes) error {
-	return db.Create(a).Error
+func (s *Store) CreateAttributes(a *Attributes) error {
+	return s.db.Create(a).Error
 }

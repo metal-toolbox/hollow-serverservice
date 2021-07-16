@@ -31,19 +31,19 @@ func (t *HardwareComponentType) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 // CreateHardwareComponentType will persist a hardware component type into the backend datastore
-func CreateHardwareComponentType(t *HardwareComponentType) error {
-	return db.Create(&t).Error
+func (s *Store) CreateHardwareComponentType(t *HardwareComponentType) error {
+	return s.db.Create(&t).Error
 }
 
 // GetHardwareComponentTypes will return a list of hardware component types with the requested params, if no
 // filter is passed then it will return all hardware component types
-func GetHardwareComponentTypes(filter *HardwareComponentTypeFilter) ([]HardwareComponentType, error) {
+func (s *Store) GetHardwareComponentTypes(filter *HardwareComponentTypeFilter) ([]HardwareComponentType, error) {
 	var types []HardwareComponentType
 
-	d := db
+	d := s.db
 
 	if filter != nil {
-		d = filter.apply(db)
+		d = filter.apply(d)
 	}
 
 	if err := d.Find(&types).Error; err != nil {

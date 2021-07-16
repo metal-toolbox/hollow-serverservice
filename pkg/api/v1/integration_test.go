@@ -19,9 +19,9 @@ type testServer struct {
 }
 
 func serverTest(t *testing.T) *testServer {
-	db.DatabaseTest(t)
+	store := db.DatabaseTest(t)
 
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), Store: store}
 	s := hs.NewServer()
 
 	ts := &testServer{

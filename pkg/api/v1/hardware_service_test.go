@@ -3,7 +3,6 @@ package hollow_test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -15,7 +14,7 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-func TestHardwareServiceListBIOSConfigs(t *testing.T) {
+func TestHardwareServiceListVersionedAttributess(t *testing.T) {
 	ctx := context.Background()
 
 	d := time.Now().Add(1 * time.Millisecond)
@@ -23,23 +22,12 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 	timeCtx, cancel := context.WithDeadline(ctx, d)
 	defer cancel()
 
-	exampleBiosResults := `{
-			"open": {
-				"boot_mode": "Bios"
-			}
-		}`
-
-	jsonBios, err := json.Marshal(exampleBiosResults)
-	if err != nil {
-		fmt.Println("failed to convert example bios to json")
-	}
-
 	testUUID := uuid.New()
 
 	var testCases = []struct {
 		testName     string
 		uuid         uuid.UUID
-		bios         hollow.BIOSConfig
+		bios         hollow.VersionedAttributes
 		ctx          context.Context
 		responseCode int
 		expectError  bool
@@ -48,7 +36,7 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 		{
 			"happy path",
 			testUUID,
-			hollow.BIOSConfig{HardwareUUID: testUUID, ConfigValues: jsonBios},
+			hollow.VersionedAttributes{EntityUUID: testUUID},
 			ctx,
 			http.StatusOK,
 			false,
@@ -57,7 +45,7 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 		{
 			"server returns an error",
 			testUUID,
-			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
+			hollow.VersionedAttributes{EntityUUID: uuid.New()},
 			ctx,
 			http.StatusUnauthorized,
 			true,
@@ -66,7 +54,7 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 		{
 			"fake timeout",
 			testUUID,
-			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
+			hollow.VersionedAttributes{EntityUUID: uuid.New()},
 			timeCtx,
 			http.StatusOK,
 			true,
@@ -75,12 +63,12 @@ func TestHardwareServiceListBIOSConfigs(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		jsonResponse, err := json.Marshal([]hollow.BIOSConfig{tt.bios})
+		jsonResponse, err := json.Marshal([]hollow.VersionedAttributes{tt.bios})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), tt.responseCode)
 
-		res, err := c.Hardware.GetBIOSConfigs(tt.ctx, tt.uuid)
+		res, err := c.Hardware.GetVersionedAttributes(tt.ctx, tt.uuid)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

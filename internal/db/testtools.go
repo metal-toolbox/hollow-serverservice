@@ -12,41 +12,51 @@ import (
 
 // TestDBURI is the URI for the test database
 var TestDBURI = "postgresql://root@localhost:26257/hollow_test?sslmode=disable"
+var testStore *Store
 
 func testDatastore() error {
 	// don't setup the datastore if we already have one
-	if db != nil {
+	if testStore != nil {
 		return nil
 	}
 
-	err := NewPostgresStore(TestDBURI, zap.NewNop())
+	z, err := zap.NewDevelopment()
 	if err != nil {
 		return err
 	}
 
+	s, err := NewPostgresStore(TestDBURI, z)
+	if err != nil {
+		return err
+	}
+
+	testStore = s
+
 	cleanDB()
 
-	return setupTestData()
+	return s.setupTestData()
 }
 
 // DatabaseTest allows you to run tests that interact with the database
-func DatabaseTest(t *testing.T) {
+func DatabaseTest(t *testing.T) *Store {
 	if testing.Short() {
 		t.Skip("skipping database test in short mode")
 	}
 
 	t.Cleanup(func() {
 		cleanDB()
-		err := setupTestData()
+		err := testStore.setupTestData()
 		require.NoError(t, err, "Unexpected error setting up test data")
 	})
 
 	err := testDatastore()
 	require.NoError(t, err, "Unexpected error setting up test datastore")
+
+	return testStore
 }
 
 func cleanDB() {
-	d := db.Session(&gorm.Session{AllowGlobalUpdate: true})
+	d := testStore.db.Session(&gorm.Session{AllowGlobalUpdate: true})
 	// Make sure the deletion goes in order so you don't break the databases foreign key constraints
 	d.Delete(&Attributes{})
 	d.Delete(&VersionedAttributes{})

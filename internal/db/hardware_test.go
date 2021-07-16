@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateHardware(t *testing.T) {
-	db.DatabaseTest(t)
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -23,57 +23,19 @@ func TestCreateHardware(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := db.CreateHardware(&tt.hw)
+		err := s.CreateHardware(&tt.hw)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		} else {
 			assert.NoError(t, err, tt.testName)
-		}
-	}
-}
-
-func TestFindOrCreateHardwareByUUID(t *testing.T) {
-	db.DatabaseTest(t)
-
-	var testCases = []struct {
-		testName   string
-		searchUUID uuid.UUID
-
-		expectError bool
-		errorMsg    string
-	}{
-		{
-			"happy path - existing hardware",
-			db.FixtureHardwareDory.ID,
-			false,
-			"",
-		},
-		{
-			"happy path - new hardware",
-			uuid.New(),
-			false,
-			"",
-		},
-	}
-
-	for _, tt := range testCases {
-		res, err := db.FindOrCreateHardwareByUUID(tt.searchUUID)
-
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-		} else {
-			assert.NoError(t, err, tt.testName)
-			assert.NotNil(t, res, tt.testName)
-			assert.NotNil(t, res.CreatedAt, tt.testName)
 		}
 	}
 }
 
 func TestFindHardwareByUUID(t *testing.T) {
-	db.DatabaseTest(t)
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName   string
@@ -97,7 +59,7 @@ func TestFindHardwareByUUID(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		res, err := db.FindHardwareByUUID(tt.searchUUID)
+		res, err := s.GetHardwareByUUID(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -111,7 +73,7 @@ func TestFindHardwareByUUID(t *testing.T) {
 }
 
 func TestGetHardware(t *testing.T) {
-	db.DatabaseTest(t)
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
@@ -273,7 +235,7 @@ func TestGetHardware(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := db.GetHardware(tt.filter)
+		r, err := s.GetHardware(tt.filter)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -284,8 +246,13 @@ func TestGetHardware(t *testing.T) {
 			var rIDs []uuid.UUID
 			for _, h := range r {
 				rIDs = append(rIDs, h.ID)
-				// Ensure preload works. All Fixture data has 2 hardware components
+				// Ensure preload works. All Fixture data has 2 hardware components and 2 attributes
 				assert.Len(t, h.HardwareComponents, 2, tt.testName)
+				assert.Len(t, h.Attributes, 2, tt.testName)
+				// Nemo has two versioned attributes but only the most recent in a namespace should preload
+				if h.ID == db.FixtureHardwareNemo.ID {
+					assert.Len(t, h.VersionedAttributes, 1, tt.testName)
+				}
 			}
 
 			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)

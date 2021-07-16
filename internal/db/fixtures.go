@@ -57,19 +57,19 @@ var (
 	FixtureHardware = []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin}
 )
 
-func setupTestData() error {
-	if err := CreateHardwareComponentType(&FixtureHCTFins); err != nil {
+func (s *Store) setupTestData() error {
+	if err := s.CreateHardwareComponentType(&FixtureHCTFins); err != nil {
 		return err
 	}
 
 	for _, hw := range FixtureHardware {
-		if err := CreateHardware(&hw); err != nil {
+		if err := s.CreateHardware(&hw); err != nil {
 			return err
 		}
 	}
 
 	for _, a := range []VersionedAttributes{FixtureVersionedAttributesOld, FixtureVersionedAttributesNew} {
-		if err := VersionedAttributesCreate(&a); err != nil {
+		if err := s.CreateVersionedAttributes(&a); err != nil {
 			return err
 		}
 	}

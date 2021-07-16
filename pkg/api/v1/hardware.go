@@ -1,11 +1,8 @@
 package hollow
 
 import (
-	"errors"
-	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
 	"go.metalkube.net/hollow/internal/db"
@@ -14,12 +11,13 @@ import (
 // Hardware represents a piece of hardware in a facility. These are the
 // details of the physical hardware
 type Hardware struct {
-	UUID               uuid.UUID           `json:"uuid"`
-	FacilityCode       string              `json:"facility"`
-	Attributes         []Attributes        `json:"attributes"`
-	HardwareComponents []HardwareComponent `json:"hardware_components"`
-	CreatedAt          time.Time           `json:"created_at"`
-	UpdatedAt          time.Time           `json:"updated_at"`
+	UUID                uuid.UUID             `json:"uuid"`
+	FacilityCode        string                `json:"facility"`
+	Attributes          []Attributes          `json:"attributes"`
+	HardwareComponents  []HardwareComponent   `json:"hardware_components"`
+	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
+	CreatedAt           time.Time             `json:"created_at"`
+	UpdatedAt           time.Time             `json:"updated_at"`
 }
 
 func (h *Hardware) fromDBModel(dbH db.Hardware) error {
@@ -36,6 +34,11 @@ func (h *Hardware) fromDBModel(dbH db.Hardware) error {
 	}
 
 	h.HardwareComponents, err = convertDBHardwareComponents(dbH.HardwareComponents)
+	if err != nil {
+		return err
+	}
+
+	h.VersionedAttributes, err = convertFromDBVersionedAttributes(dbH.VersionedAttributes)
 	if err != nil {
 		return err
 	}
@@ -65,111 +68,12 @@ func (h *Hardware) toDBModel() (*db.Hardware, error) {
 
 	dbC.Attributes = attrs
 
+	verAttrs, err := convertToDBVersionedAttributes(h.VersionedAttributes)
+	if err != nil {
+		return nil, err
+	}
+
+	dbC.VersionedAttributes = verAttrs
+
 	return dbC, nil
-}
-
-func hardwareGet(c *gin.Context) {
-	hwUUID, err := uuid.Parse(c.Param("uuid"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, newErrorResponse("invalid hardware UUID", err))
-		return
-	}
-
-	dbHW, err := db.FindHardwareByUUID(hwUUID)
-	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			c.JSON(http.StatusNotFound, notFoundResponse())
-			return
-		}
-
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed fetching records from datastore", err))
-
-		return
-	}
-
-	hw := &Hardware{}
-
-	if err = hw.fromDBModel(*dbHW); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the results", err))
-		return
-	}
-
-	c.JSON(http.StatusOK, hw)
-}
-
-func hardwareCreate(c *gin.Context) {
-	var hw Hardware
-	if err := c.ShouldBindJSON(&hw); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid hardware",
-			"error":   err.Error(),
-		})
-
-		return
-	}
-
-	dbHW, err := hw.toDBModel()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware", "error": err.Error})
-		return
-	}
-
-	if err := db.CreateHardware(dbHW); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create hardware", err))
-		return
-	}
-
-	c.JSON(http.StatusOK, createdResponse(dbHW.ID))
-}
-
-func hardwareList(c *gin.Context) {
-	var params HardwareListParams
-	if err := c.ShouldBindQuery(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid filter",
-			"error":   err.Error(),
-		})
-	}
-
-	alp, err := parseQueryAttributesListParams(c, "attr")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid attributes list params",
-			"error":   err.Error(),
-		})
-	}
-
-	params.AttributeListParams = alp
-
-	valp, err := parseQueryAttributesListParams(c, "ver_attr")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid versioned attributes list params",
-			"error":   err.Error(),
-		})
-	}
-
-	params.VersionedAttributeListParams = valp
-
-	dbFilter := params.dbFilter()
-
-	dbHW, err := db.GetHardware(dbFilter)
-	if err != nil {
-		dbQueryFailureResponse(c, err)
-		return
-	}
-
-	hw := []Hardware{}
-
-	for _, dbH := range dbHW {
-		h := Hardware{}
-		if err := h.fromDBModel(dbH); err != nil {
-			failedConvertingToVersioned(c, err)
-			return
-		}
-
-		hw = append(hw, h)
-	}
-
-	c.JSON(http.StatusOK, hw)
 }

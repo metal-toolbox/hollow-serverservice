@@ -9,8 +9,8 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-func TestVersionedAttributesCreate(t *testing.T) {
-	db.DatabaseTest(t)
+func TestCreateVersionedAttributes(t *testing.T) {
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -23,7 +23,7 @@ func TestVersionedAttributesCreate(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := db.VersionedAttributesCreate(tt.a)
+		err := s.CreateVersionedAttributes(tt.a)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -34,8 +34,8 @@ func TestVersionedAttributesCreate(t *testing.T) {
 	}
 }
 
-func TestVersionedAttributesList(t *testing.T) {
-	db.DatabaseTest(t)
+func TestGetVersionedAttributes(t *testing.T) {
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -49,7 +49,7 @@ func TestVersionedAttributesList(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		res, err := db.VersionedAttributesList(tt.searchUUID)
+		res, err := s.GetVersionedAttributes(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
