@@ -171,6 +171,50 @@ func TestIntegrationHardwareList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search by type from attributes and name from versioned attributes",
+			&hollow.HardwareListParams{
+				AttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceOtherdata,
+						Keys:       []string{"type"},
+						EqualValue: "clown",
+					},
+				},
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by type from attributes and name from versioned attributes, using the not current value, so nothing should return",
+			&hollow.HardwareListParams{
+				AttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceOtherdata,
+						Keys:       []string{"type"},
+						EqualValue: "clown",
+					},
+				},
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "old",
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
