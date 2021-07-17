@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.metalkube.net/hollow/internal/db"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
@@ -14,6 +15,15 @@ import (
 
 func TestIntegrationHardwareList(t *testing.T) {
 	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		res, err := s.Client.Hardware.List(ctx, nil)
+		if !expectError {
+			require.Len(t, res, 3)
+		}
+
+		return err
+	})
 
 	// These are the same test cases used in db/hardware_test.go
 	var testCases = []struct {
@@ -151,42 +161,37 @@ func TestIntegrationHardwareList(t *testing.T) {
 func TestIntegrationHardwareCreate(t *testing.T) {
 	s := serverTest(t)
 
+	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		hw := hollow.Hardware{FacilityCode: "int-test"}
+
+		res, err := s.Client.Hardware.Create(ctx, hw)
+		if !expectError {
+			assert.NotNil(t, res)
+		}
+
+		return err
+	})
+
 	var testCases = []struct {
-		testName    string
-		hw          *hollow.Hardware
-		expectError bool
-		errorMsg    string
+		testName string
+		hw       *hollow.Hardware
+		errorMsg string
 	}{
-		{
-			"happy path",
-			&hollow.Hardware{
-				FacilityCode: "int-test",
-			},
-			false,
-			"",
-		},
 		{
 			"fails on a duplicate uuid",
 			&hollow.Hardware{
 				UUID:         db.FixtureHardwareNemo.ID,
 				FacilityCode: "int-test",
 			},
-			true,
 			"duplicate key",
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			r, err := s.Client.Hardware.Create(context.TODO(), *tt.hw)
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMsg)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, r)
-				assert.NotEqual(t, uuid.Nil.String(), r.String())
-			}
+			_, err := s.Client.Hardware.Create(context.TODO(), *tt.hw)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
 	}
 }
@@ -194,22 +199,18 @@ func TestIntegrationHardwareCreate(t *testing.T) {
 func TestIntegrationHardwareDelete(t *testing.T) {
 	s := serverTest(t)
 
+	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		return s.Client.Hardware.Delete(ctx, hollow.Hardware{UUID: db.FixtureHardwareNemo.ID})
+	})
+
 	var testCases = []struct {
-		testName    string
-		uuid        uuid.UUID
-		expectError bool
-		errorMsg    string
+		testName string
+		uuid     uuid.UUID
+		errorMsg string
 	}{
-		{
-			"happy path",
-			db.FixtureHardwareNemo.ID,
-			false,
-			"",
-		},
 		{
 			"fails on unknown uuid",
 			uuid.New(),
-			true,
 			"resource not found",
 		},
 	}
@@ -217,12 +218,8 @@ func TestIntegrationHardwareDelete(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			err := s.Client.Hardware.Delete(context.TODO(), hollow.Hardware{UUID: tt.uuid})
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMsg)
-			} else {
-				assert.NoError(t, err)
-			}
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
 	}
 }
@@ -291,36 +288,32 @@ func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
 
 func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
 	s := serverTest(t)
-	hwUUID := db.FixtureHardwareDory.ID
 
-	var testCases = []struct {
-		testName    string
-		va          hollow.VersionedAttributes
-		expectError bool
-		errorMsg    string
-	}{
-		{
-			"happy path",
-			hollow.VersionedAttributes{
-				Namespace: "hollow.integration.test",
-				Values:    json.RawMessage([]byte(`{"integration":true}`)),
-			},
-			false,
-			"",
-		},
-	}
+	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Values: json.RawMessage([]byte(`{"test":"integration"}`))}
 
-	for _, tt := range testCases {
-		t.Run(tt.testName, func(t *testing.T) {
-			r, err := s.Client.Hardware.CreateVersionedAttributes(context.TODO(), hwUUID, tt.va)
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMsg)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, r)
-				assert.NotEqual(t, uuid.Nil.String(), r.String())
-			}
-		})
-	}
+		res, err := s.Client.Hardware.CreateVersionedAttributes(ctx, db.FixtureHardwareDory.ID, va)
+		if !expectError {
+			assert.NotNil(t, res)
+		}
+
+		return err
+	})
+}
+
+func TestIntegrationHardwareServiceGetVersionedAttributes(t *testing.T) {
+	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		res, err := s.Client.Hardware.GetVersionedAttributes(ctx, db.FixtureHardwareNemo.ID)
+		if !expectError {
+			require.Len(t, res, 2)
+			assert.Equal(t, db.FixtureNamespaceVersioned, res[0].Namespace)
+			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Values)
+			assert.Equal(t, db.FixtureNamespaceVersioned, res[1].Namespace)
+			assert.Equal(t, json.RawMessage([]byte(`{"name":"old"}`)), res[1].Values)
+		}
+
+		return err
+	})
 }
