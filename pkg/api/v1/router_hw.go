@@ -1,13 +1,10 @@
 package hollow
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"go.metalkube.net/hollow/internal/db"
 )
 
 func (r *Router) hardwareList(c *gin.Context) {
@@ -43,7 +40,7 @@ func (r *Router) hardwareList(c *gin.Context) {
 
 	dbHW, err := r.Store.GetHardware(dbFilter)
 	if err != nil {
-		dbQueryFailureResponse(c, err)
+		dbFailureResponse(c, err)
 		return
 	}
 
@@ -63,28 +60,14 @@ func (r *Router) hardwareList(c *gin.Context) {
 }
 
 func (r *Router) hardwareGet(c *gin.Context) {
-	hwUUID, err := uuid.Parse(c.Param("uuid"))
+	dbHW, err := r.loadHardwareFromParams(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, newErrorResponse("invalid hardware UUID", err))
 		return
 	}
 
-	dbHW, err := r.Store.GetHardwareByUUID(hwUUID)
-	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			c.JSON(http.StatusNotFound, notFoundResponse())
-			return
-		}
-
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed fetching records from datastore", err))
-
-		return
-	}
-
-	hw := &Hardware{}
-
+	var hw Hardware
 	if err = hw.fromDBModel(*dbHW); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the results", err))
+		failedConvertingToVersioned(c, err)
 		return
 	}
 
@@ -113,7 +96,21 @@ func (r *Router) hardwareCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, createdResponse(dbHW.ID))
+	createdResponse(c, &dbHW.ID)
+}
+
+func (r *Router) hardwareDelete(c *gin.Context) {
+	dbHW, err := r.loadHardwareFromParams(c)
+	if err != nil {
+		return
+	}
+
+	if err = r.Store.DeleteHardware(dbHW); err != nil {
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed deleting resource", err))
+		return
+	}
+
+	deletedResponse(c)
 }
 
 func (r *Router) hardwareVersionedAttributesList(c *gin.Context) {
@@ -125,7 +122,7 @@ func (r *Router) hardwareVersionedAttributesList(c *gin.Context) {
 
 	dbVA, err := r.Store.GetVersionedAttributes(hwUUID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed fetching records from datastore", "error": err.Error()})
+		dbFailureResponse(c, err)
 		return
 	}
 
@@ -142,4 +139,35 @@ func (r *Router) hardwareVersionedAttributesList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, va)
+}
+
+func (r *Router) hardwareVersionedAttributesCreate(c *gin.Context) {
+	var va VersionedAttributes
+	if err := c.ShouldBindJSON(&va); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid versioned attributes",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	dbVA, err := va.toDBModel()
+	if err != nil {
+		failedConvertingToVersioned(c, err)
+		return
+	}
+
+	hw, err := r.loadHardwareFromParams(c)
+	if err != nil {
+		return
+	}
+
+	err = r.Store.CreateVersionedAttributes(hw, dbVA)
+	if err != nil {
+		dbFailureResponse(c, err)
+		return
+	}
+
+	createdResponse(c, &dbVA.ID)
 }

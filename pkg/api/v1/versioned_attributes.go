@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/datatypes"
 
 	"go.metalkube.net/hollow/internal/db"
@@ -12,11 +11,9 @@ import (
 
 // VersionedAttributes represents a set of attributes of an entity at a given time
 type VersionedAttributes struct {
-	EntityType string          `json:"entity_type" binding:"required"`
-	EntityUUID uuid.UUID       `json:"entity_uuid" binding:"required"`
-	Namespace  string          `json:"namespace" binding:"required"`
-	Values     json.RawMessage `json:"values" binding:"required"`
-	CreatedAt  time.Time       `json:"created_at"`
+	Namespace string          `json:"namespace" binding:"required"`
+	Values    json.RawMessage `json:"values" binding:"required"`
+	CreatedAt time.Time       `json:"created_at"`
 }
 
 // func biosConfigCreate(c *gin.Context) {
@@ -52,18 +49,14 @@ type VersionedAttributes struct {
 
 func (a *VersionedAttributes) toDBModel() (*db.VersionedAttributes, error) {
 	dbc := &db.VersionedAttributes{
-		EntityType: a.EntityType,
-		EntityID:   a.EntityUUID,
-		Namespace:  a.Namespace,
-		Values:     datatypes.JSON(a.Values),
+		Namespace: a.Namespace,
+		Values:    datatypes.JSON(a.Values),
 	}
 
 	return dbc, nil
 }
 
 func (a *VersionedAttributes) fromDBModel(dba db.VersionedAttributes) error {
-	a.EntityType = dba.EntityType
-	a.EntityUUID = dba.EntityID
 	a.CreatedAt = dba.CreatedAt
 	a.Namespace = dba.Namespace
 	a.Values = json.RawMessage(dba.Values)

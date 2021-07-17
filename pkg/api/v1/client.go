@@ -75,7 +75,33 @@ func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid
 		return nil, err
 	}
 
-	return &r.UUID, nil
+	return r.UUID, nil
+}
+
+// put provides a reusable method for a standard post to a hollow server
+func (c *Client) put(ctx context.Context, path string, body interface{}) (*uuid.UUID, error) {
+	request, err := newPutRequest(ctx, c.url, path, body)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := ensureValidServerResponse(resp); err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var r serverResponse
+	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		return nil, err
+	}
+
+	return r.UUID, nil
 }
 
 type queryParams interface {
@@ -128,4 +154,19 @@ func (c *Client) get(ctx context.Context, path string, params queryParams, resul
 	defer resp.Body.Close()
 
 	return json.NewDecoder(resp.Body).Decode(&results)
+}
+
+// post provides a reusable method for a standard post to a hollow server
+func (c *Client) delete(ctx context.Context, path string) error {
+	request, err := newDeleteRequest(ctx, c.url, path)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.do(request)
+	if err != nil {
+		return err
+	}
+
+	return ensureValidServerResponse(resp)
 }

@@ -69,7 +69,7 @@ func (s *Store) setupTestData() error {
 	}
 
 	for _, a := range []VersionedAttributes{FixtureVersionedAttributesOld, FixtureVersionedAttributesNew} {
-		if err := s.CreateVersionedAttributes(&a); err != nil {
+		if err := s.db.Create(&a).Error; err != nil {
 			return err
 		}
 	}

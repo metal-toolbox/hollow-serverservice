@@ -7,7 +7,7 @@ import (
 
 var (
 	// ErrNotFound is the error returned when a record is not found in the store
-	ErrNotFound = errors.New("record not found in datastore")
+	ErrNotFound = errors.New("resource not found in datastore")
 )
 
 // ValidationError is returned when an object fails Validation

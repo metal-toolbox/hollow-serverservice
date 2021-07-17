@@ -26,11 +26,11 @@ func (r *Router) hardwareComponentTypeCreate(c *gin.Context) {
 	}
 
 	if err := r.Store.CreateHardwareComponentType(dbT); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create hardware component type", err))
+		dbFailureResponse(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, createdResponse(dbT.ID))
+	createdResponse(c, &dbT.ID)
 }
 
 func (r *Router) hardwareComponentTypeList(c *gin.Context) {
@@ -40,7 +40,7 @@ func (r *Router) hardwareComponentTypeList(c *gin.Context) {
 
 	dbTypes, err := r.Store.GetHardwareComponentTypes(dbFilter)
 	if err != nil {
-		dbQueryFailureResponse(c, err)
+		dbFailureResponse(c, err)
 		return
 	}
 

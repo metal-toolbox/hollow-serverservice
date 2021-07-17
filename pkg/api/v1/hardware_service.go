@@ -15,6 +15,7 @@ const (
 // HardwareService provides the ability to interact with hardware via Hollow
 type HardwareService interface {
 	Create(context.Context, Hardware) (*uuid.UUID, error)
+	Delete(context.Context, Hardware) error
 	Get(context.Context, uuid.UUID) (*Hardware, error)
 	List(context.Context, *HardwareListParams) ([]Hardware, error)
 	GetVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, error)
@@ -29,6 +30,11 @@ type HardwareServiceClient struct {
 // Create will attempt to create hardware in Hollow and return the new hardware UUID
 func (c *HardwareServiceClient) Create(ctx context.Context, hw Hardware) (*uuid.UUID, error) {
 	return c.client.post(ctx, hardwareEndpoint, hw)
+}
+
+// Delete will attempt to delete hardware in Hollow and return an error on failure
+func (c *HardwareServiceClient) Delete(ctx context.Context, hw Hardware) error {
+	return c.client.delete(ctx, fmt.Sprintf("%s/%s", hardwareEndpoint, hw.UUID))
 }
 
 // Get will return a given piece of hardware by it's UUID
@@ -68,5 +74,5 @@ func (c *HardwareServiceClient) GetVersionedAttributes(ctx context.Context, hwUU
 // CreateVersionedAttributes will create a new versioned attribute for a given piece of hardware
 func (c *HardwareServiceClient) CreateVersionedAttributes(ctx context.Context, hwUUID uuid.UUID, va VersionedAttributes) (*uuid.UUID, error) {
 	path := fmt.Sprintf("%s/%s/%s", hardwareEndpoint, hwUUID, hardwareVersionedAttributesEndpoint)
-	return c.client.post(ctx, path, va)
+	return c.client.put(ctx, path, va)
 }

@@ -18,6 +18,7 @@ type Hardware struct {
 	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
 	CreatedAt           time.Time             `json:"created_at"`
 	UpdatedAt           time.Time             `json:"updated_at"`
+	DeletedAt           *time.Time            `json:"deleted_at,omitempty"`
 }
 
 func (h *Hardware) fromDBModel(dbH db.Hardware) error {
@@ -27,6 +28,10 @@ func (h *Hardware) fromDBModel(dbH db.Hardware) error {
 	h.FacilityCode = dbH.FacilityCode
 	h.CreatedAt = dbH.CreatedAt
 	h.UpdatedAt = dbH.UpdatedAt
+
+	if dbH.DeletedAt.Valid {
+		h.DeletedAt = &dbH.DeletedAt.Time
+	}
 
 	h.Attributes, err = convertFromDBAttributes(dbH.Attributes)
 	if err != nil {

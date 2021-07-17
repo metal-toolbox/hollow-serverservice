@@ -30,8 +30,9 @@ func (a *VersionedAttributes) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 // CreateVersionedAttributes will persist VersionedAttributes into the backend datastore
-func (s *Store) CreateVersionedAttributes(a *VersionedAttributes) error {
-	return s.db.Create(a).Error
+func (s *Store) CreateVersionedAttributes(entity interface{}, a *VersionedAttributes) error {
+	// return s.db.Create(a).Error
+	return s.db.Model(entity).Association("VersionedAttributes").Append(a)
 }
 
 // GetVersionedAttributes will return all the BIOSConfigs for a given Hardware UUID, the list will be sorted with the newest one

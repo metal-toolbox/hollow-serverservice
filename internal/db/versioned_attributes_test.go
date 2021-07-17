@@ -2,6 +2,7 @@ package db_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -14,23 +15,30 @@ func TestCreateVersionedAttributes(t *testing.T) {
 
 	var testCases = []struct {
 		testName    string
-		a           *db.VersionedAttributes
+		hw          db.Hardware
+		a           db.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing namespace", &db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttribute attribute"},
-		{"happy path", &db.VersionedAttributes{EntityType: "hardware", EntityID: db.FixtureHardwareNemo.ID, Namespace: db.FixtureNamespaceVersioned}, false, ""},
+		{"missing namespace", db.FixtureHardwareDory, db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttribute attribute"},
+		{"happy path", db.FixtureHardwareDory, db.VersionedAttributes{Namespace: "integration.test.createva"}, false, ""},
 	}
 
 	for _, tt := range testCases {
-		err := s.CreateVersionedAttributes(tt.a)
+		t.Run(tt.testName, func(t *testing.T) {
+			va := &tt.a
+			err := s.CreateVersionedAttributes(&tt.hw, va)
 
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-		} else {
-			assert.NoError(t, err, tt.testName)
-		}
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+			} else {
+				assert.NoError(t, err)
+				// ensure the record is updated with it's attributes
+				assert.NotEqual(t, uuid.Nil.String(), va.ID)
+				assert.WithinDuration(t, time.Now(), va.CreatedAt, 10*time.Millisecond)
+			}
+		})
 	}
 }
 
@@ -45,21 +53,23 @@ func TestGetVersionedAttributes(t *testing.T) {
 		errorMsg    string
 	}{
 		{"no results, bad uuid", uuid.New(), []db.VersionedAttributes{}, false, ""},
-		{"happy path", db.FixtureVersionedAttributesNew.EntityID, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
+		{"happy path", db.FixtureHardwareNemo.ID, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
 	}
 
 	for _, tt := range testCases {
-		res, err := s.GetVersionedAttributes(tt.searchUUID)
+		t.Run(tt.testName, func(t *testing.T) {
+			res, err := s.GetVersionedAttributes(tt.searchUUID)
 
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-		} else {
-			assert.NoError(t, err, tt.testName)
-			for i, bc := range tt.expectList {
-				assert.Equal(t, bc.ID, res[i].ID)
-				assert.Equal(t, bc.Values, res[i].Values)
+			if tt.expectError {
+				assert.Error(t, err, tt.testName)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+			} else {
+				assert.NoError(t, err, tt.testName)
+				for i, bc := range tt.expectList {
+					assert.Equal(t, bc.ID, res[i].ID)
+					assert.Equal(t, bc.Values, res[i].Values)
+				}
 			}
-		}
+		})
 	}
 }

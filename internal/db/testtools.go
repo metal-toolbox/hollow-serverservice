@@ -20,12 +20,7 @@ func testDatastore() error {
 		return nil
 	}
 
-	z, err := zap.NewDevelopment()
-	if err != nil {
-		return err
-	}
-
-	s, err := NewPostgresStore(TestDBURI, z)
+	s, err := NewPostgresStore(TestDBURI, zap.NewNop())
 	if err != nil {
 		return err
 	}
@@ -62,5 +57,5 @@ func cleanDB() {
 	d.Delete(&VersionedAttributes{})
 	d.Delete(&HardwareComponent{})
 	d.Delete(&HardwareComponentType{})
-	d.Delete(&Hardware{})
+	d.Unscoped().Delete(&Hardware{})
 }

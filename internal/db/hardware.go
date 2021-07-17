@@ -16,7 +16,7 @@ type Hardware struct {
 	ID                  uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
-	DeletedAt           time.Time `gorm:"index"`
+	DeletedAt           gorm.DeletedAt `gorm:"index"`
 	FacilityCode        string
 	Attributes          []Attributes `gorm:"polymorphic:Entity;"`
 	HardwareComponents  []HardwareComponent
@@ -28,18 +28,24 @@ func (Hardware) TableName() string {
 	return "hardware"
 }
 
-// BeforeSave ensures that the hardware passes validation checks
-// func (h *Hardware) BeforeSave(tx *gorm.DB) (err error) {
-// 	if h.FacilityCode == "" {
-// 		return requiredFieldMissing("hardware", "facility")
-// 	}
+func hardwarePreload(db *gorm.DB) *gorm.DB {
+	d := db.Preload("VersionedAttributes",
+		"(created_at, namespace, entity_id, entity_type) IN (?)",
+		db.Table("versioned_attributes").Select("max(created_at), namespace, entity_id, entity_type").Group("namespace").Group("entity_id").Group("entity_type"),
+	)
 
-// 	return nil
-// }
+	return d.Preload("HardwareComponents.HardwareComponentType").Preload("HardwareComponents.Attributes").Preload(clause.Associations)
+}
 
 // CreateHardware will persist hardware into the backend datastore
 func (s *Store) CreateHardware(h *Hardware) error {
 	return s.db.Create(h).Error
+}
+
+// DeleteHardware will "delete" hardware in the datastore. Hardware is only soft deleted
+// so all records will still exists they just won't be accessible by default
+func (s *Store) DeleteHardware(h *Hardware) error {
+	return s.db.Delete(h).Error
 }
 
 // GetHardware will return a list of hardware with the requested params, if no
@@ -58,15 +64,6 @@ func (s *Store) GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 	}
 
 	return hw, nil
-}
-
-func hardwarePreload(db *gorm.DB) *gorm.DB {
-	d := db.Preload("VersionedAttributes",
-		"(created_at, namespace, entity_id, entity_type) IN (?)",
-		db.Table("versioned_attributes").Select("max(created_at), namespace, entity_id, entity_type").Group("namespace").Group("entity_id").Group("entity_type"),
-	)
-
-	return d.Preload("HardwareComponents.HardwareComponentType").Preload("HardwareComponents.Attributes").Preload(clause.Associations)
 }
 
 // GetHardwareByUUID will return an existing hardware instance if one
