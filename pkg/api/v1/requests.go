@@ -18,14 +18,7 @@ func newGetRequest(ctx context.Context, uri, path string) (*http.Request, error)
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgentString())
-
-	return req, nil
+	return http.NewRequestWithContext(ctx, http.MethodGet, requestURL.String(), nil)
 }
 
 func newPostRequest(ctx context.Context, uri, path string, body interface{}) (*http.Request, error) {
@@ -45,14 +38,7 @@ func newPostRequest(ctx context.Context, uri, path string, body interface{}) (*h
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestURL.String(), buf)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgentString())
-
-	return req, nil
+	return http.NewRequestWithContext(ctx, http.MethodPost, requestURL.String(), buf)
 }
 
 func newPutRequest(ctx context.Context, uri, path string, body interface{}) (*http.Request, error) {
@@ -72,14 +58,7 @@ func newPutRequest(ctx context.Context, uri, path string, body interface{}) (*ht
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, requestURL.String(), buf)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgentString())
-
-	return req, nil
+	return http.NewRequestWithContext(ctx, http.MethodPut, requestURL.String(), buf)
 }
 
 func newDeleteRequest(ctx context.Context, uri, path string) (*http.Request, error) {
@@ -88,14 +67,7 @@ func newDeleteRequest(ctx context.Context, uri, path string) (*http.Request, err
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, requestURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgentString())
-
-	return req, nil
+	return http.NewRequestWithContext(ctx, http.MethodDelete, requestURL.String(), nil)
 }
 
 func userAgentString() string {
@@ -104,5 +76,7 @@ func userAgentString() string {
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", c.authToken))
+	req.Header.Set("User-Agent", userAgentString())
+
 	return c.httpClient.Do(req)
 }
