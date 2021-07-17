@@ -13,6 +13,38 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
+var testHW = hollow.Hardware{
+	UUID:         uuid.New(),
+	FacilityCode: "int-test",
+	HardwareComponents: []hollow.HardwareComponent{
+		{
+			Name:   "Intel Xeon 123",
+			Model:  "Xeon 123",
+			Vendor: "Intel",
+			Serial: "987654321",
+			Attributes: []hollow.Attributes{
+				{
+					Namespace: "hollow.integration.test",
+					Values:    json.RawMessage([]byte(`{"firmware":1}`)),
+				},
+			},
+			HardwareComponentTypeUUID: db.FixtureHCTFins.ID,
+		},
+	},
+	Attributes: []hollow.Attributes{
+		{
+			Namespace: "hollow.integration.test",
+			Values:    json.RawMessage([]byte(`{"plan_type":"large"}`)),
+		},
+	},
+	VersionedAttributes: []hollow.VersionedAttributes{
+		{
+			Namespace: "hollow.integration.settings",
+			Values:    json.RawMessage([]byte(`{"setting":"enabled"}`)),
+		},
+	},
+}
+
 func TestIntegrationHardwareList(t *testing.T) {
 	s := serverTest(t)
 
@@ -162,11 +194,10 @@ func TestIntegrationHardwareCreate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		hw := hollow.Hardware{FacilityCode: "int-test"}
-
-		res, err := s.Client.Hardware.Create(ctx, hw)
+		res, err := s.Client.Hardware.Create(ctx, testHW)
 		if !expectError {
 			assert.NotNil(t, res)
+			assert.Equal(t, testHW.UUID.String(), res.String())
 		}
 
 		return err
@@ -226,44 +257,16 @@ func TestIntegrationHardwareDelete(t *testing.T) {
 
 func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
 	s := serverTest(t)
-	testUUID := uuid.New()
-
 	// Attempt to get the testUUID (should return a failure unless somehow we got a collision with fixtures)
-	_, err := s.Client.Hardware.Get(context.TODO(), testUUID)
+	_, err := s.Client.Hardware.Get(context.TODO(), testHW.UUID)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "resource not found")
 
-	hw := &hollow.Hardware{
-		UUID:         testUUID,
-		FacilityCode: "int-test",
-		HardwareComponents: []hollow.HardwareComponent{
-			{
-				Name:   "Intel Xeon 123",
-				Model:  "Xeon 123",
-				Vendor: "Intel",
-				Serial: "987654321",
-				Attributes: []hollow.Attributes{
-					{
-						Namespace: "hollow.integration.test",
-						Values:    json.RawMessage([]byte(`{"firmware":1}`)),
-					},
-				},
-				HardwareComponentTypeUUID: db.FixtureHCTFins.ID,
-			},
-		},
-		Attributes: []hollow.Attributes{
-			{
-				Namespace: "hollow.integration.test",
-				Values:    json.RawMessage([]byte(`{"plan_type":"large"}`)),
-			},
-		},
-	}
-
-	_, err = s.Client.Hardware.Create(context.TODO(), *hw)
+	_, err = s.Client.Hardware.Create(context.TODO(), testHW)
 	assert.NoError(t, err)
 
 	// Get the hardware back and ensure all the things we set are returned
-	rHW, err := s.Client.Hardware.Get(context.TODO(), testUUID)
+	rHW, err := s.Client.Hardware.Get(context.TODO(), testHW.UUID)
 	assert.NoError(t, err)
 
 	assert.Equal(t, rHW.FacilityCode, "int-test")
@@ -284,6 +287,10 @@ func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
 	assert.Len(t, rHW.Attributes, 1)
 	assert.Equal(t, "hollow.integration.test", rHW.Attributes[0].Namespace)
 	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), rHW.Attributes[0].Values)
+
+	assert.Len(t, rHW.VersionedAttributes, 1)
+	assert.Equal(t, "hollow.integration.settings", rHW.VersionedAttributes[0].Namespace)
+	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), rHW.VersionedAttributes[0].Values)
 }
 
 func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
