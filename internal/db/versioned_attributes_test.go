@@ -20,7 +20,7 @@ func TestCreateVersionedAttributes(t *testing.T) {
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing namespace", db.FixtureHardwareDory, db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttribute attribute"},
+		{"missing namespace", db.FixtureHardwareDory, db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttributes attribute"},
 		{"happy path", db.FixtureHardwareDory, db.VersionedAttributes{Namespace: "integration.test.createva"}, false, ""},
 	}
 
