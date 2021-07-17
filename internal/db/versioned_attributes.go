@@ -20,10 +20,10 @@ type VersionedAttributes struct {
 	CreatedAt  time.Time
 }
 
-// BeforeSave ensures that the BIOS config passes validation checks
+// BeforeSave ensures that the VersionedAttributes passes validation checks
 func (a *VersionedAttributes) BeforeSave(tx *gorm.DB) (err error) {
 	if a.Namespace == "" {
-		return requiredFieldMissing("VersionedAttribute", "namespace")
+		return requiredFieldMissing("VersionedAttributes", "namespace")
 	}
 
 	return nil
@@ -35,7 +35,7 @@ func (s *Store) CreateVersionedAttributes(entity interface{}, a *VersionedAttrib
 	return s.db.Model(entity).Association("VersionedAttributes").Append(a)
 }
 
-// GetVersionedAttributes will return all the BIOSConfigs for a given Hardware UUID, the list will be sorted with the newest one
+// GetVersionedAttributes will return all the VersionedAttributes for a given Hardware UUID, the list will be sorted with the newest one
 // first
 func (s *Store) GetVersionedAttributes(hwUUID uuid.UUID) ([]VersionedAttributes, error) {
 	var al []VersionedAttributes

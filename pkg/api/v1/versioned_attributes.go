@@ -16,37 +16,6 @@ type VersionedAttributes struct {
 	CreatedAt time.Time       `json:"created_at"`
 }
 
-// func biosConfigCreate(c *gin.Context) {
-// 	var va VersionedAttributes
-// 	if err := c.ShouldBindJSON(&va); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{
-// 			"message": "invalid versioned attributes",
-// 			"error":   err.Error(),
-// 		})
-
-// 		return
-// 	}
-
-// 	dbVA, err := va.toDBModel()
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid versioned attributes", "error": err.Error})
-// 		return
-// 	}
-
-// 	// ensure the hardware for the UUID exist already
-// 	if _, err := db.FindOrCreateHardwareByUUID(dbVA.EntityID); err != nil {
-// 		c.JSON(http.StatusInternalServerError, newErrorResponse("failed ensuring hardware with uuid exists", err))
-// 		return
-// 	}
-
-// 	if err := db.VersionedAttributesCreate(dbVA); err != nil {
-// 		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create versioned attributes", err))
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, createdResponse(dbVA.ID))
-// }
-
 func (a *VersionedAttributes) toDBModel() (*db.VersionedAttributes, error) {
 	dbc := &db.VersionedAttributes{
 		Namespace: a.Namespace,

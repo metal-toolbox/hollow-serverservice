@@ -34,6 +34,13 @@ func TestCreateHardware(t *testing.T) {
 	}
 }
 
+func TestDeleteHardware(t *testing.T) {
+	s := db.DatabaseTest(t)
+
+	err := s.DeleteHardware(&db.FixtureHardwareNemo)
+	assert.NoError(t, err)
+}
+
 func TestFindHardwareByUUID(t *testing.T) {
 	s := db.DatabaseTest(t)
 
