@@ -51,8 +51,20 @@ var (
 		HardwareComponents: []HardwareComponent{FixtureHCMarlinLeftFin, FixtureHCMarlinRightFin},
 	}
 
-	FixtureVersionedAttributesOld = VersionedAttributes{ID: uuid.New(), EntityType: "hardware", EntityID: FixtureHardwareNemo.ID, Namespace: FixtureNamespaceVersioned, Values: datatypes.JSON([]byte(`{"name": "old"}`))}
-	FixtureVersionedAttributesNew = VersionedAttributes{ID: uuid.New(), EntityType: "hardware", EntityID: FixtureHardwareNemo.ID, Namespace: FixtureNamespaceVersioned, Values: datatypes.JSON([]byte(`{"name": "new"}`))}
+	FixtureVersionedAttributesOld = VersionedAttributes{
+	  ID: uuid.New(), 
+	  EntityType: "hardware", 
+	  EntityID: FixtureHardwareNemo.ID, 
+	  Namespace: FixtureNamespaceVersioned, 
+	  Values: datatypes.JSON([]byte(`{"name": "old"}`))
+	}
+	FixtureVersionedAttributesNew = VersionedAttributes{
+	  ID: uuid.New(), 
+	  EntityType: "hardware",
+	  EntityID: FixtureHardwareNemo.ID,
+	  Namespace: FixtureNamespaceVersioned,
+	  Values: datatypes.JSON([]byte(`{"name": "new"}`))
+	}
 
 	FixtureHardware = []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin}
 )
