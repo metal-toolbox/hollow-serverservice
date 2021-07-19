@@ -18,14 +18,7 @@ func newGetRequest(ctx context.Context, uri, path string) (*http.Request, error)
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgentString())
-
-	return req, nil
+	return http.NewRequestWithContext(ctx, http.MethodGet, requestURL.String(), nil)
 }
 
 func newPostRequest(ctx context.Context, uri, path string, body interface{}) (*http.Request, error) {
@@ -45,14 +38,36 @@ func newPostRequest(ctx context.Context, uri, path string, body interface{}) (*h
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestURL.String(), buf)
+	return http.NewRequestWithContext(ctx, http.MethodPost, requestURL.String(), buf)
+}
+
+func newPutRequest(ctx context.Context, uri, path string, body interface{}) (*http.Request, error) {
+	requestURL, err := url.Parse(fmt.Sprintf("%s/api/%s/%s", uri, apiVersion, path))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", userAgentString())
+	var buf io.ReadWriter
+	if body != nil {
+		buf = &bytes.Buffer{}
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
 
-	return req, nil
+		if err := enc.Encode(body); err != nil {
+			return nil, err
+		}
+	}
+
+	return http.NewRequestWithContext(ctx, http.MethodPut, requestURL.String(), buf)
+}
+
+func newDeleteRequest(ctx context.Context, uri, path string) (*http.Request, error) {
+	requestURL, err := url.Parse(fmt.Sprintf("%s/api/%s/%s", uri, apiVersion, path))
+	if err != nil {
+		return nil, err
+	}
+
+	return http.NewRequestWithContext(ctx, http.MethodDelete, requestURL.String(), nil)
 }
 
 func userAgentString() string {
@@ -61,5 +76,7 @@ func userAgentString() string {
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", c.authToken))
+	req.Header.Set("User-Agent", userAgentString())
+
 	return c.httpClient.Do(req)
 }

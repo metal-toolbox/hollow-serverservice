@@ -62,6 +62,16 @@ func client(ctx context.Context) {
     }
   }`))
 
+	newJSONBios := json.RawMessage([]byte(`{
+    "dell": {
+      "boot_mode": "UEFI",
+      "cpu_min_sev_asid": 1,
+      "logical_proc": "Disabled",
+      "sriov_global_enable": "Enabled",
+      "tpm_security": "Off"
+    }
+  }`))
+
 	typeMap := make(map[string]uuid.UUID)
 
 	types, err := client.HardwareComponentType.List(ctx, nil)
@@ -134,17 +144,37 @@ func client(ctx context.Context) {
 		log.Fatal(err)
 	}
 
-	bc := hollow.BIOSConfig{
-		HardwareUUID: hwUUID,
-		ConfigValues: jsonBios,
+	bc := hollow.VersionedAttributes{
+		Namespace: "net.equinixplatform.bios",
+		Values:    jsonBios,
 	}
 
-	if _, err := client.BIOSConfig.Create(ctx, bc); err != nil {
+	if _, err := client.Hardware.CreateVersionedAttributes(ctx, hwUUID, bc); err != nil {
 		fmt.Println("failed to create bios config")
 		log.Fatal(err)
 	}
 
-	lbc, err := client.Hardware.GetBIOSConfigs(ctx, hwUUID)
+	bcNew := hollow.VersionedAttributes{
+		Namespace: "net.equinixplatform.bios",
+		Values:    newJSONBios,
+	}
+
+	if _, err := client.Hardware.CreateVersionedAttributes(ctx, hwUUID, bcNew); err != nil {
+		fmt.Println("failed to create bios config")
+		log.Fatal(err)
+	}
+
+	bcNew2 := hollow.VersionedAttributes{
+		Namespace: "net.hollow.test",
+		Values:    jsonBios,
+	}
+
+	if _, err := client.Hardware.CreateVersionedAttributes(ctx, hwUUID, bcNew2); err != nil {
+		fmt.Println("failed to create bios config")
+		log.Fatal(err)
+	}
+
+	lbc, err := client.Hardware.GetVersionedAttributes(ctx, hwUUID)
 	if err != nil {
 		fmt.Println("Failed to get bios configs")
 		log.Fatal(err)
@@ -168,6 +198,54 @@ func client(ctx context.Context) {
 	}
 
 	fmt.Printf("Found %d pieces of hardware filtered by plan type (%s)\n", len(lhw), hwPlan)
+
+	lhw, err = client.Hardware.List(ctx, &hollow.HardwareListParams{
+		FacilityCode: "TEST1",
+		AttributeListParams: []hollow.AttributeListParams{
+			{
+				Namespace:  "hollow.client.test.api",
+				Keys:       []string{"plan_type"},
+				EqualValue: hwPlan,
+			},
+		},
+		VersionedAttributeListParams: []hollow.AttributeListParams{
+			{
+				Namespace:  "net.equinixplatform.bios",
+				Keys:       []string{"dell", "tpm_security"},
+				EqualValue: "On",
+			},
+		},
+	})
+	if err != nil {
+		fmt.Println("Failed to list hardware")
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d pieces of hardware filtered by plan type (%s) AND bios: tpm_security On\n", len(lhw), hwPlan)
+
+	lhw, err = client.Hardware.List(ctx, &hollow.HardwareListParams{
+		FacilityCode: "TEST1",
+		AttributeListParams: []hollow.AttributeListParams{
+			{
+				Namespace:  "hollow.client.test.api",
+				Keys:       []string{"plan_type"},
+				EqualValue: hwPlan,
+			},
+		},
+		VersionedAttributeListParams: []hollow.AttributeListParams{
+			{
+				Namespace:  "net.equinixplatform.bios",
+				Keys:       []string{"dell", "tpm_security"},
+				EqualValue: "Off",
+			},
+		},
+	})
+	if err != nil {
+		fmt.Println("Failed to list hardware")
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d pieces of hardware filtered by plan type (%s) AND bios: tpm_security Off\n", len(lhw), hwPlan)
 
 	lhw, err = client.Hardware.List(ctx, nil)
 	if err != nil {

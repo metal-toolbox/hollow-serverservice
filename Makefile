@@ -7,7 +7,7 @@ test: | unit-test integration-test
 
 integration-test: docker-up local-dev-databases
 	@echo Running integration tests...
-	@go test -cover -tags testtools ./... -p 1
+	@go test -cover -tags testtools,integration ./... -p 1
 
 unit-test: | lint
 	@echo Running unit tests...
@@ -29,6 +29,7 @@ clean: docker-down
 	@echo Cleaning...
 	@rm -rf ./dist/
 	@rm -rf ./.dev-data/coverage.out
+	@rm -rf ./.dev-data/compose/db/*
 
 vendor:
 	@go mod download

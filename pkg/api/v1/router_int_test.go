@@ -19,9 +19,9 @@ type testServer struct {
 }
 
 func serverTest(t *testing.T) *testServer {
-	db.DatabaseTest(t)
+	store := db.DatabaseTest(t)
 
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), Store: store}
 	s := hs.NewServer()
 
 	ts := &testServer{
@@ -37,6 +37,11 @@ func serverTest(t *testing.T) *testServer {
 }
 
 func (s *testServer) Do(req *http.Request) (*http.Response, error) {
+	// if the context is expired return the error, used for timeout tests
+	if err := req.Context().Err(); err != nil {
+		return nil, err
+	}
+
 	w := httptest.NewRecorder()
 	s.h.ServeHTTP(w, req)
 

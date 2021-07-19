@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateHardwareComponentType(t *testing.T) {
-	db.DatabaseTest(t)
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -23,7 +23,7 @@ func TestCreateHardwareComponentType(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := db.CreateHardwareComponentType(tt.hct)
+		err := s.CreateHardwareComponentType(tt.hct)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -35,7 +35,7 @@ func TestCreateHardwareComponentType(t *testing.T) {
 }
 
 func TestGetHardwareComponentType(t *testing.T) {
-	db.DatabaseTest(t)
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
@@ -48,7 +48,7 @@ func TestGetHardwareComponentType(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := db.GetHardwareComponentTypes(tt.filter)
+		r, err := s.GetHardwareComponentTypes(tt.filter)
 		assert.NoError(t, err, tt.testName)
 
 		var rIDs []uuid.UUID

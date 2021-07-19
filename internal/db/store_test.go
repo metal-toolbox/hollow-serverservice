@@ -15,13 +15,15 @@ func TestNewPostgresStore(t *testing.T) {
 		t.Skip("skipping database test in short mode")
 	}
 
-	err := db.NewPostgresStore(db.TestDBURI, zap.NewNop())
+	s, err := db.NewPostgresStore(db.TestDBURI, zap.NewNop())
 	assert.NoError(t, err)
+	assert.NotNil(t, s)
 }
 
 func TestNewPostgresStoreFailure(t *testing.T) {
-	err := db.NewPostgresStore("invalid-uri", zap.NewNop())
+	s, err := db.NewPostgresStore("invalid-uri", zap.NewNop())
 	assert.Error(t, err)
+	assert.Nil(t, s)
 }
 
 func TestPingNoDB(t *testing.T) {
@@ -33,11 +35,8 @@ func TestPingNoDB(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		// fail to make a DB conn to close any open connection we might have
-		err := db.NewPostgresStore("invalid-uri", zap.NewNop())
-		require.Error(t, err)
-
-		res := db.Ping()
+		s := &db.Store{}
+		res := s.Ping()
 		assert.Equal(t, tt.expectedResult, res, tt.testName)
 	}
 }
@@ -56,10 +55,11 @@ func TestPing(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := db.NewPostgresStore(tt.dbURI, zap.NewNop())
+		s, err := db.NewPostgresStore(tt.dbURI, zap.NewNop())
 		require.NoError(t, err)
+		require.NotNil(t, s)
 
-		res := db.Ping()
+		res := s.Ping()
 		assert.Equal(t, tt.expectedResult, res, tt.testName)
 	}
 }

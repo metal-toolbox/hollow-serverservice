@@ -76,9 +76,9 @@ func convertToDBAttributes(attrs []Attributes) ([]db.Attributes, error) {
 	return dbAttrs, nil
 }
 
-func encodeAttributesListParams(alp []AttributeListParams, q url.Values) {
+func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Values) {
 	for i, ap := range alp {
-		keyPrefix := fmt.Sprintf("attributes_%d_", i)
+		keyPrefix := fmt.Sprintf("%s_%d_", key, i)
 
 		q.Set(keyPrefix+"namespace", ap.Namespace)
 
@@ -97,14 +97,14 @@ func encodeAttributesListParams(alp []AttributeListParams, q url.Values) {
 	}
 }
 
-func parseQueryAttributesListParams(c *gin.Context) ([]AttributeListParams, error) {
+func parseQueryAttributesListParams(c *gin.Context, key string) ([]AttributeListParams, error) {
 	var err error
 
 	alp := []AttributeListParams{}
 	i := 0
 
 	for {
-		keyPrefix := fmt.Sprintf("attributes_%d_", i)
+		keyPrefix := fmt.Sprintf("%s_%d_", key, i)
 
 		ns := c.Query(keyPrefix + "namespace")
 		if ns == "" {

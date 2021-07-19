@@ -53,7 +53,7 @@ func TestLivenessRoute(t *testing.T) {
 }
 
 func TestReadinessRouteDown(t *testing.T) {
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), Store: &db.Store{}}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -66,9 +66,9 @@ func TestReadinessRouteDown(t *testing.T) {
 }
 
 func TestReadinessRouteUp(t *testing.T) {
-	db.DatabaseTest(t)
+	store := db.DatabaseTest(t)
 
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), Store: store}
 	s := hs.NewServer()
 	router := s.Handler
 

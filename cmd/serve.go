@@ -27,7 +27,8 @@ func init() {
 }
 
 func serve() {
-	if err := db.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar()); err != nil {
+	store, err := db.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar())
+	if err != nil {
 		logger.Fatalw("failed to init data store", "error", err)
 	}
 
@@ -39,6 +40,7 @@ func serve() {
 		Logger: logger.Desugar(),
 		Listen: viper.GetString("listen"),
 		Debug:  viper.GetBool("logging.debug"),
+		Store:  store,
 	}
 	s := hs.NewServer()
 

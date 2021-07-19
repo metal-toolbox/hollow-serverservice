@@ -11,6 +11,7 @@ import (
 var (
 	FixtureNamespaceMetadata  = "hollow.metadata"
 	FixtureNamespaceOtherdata = "hollow.other_data"
+	FixtureNamespaceVersioned = "hollow.versioned"
 
 	FixtureHCTFins = HardwareComponentType{ID: uuid.New(), Name: "Fins"}
 
@@ -50,25 +51,38 @@ var (
 		HardwareComponents: []HardwareComponent{FixtureHCMarlinLeftFin, FixtureHCMarlinRightFin},
 	}
 
-	FixtureBIOSConfig    = BIOSConfig{ID: uuid.New(), HardwareID: FixtureHardwareNemo.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "old"}`))}
-	FixtureBIOSConfigNew = BIOSConfig{ID: uuid.New(), HardwareID: FixtureHardwareNemo.ID, ConfigValues: datatypes.JSON([]byte(`{"name": "new"}`))}
+	FixtureVersionedAttributesOld = VersionedAttributes{
+		ID:         uuid.New(),
+		EntityType: "hardware",
+		EntityID:   FixtureHardwareNemo.ID,
+		Namespace:  FixtureNamespaceVersioned,
+		Values:     datatypes.JSON([]byte(`{"name": "old"}`)),
+	}
+
+	FixtureVersionedAttributesNew = VersionedAttributes{
+		ID:         uuid.New(),
+		EntityType: "hardware",
+		EntityID:   FixtureHardwareNemo.ID,
+		Namespace:  FixtureNamespaceVersioned,
+		Values:     datatypes.JSON([]byte(`{"name": "new"}`)),
+	}
 
 	FixtureHardware = []Hardware{FixtureHardwareNemo, FixtureHardwareDory, FixtureHardwareMarlin}
 )
 
-func setupTestData() error {
-	if err := CreateHardwareComponentType(&FixtureHCTFins); err != nil {
+func (s *Store) setupTestData() error {
+	if err := s.CreateHardwareComponentType(&FixtureHCTFins); err != nil {
 		return err
 	}
 
 	for _, hw := range FixtureHardware {
-		if err := CreateHardware(&hw); err != nil {
+		if err := s.CreateHardware(&hw); err != nil {
 			return err
 		}
 	}
 
-	for _, bc := range []BIOSConfig{FixtureBIOSConfig, FixtureBIOSConfigNew} {
-		if err := CreateBIOSConfig(&bc); err != nil {
+	for _, a := range []VersionedAttributes{FixtureVersionedAttributesOld, FixtureVersionedAttributesNew} {
+		if err := s.db.Create(&a).Error; err != nil {
 			return err
 		}
 	}

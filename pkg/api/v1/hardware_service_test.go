@@ -3,10 +3,7 @@ package hollow_test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"net/http"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -15,79 +12,89 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-func TestHardwareServiceListBIOSConfigs(t *testing.T) {
-	ctx := context.Background()
+func TestHardwareServiceCreate(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		hw := hollow.Hardware{UUID: uuid.New(), FacilityCode: "Test1"}
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
 
-	d := time.Now().Add(1 * time.Millisecond)
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.Hardware.Create(ctx, hw)
+		if !expectError {
+			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
+		}
 
-	timeCtx, cancel := context.WithDeadline(ctx, d)
-	defer cancel()
+		return err
+	})
+}
 
-	exampleBiosResults := `{
-			"open": {
-				"boot_mode": "Bios"
-			}
-		}`
+func TestHardwareServiceDelete(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource deleted"}`))
+		c := mockClient(string(jsonResponse), respCode)
 
-	jsonBios, err := json.Marshal(exampleBiosResults)
-	if err != nil {
-		fmt.Println("failed to convert example bios to json")
-	}
-
-	testUUID := uuid.New()
-
-	var testCases = []struct {
-		testName     string
-		uuid         uuid.UUID
-		bios         hollow.BIOSConfig
-		ctx          context.Context
-		responseCode int
-		expectError  bool
-		errorMsg     string
-	}{
-		{
-			"happy path",
-			testUUID,
-			hollow.BIOSConfig{HardwareUUID: testUUID, ConfigValues: jsonBios},
-			ctx,
-			http.StatusOK,
-			false,
-			"",
-		},
-		{
-			"server returns an error",
-			testUUID,
-			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
-			ctx,
-			http.StatusUnauthorized,
-			true,
-			"server error - response code: 401, message:",
-		},
-		{
-			"fake timeout",
-			testUUID,
-			hollow.BIOSConfig{HardwareUUID: uuid.New(), ConfigValues: jsonBios},
-			timeCtx,
-			http.StatusOK,
-			true,
-			"context deadline exceeded",
-		},
-	}
-
-	for _, tt := range testCases {
-		jsonResponse, err := json.Marshal([]hollow.BIOSConfig{tt.bios})
+		return c.Hardware.Delete(ctx, hollow.Hardware{UUID: uuid.New()})
+	})
+}
+func TestHardwareServiceGet(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		hw := hollow.Hardware{UUID: uuid.New(), FacilityCode: "Test1"}
+		jsonResponse, err := json.Marshal(hw)
 		require.Nil(t, err)
 
-		c := mockClient(string(jsonResponse), tt.responseCode)
-
-		res, err := c.Hardware.GetBIOSConfigs(tt.ctx, tt.uuid)
-
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-		} else {
-			assert.NoError(t, err, tt.testName)
-			assert.NotNil(t, res, tt.testName)
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.Hardware.Get(ctx, hw.UUID)
+		if !expectError {
+			assert.Equal(t, hw.UUID, res.UUID)
+			assert.Equal(t, hw.FacilityCode, res.FacilityCode)
 		}
-	}
+
+		return err
+	})
+}
+
+func TestHardwareServiceList(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		hw := []hollow.Hardware{{UUID: uuid.New(), FacilityCode: "Test1"}}
+		jsonResponse, err := json.Marshal(hw)
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.Hardware.List(ctx, nil)
+		if !expectError {
+			assert.ElementsMatch(t, hw, res)
+		}
+
+		return err
+	})
+}
+
+func TestHardwareServiceVersionedAttributeCreate(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		va := hollow.VersionedAttributes{Namespace: "unit-test", Values: json.RawMessage([]byte(`{"test":"unit"}`))}
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.Hardware.CreateVersionedAttributes(ctx, uuid.New(), va)
+		if !expectError {
+			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
+		}
+
+		return err
+	})
+}
+
+func TestHardwareServiceListVersionedAttributess(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		va := []hollow.VersionedAttributes{{Namespace: "test", Values: json.RawMessage([]byte(`{}`))}}
+		jsonResponse, err := json.Marshal(va)
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.Hardware.GetVersionedAttributes(ctx, uuid.New())
+		if !expectError {
+			assert.ElementsMatch(t, va, res)
+		}
+
+		return err
+	})
 }

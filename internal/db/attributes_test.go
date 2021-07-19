@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateAttributes(t *testing.T) {
-	db.DatabaseTest(t)
+	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
@@ -23,7 +23,7 @@ func TestCreateAttributes(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := db.CreateAttributes(tt.hw)
+		err := s.CreateAttributes(tt.hw)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
