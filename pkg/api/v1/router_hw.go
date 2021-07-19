@@ -11,7 +11,7 @@ func (r *Router) hardwareList(c *gin.Context) {
 	var params HardwareListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid filter",
+			"message": "invalid filter",
 			"error":   err.Error(),
 		})
 	}
@@ -78,7 +78,7 @@ func (r *Router) hardwareCreate(c *gin.Context) {
 	var hw Hardware
 	if err := c.ShouldBindJSON(&hw); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid hardware",
+			"message": "invalid hardware",
 			"error":   err.Error(),
 		})
 

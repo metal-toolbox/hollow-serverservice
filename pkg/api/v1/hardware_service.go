@@ -42,7 +42,7 @@ func (c *HardwareServiceClient) Get(ctx context.Context, hwUUID uuid.UUID) (*Har
 	path := fmt.Sprintf("%s/%s", hardwareEndpoint, hwUUID)
 
 	var hw Hardware
-	if err := c.client.get(ctx, path, nil, &hw); err != nil {
+	if err := c.client.get(ctx, path, &hw); err != nil {
 		return nil, err
 	}
 

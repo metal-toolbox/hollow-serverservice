@@ -52,7 +52,7 @@ func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
 	return c, nil
 }
 
-// post provides a reusable method for a standard post to a hollow server
+// post provides a reusable method for a standard POST to a hollow server
 func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid.UUID, error) {
 	request, err := newPostRequest(ctx, c.url, path, body)
 	if err != nil {
@@ -78,7 +78,7 @@ func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid
 	return r.UUID, nil
 }
 
-// put provides a reusable method for a standard post to a hollow server
+// put provides a reusable method for a standard PUT to a hollow server
 func (c *Client) put(ctx context.Context, path string, body interface{}) (*uuid.UUID, error) {
 	request, err := newPutRequest(ctx, c.url, path, body)
 	if err != nil {
@@ -135,8 +135,8 @@ func (c *Client) list(ctx context.Context, path string, params queryParams, resu
 	return json.NewDecoder(resp.Body).Decode(&results)
 }
 
-// get provides a reusable method for a standard get of a single item
-func (c *Client) get(ctx context.Context, path string, params queryParams, results interface{}) error {
+// get provides a reusable method for a standard GET of a single item
+func (c *Client) get(ctx context.Context, path string, results interface{}) error {
 	request, err := newGetRequest(ctx, c.url, path)
 	if err != nil {
 		return err

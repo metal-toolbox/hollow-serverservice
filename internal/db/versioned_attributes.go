@@ -8,9 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-// VersionedAttributes represents the an attribute of an entity at a specific point in time.
-// You would use this over an Attribute when you want to store historical data on what the
-// previous attributes were over time.
+// VersionedAttributes provide the ability to store namespaced values attached
+// to an entity, tied to a specific timestamp. You would use VersionedAttributes
+// over Attributes when you want to store historical data on what the previous
+// values were.
 type VersionedAttributes struct {
 	ID         uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
 	EntityID   uuid.UUID      `gorm:"<-:create;index:idx_versioned_attributes_entity;index:idx_versioned_attributes_entity_namespace;not null;"`
