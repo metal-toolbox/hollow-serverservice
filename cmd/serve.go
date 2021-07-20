@@ -24,6 +24,13 @@ func init() {
 
 	serveCmd.Flags().String("db-uri", "postgresql://root@db:26257/hollow_dev?sslmode=disable", "URI for database connection")
 	viperBindFlag("db.uri", serveCmd.Flags().Lookup("db-uri"))
+
+	serveCmd.Flags().String("jwt-aud", "", "expected audience on JWT tokens")
+	viperBindFlag("jwt.audience", serveCmd.Flags().Lookup("jwt-aud"))
+	serveCmd.Flags().String("jwt-issuer", "https://equinixmetal.us.auth0.com/", "expected issuer of JWT tokens")
+	viperBindFlag("jwt.issuer", serveCmd.Flags().Lookup("jwt-issuer"))
+	serveCmd.Flags().String("jwt-jwksuri", "https://equinixmetal.us.auth0.com/.well-known/jwks.json", "URI for JWKS listing for JWTs")
+	viperBindFlag("jwt.jwksuri", serveCmd.Flags().Lookup("jwt-jwksuri"))
 }
 
 func serve() {
@@ -42,9 +49,9 @@ func serve() {
 		Debug:  viper.GetBool("logging.debug"),
 		Store:  store,
 		AuthConfig: hollowserver.AuthConfig{
-			Audience: "https://staging.hollow.platformequinix.net",
-			Issuer:   "https://equinixmetal.us.auth0.com/",
-			JWKSURI:  "https://equinixmetal.us.auth0.com/.well-known/jwks.json",
+			Audience: viper.GetString("jwt.audience"),
+			Issuer:   viper.GetString("jwt.issuer"),
+			JWKSURI:  viper.GetString("jwt.jwksuri"),
 		},
 	}
 	s := hs.NewServer()
