@@ -105,7 +105,7 @@ func mockClientTests(t *testing.T, f func(ctx context.Context, respCode int, exp
 	}
 }
 
-func realClientTests(t *testing.T, f func(ctx context.Context, respCode int, expectError bool) error) {
+func realClientTests(t *testing.T, f func(ctx context.Context, token string, respCode int, expectError bool) error) {
 	ctx := context.Background()
 	timeCtx, cancel := context.WithTimeout(ctx, 1*time.Nanosecond)
 
@@ -114,6 +114,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, respCode int, exp
 	var testCases = []struct {
 		testName     string
 		ctx          context.Context
+		authToken    string
 		responseCode int
 		expectError  bool
 		errorMsg     string
@@ -121,21 +122,32 @@ func realClientTests(t *testing.T, f func(ctx context.Context, respCode int, exp
 		{
 			"happy path",
 			ctx,
+			validToken([]string{"read", "write"}),
 			http.StatusOK,
 			false,
 			"",
 		},
-		// will enable once auth is available on test server
-		// {
-		// 	"server returns an error",
-		// 	ctx,
-		// 	http.StatusUnauthorized,
-		// 	true,
-		// 	"server error - response code: 401, message:",
-		// },
+		{
+			"invalid auth token",
+			ctx,
+			"invalidToken",
+			http.StatusUnauthorized,
+			true,
+			"server error - response code: 401, message:",
+		},
+		// this acts as a safeguard test to ensure that all methods require at least one scope
+		{
+			"auth token with no scopes",
+			ctx,
+			validToken([]string{}),
+			http.StatusUnauthorized,
+			true,
+			"server error - response code: 401, message:",
+		},
 		{
 			"fake timeout",
 			timeCtx,
+			validToken([]string{"read", "write"}),
 			http.StatusOK,
 			true,
 			"context deadline exceeded",
@@ -144,7 +156,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, respCode int, exp
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			err := f(tt.ctx, tt.responseCode, tt.expectError)
+			err := f(tt.ctx, tt.authToken, tt.responseCode, tt.expectError)
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)

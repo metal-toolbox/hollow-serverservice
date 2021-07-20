@@ -12,14 +12,23 @@ import (
 
 	"go.metalkube.net/hollow/internal/db"
 	v1api "go.metalkube.net/hollow/pkg/api/v1"
+	"go.metalkube.net/hollow/pkg/ginjwt"
 )
 
 // Server implements the Hollow server
 type Server struct {
-	Logger *zap.Logger
-	Listen string
-	Debug  bool
-	Store  *db.Store
+	Logger     *zap.Logger
+	Listen     string
+	Debug      bool
+	Store      *db.Store
+	AuthConfig AuthConfig
+}
+
+// AuthConfig provides the configuration for the authentication service
+type AuthConfig struct {
+	Audience string
+	Issuer   string
+	JWKSURI  string
 }
 
 var (
@@ -28,10 +37,21 @@ var (
 )
 
 func (s *Server) setup() http.Handler {
+	var (
+		authMW *ginjwt.Middleware
+		err    error
+	)
+
+	authMW, err = ginjwt.NewAuthMiddleware(s.AuthConfig.Audience, s.AuthConfig.Issuer, s.AuthConfig.JWKSURI)
+	if err != nil {
+		s.Logger.Sugar().Fatal("failed to initialize auth middleware", "error", err)
+	}
+
 	// Setup default gin router
 	r := gin.New()
 	p := ginprometheus.NewPrometheus("gin")
-	v1Rtr := v1api.Router{Store: s.Store}
+
+	v1Rtr := v1api.Router{Store: s.Store, AuthMW: authMW}
 
 	// Remove any params from the URL string to keep the number of labels down
 	p.ReqCntURLLabelMappingFn = func(c *gin.Context) string {
@@ -49,7 +69,12 @@ func (s *Server) setup() http.Handler {
 
 	p.Use(r)
 
-	r.Use(ginzap.Ginzap(s.Logger, time.RFC3339, true))
+	r.Use(ginzap.Logger(s.Logger, ginzap.WithTimeFormat(time.RFC3339),
+		ginzap.WithUTC(true),
+		ginzap.WithCustomFields(
+			func(c *gin.Context) zap.Field { return zap.String("jwt_subject", ginjwt.GetSubject(c)) },
+		),
+	))
 	r.Use(ginzap.RecoveryWithZap(s.Logger, true))
 
 	v1 := r.Group("/api/v1")

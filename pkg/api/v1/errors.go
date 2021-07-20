@@ -14,7 +14,7 @@ type ClientError struct {
 // ServerError is returned when the client receives an error back from the server
 type ServerError struct {
 	Message      string `json:"message"`
-	ErrorDetails string `json:"error_details"`
+	ErrorMessage string `json:"error"`
 	StatusCode   int
 }
 
@@ -25,7 +25,7 @@ func (e *ClientError) Error() string {
 
 // Error returns the ServerError in string format
 func (e ServerError) Error() string {
-	return fmt.Sprintf("hollow client received a server error - response code: %d, message: %s, details: %s", e.StatusCode, e.Message, e.ErrorDetails)
+	return fmt.Sprintf("hollow client received a server error - response code: %d, message: %s, details: %s", e.StatusCode, e.Message, e.ErrorMessage)
 }
 
 func newClientError(msg string) *ClientError {
@@ -43,7 +43,7 @@ func ensureValidServerResponse(resp *http.Response) error {
 		se.StatusCode = resp.StatusCode
 
 		if err := json.NewDecoder(resp.Body).Decode(&se); err != nil {
-			se.ErrorDetails = "failed to decode response from server"
+			se.ErrorMessage = "failed to decode response from server"
 		}
 
 		return se

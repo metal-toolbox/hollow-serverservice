@@ -48,7 +48,9 @@ var testHW = hollow.Hardware{
 func TestIntegrationHardwareList(t *testing.T) {
 	s := serverTest(t)
 
-	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
 		res, err := s.Client.Hardware.List(ctx, nil)
 		if !expectError {
 			require.Len(t, res, 3)
@@ -237,7 +239,9 @@ func TestIntegrationHardwareList(t *testing.T) {
 func TestIntegrationHardwareCreate(t *testing.T) {
 	s := serverTest(t)
 
-	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
 		res, err := s.Client.Hardware.Create(ctx, testHW)
 		if !expectError {
 			assert.NotNil(t, res)
@@ -274,7 +278,9 @@ func TestIntegrationHardwareCreate(t *testing.T) {
 func TestIntegrationHardwareDelete(t *testing.T) {
 	s := serverTest(t)
 
-	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
 		return s.Client.Hardware.Delete(ctx, hollow.Hardware{UUID: db.FixtureHardwareNemo.ID})
 	})
 
@@ -301,6 +307,8 @@ func TestIntegrationHardwareDelete(t *testing.T) {
 
 func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
 	s := serverTest(t)
+	s.Client.SetToken(validToken([]string{"read", "write"}))
+
 	// Attempt to get the testUUID (should return a failure unless somehow we got a collision with fixtures)
 	_, err := s.Client.Hardware.Get(context.TODO(), testHW.UUID)
 	assert.Error(t, err)
@@ -340,7 +348,9 @@ func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
 func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
 	s := serverTest(t)
 
-	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
 		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Values: json.RawMessage([]byte(`{"test":"integration"}`))}
 
 		res, err := s.Client.Hardware.CreateVersionedAttributes(ctx, db.FixtureHardwareDory.ID, va)
@@ -355,7 +365,9 @@ func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
 func TestIntegrationHardwareServiceGetVersionedAttributes(t *testing.T) {
 	s := serverTest(t)
 
-	realClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
 		res, err := s.Client.Hardware.GetVersionedAttributes(ctx, db.FixtureHardwareNemo.ID)
 		if !expectError {
 			require.Len(t, res, 2)
