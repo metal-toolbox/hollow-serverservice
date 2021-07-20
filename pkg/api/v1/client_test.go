@@ -127,14 +127,23 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 			false,
 			"",
 		},
-		// will enable once auth is available on test server
-		// {
-		// 	"server returns an error",
-		// 	ctx,
-		// 	http.StatusUnauthorized,
-		// 	true,
-		// 	"server error - response code: 401, message:",
-		// },
+		{
+			"invalid auth token",
+			ctx,
+			"invalidToken",
+			http.StatusUnauthorized,
+			true,
+			"server error - response code: 401, message:",
+		},
+		// this acts as a safeguard test to ensure that all methods require at least one scope
+		{
+			"auth token with no scopes",
+			ctx,
+			validToken([]string{}),
+			http.StatusUnauthorized,
+			true,
+			"server error - response code: 401, message:",
+		},
 		{
 			"fake timeout",
 			timeCtx,
