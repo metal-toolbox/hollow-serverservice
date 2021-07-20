@@ -138,7 +138,7 @@ func hasScope(have, needed []string) bool {
 }
 
 // GetSubject will return the JWT subject that is saved in the request. This requires that authentication of the request
-// has already occurred. If authentication failed an or there isn't a user an empty string is returned. This returns
+// has already occurred. If authentication failed or there isn't a user, an empty string is returned. This returns
 // whatever value was in the JWT subject field and might not be a human readable value
 func GetSubject(c *gin.Context) string {
 	return c.GetString(contextKeySubject)
