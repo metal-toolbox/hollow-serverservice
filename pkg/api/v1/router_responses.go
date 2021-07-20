@@ -8,15 +8,15 @@ import (
 )
 
 type serverResponse struct {
-	Message      string     `json:"message"`
-	UUID         *uuid.UUID `json:"uuid,omitempty"`
-	ErrorDetails string     `json:"error_details,omitempty"`
+	Message string     `json:"message"`
+	UUID    *uuid.UUID `json:"uuid,omitempty"`
+	Error   string     `json:"error,omitempty"`
 }
 
 func newErrorResponse(m string, err error) *serverResponse {
 	return &serverResponse{
-		Message:      m,
-		ErrorDetails: err.Error(),
+		Message: m,
+		Error:   err.Error(),
 	}
 }
 

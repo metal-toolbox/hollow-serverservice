@@ -52,6 +52,11 @@ func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
 	return c, nil
 }
 
+// SetToken allows you to change the token of a client
+func (c *Client) SetToken(token string) {
+	c.authToken = token
+}
+
 // post provides a reusable method for a standard POST to a hollow server
 func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid.UUID, error) {
 	request, err := newPostRequest(ctx, c.url, path, body)

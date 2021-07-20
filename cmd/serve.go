@@ -41,6 +41,11 @@ func serve() {
 		Listen: viper.GetString("listen"),
 		Debug:  viper.GetBool("logging.debug"),
 		Store:  store,
+		AuthConfig: hollowserver.AuthConfig{
+			Audience: "https://staging.hollow.platformequinix.net",
+			Issuer:   "https://equinixmetal.us.auth0.com/",
+			JWKSURI:  "https://equinixmetal.us.auth0.com/.well-known/jwks.json",
+		},
 	}
 	s := hs.NewServer()
 

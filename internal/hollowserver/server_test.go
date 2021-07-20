@@ -13,8 +13,15 @@ import (
 	"go.metalkube.net/hollow/internal/hollowserver"
 )
 
+// use a public keys listing so tests pass
+var serverAuthConfig = hollowserver.AuthConfig{
+	Audience: "",
+	Issuer:   "",
+	JWKSURI:  "https://www.googleapis.com/oauth2/v3/certs",
+}
+
 func TestUnknownRoute(t *testing.T) {
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -27,7 +34,7 @@ func TestUnknownRoute(t *testing.T) {
 }
 
 func TestHealthzRoute(t *testing.T) {
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -40,7 +47,7 @@ func TestHealthzRoute(t *testing.T) {
 }
 
 func TestLivenessRoute(t *testing.T) {
-	hs := hollowserver.Server{Logger: zap.NewNop()}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -53,7 +60,7 @@ func TestLivenessRoute(t *testing.T) {
 }
 
 func TestReadinessRouteDown(t *testing.T) {
-	hs := hollowserver.Server{Logger: zap.NewNop(), Store: &db.Store{}}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, Store: &db.Store{}}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -68,7 +75,7 @@ func TestReadinessRouteDown(t *testing.T) {
 func TestReadinessRouteUp(t *testing.T) {
 	store := db.DatabaseTest(t)
 
-	hs := hollowserver.Server{Logger: zap.NewNop(), Store: store}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, Store: store}
 	s := hs.NewServer()
 	router := s.Handler
 

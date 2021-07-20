@@ -4,13 +4,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2/jwt"
 
 	"go.metalkube.net/hollow/internal/db"
 	"go.metalkube.net/hollow/internal/hollowserver"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
+	"go.metalkube.net/hollow/pkg/ginjwt"
 )
 
 type testServer struct {
@@ -19,9 +23,19 @@ type testServer struct {
 }
 
 func serverTest(t *testing.T) *testServer {
+	jwksURI := ginjwt.TestHelperJWKSProvider()
+
 	store := db.DatabaseTest(t)
 
-	hs := hollowserver.Server{Logger: zap.NewNop(), Store: store}
+	hs := hollowserver.Server{
+		Logger: zap.NewNop(),
+		Store:  store,
+		AuthConfig: hollowserver.AuthConfig{
+			Audience: "hollow.test",
+			Issuer:   "hollow.test.issuer",
+			JWKSURI:  jwksURI,
+		},
+	}
 	s := hs.NewServer()
 
 	ts := &testServer{
@@ -46,4 +60,18 @@ func (s *testServer) Do(req *http.Request) (*http.Response, error) {
 	s.h.ServeHTTP(w, req)
 
 	return w.Result(), nil
+}
+
+func validToken(scopes []string) string {
+	claims := jwt.Claims{
+		Subject:   "test-user",
+		Issuer:    "hollow.test.issuer",
+		NotBefore: jwt.NewNumericDate(time.Now().Add(-1 * time.Hour)),
+		Expiry:    jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		Audience:  jwt.Audience{"hollow.test", "another.test.service"},
+	}
+	signer := ginjwt.TestHelperMustMakeSigner(jose.RS256, ginjwt.TestPrivRSAKey1ID, ginjwt.TestPrivRSAKey1)
+
+	return ginjwt.TestHelperGetToken(signer, claims, scopes)
 }
