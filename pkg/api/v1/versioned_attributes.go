@@ -12,14 +12,14 @@ import (
 // VersionedAttributes represents a set of attributes of an entity at a given time
 type VersionedAttributes struct {
 	Namespace string          `json:"namespace" binding:"required"`
-	Values    json.RawMessage `json:"values" binding:"required"`
+	Data      json.RawMessage `json:"data" binding:"required"`
 	CreatedAt time.Time       `json:"created_at"`
 }
 
 func (a *VersionedAttributes) toDBModel() (*db.VersionedAttributes, error) {
 	dbc := &db.VersionedAttributes{
 		Namespace: a.Namespace,
-		Values:    datatypes.JSON(a.Values),
+		Data:      datatypes.JSON(a.Data),
 	}
 
 	return dbc, nil
@@ -28,7 +28,7 @@ func (a *VersionedAttributes) toDBModel() (*db.VersionedAttributes, error) {
 func (a *VersionedAttributes) fromDBModel(dba db.VersionedAttributes) error {
 	a.CreatedAt = dba.CreatedAt
 	a.Namespace = dba.Namespace
-	a.Values = json.RawMessage(dba.Values)
+	a.Data = json.RawMessage(dba.Data)
 
 	return nil
 }

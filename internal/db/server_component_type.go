@@ -9,10 +9,10 @@ import (
 
 // ServerComponentType provides a way to group server components by their type
 type ServerComponentType struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
+	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      string `gorm:"<-:create;not null;uniqueIndex;"`
+	Name      string
 }
 
 // ServerComponentTypeFilter provides the ability to filter the server components
@@ -23,6 +23,10 @@ type ServerComponentTypeFilter struct {
 
 // BeforeSave ensures that the server component type passes validation checks
 func (t *ServerComponentType) BeforeSave(tx *gorm.DB) (err error) {
+	if t.ID.String() == uuid.Nil.String() {
+		t.ID = uuid.New()
+	}
+
 	if t.Name == "" {
 		return requiredFieldMissing("server component type", "name")
 	}

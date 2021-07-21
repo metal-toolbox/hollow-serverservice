@@ -4,21 +4,31 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // ServerComponent represents a component of a server. These can be things like
 // processors, NICs, hard drives, etc.
 type ServerComponent struct {
-	ID                    uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
+	ID                    uuid.UUID
 	CreatedAt             time.Time
 	UpdatedAt             time.Time
 	Name                  string
 	Vendor                string
 	Model                 string
 	Serial                string
-	ServerComponentTypeID uuid.UUID `gorm:"type:uuid;index"`
+	ServerComponentTypeID uuid.UUID
 	ServerComponentType   ServerComponentType
-	ServerID              uuid.UUID `gorm:"type:uuid;index"`
+	ServerID              uuid.UUID
 	Server                Server
-	Attributes            []Attributes `gorm:"polymorphic:Entity;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Attributes            []Attributes
+}
+
+// BeforeSave ensures that the server component type passes validation checks
+func (c *ServerComponent) BeforeSave(tx *gorm.DB) (err error) {
+	if c.ID.String() == uuid.Nil.String() {
+		c.ID = uuid.New()
+	}
+
+	return nil
 }

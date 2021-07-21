@@ -70,7 +70,7 @@ func TestServerServiceList(t *testing.T) {
 
 func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		va := hollow.VersionedAttributes{Namespace: "unit-test", Values: json.RawMessage([]byte(`{"test":"unit"}`))}
+		va := hollow.VersionedAttributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -85,7 +85,7 @@ func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 
 func TestServerServiceListVersionedAttributess(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		va := []hollow.VersionedAttributes{{Namespace: "test", Values: json.RawMessage([]byte(`{}`))}}
+		va := []hollow.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
 		jsonResponse, err := json.Marshal(va)
 		require.Nil(t, err)
 

@@ -58,14 +58,3 @@ func (s *Store) Ping() bool {
 
 	return sqlDB.Ping() == nil
 }
-
-// Migrate will migrate the database to ensure the schema matches what is expected
-func (s *Store) Migrate() error {
-	return s.db.AutoMigrate(
-		&Attributes{},
-		&VersionedAttributes{},
-		&Server{},
-		&ServerComponent{},
-		&ServerComponentType{},
-	)
-}

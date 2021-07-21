@@ -67,7 +67,7 @@ func TestGetVersionedAttributes(t *testing.T) {
 				assert.NoError(t, err, tt.testName)
 				for i, bc := range tt.expectList {
 					assert.Equal(t, bc.ID, res[i].ID)
-					assert.Equal(t, bc.Values, res[i].Values)
+					assert.Equal(t, bc.Data, res[i].Data)
 				}
 			}
 		})

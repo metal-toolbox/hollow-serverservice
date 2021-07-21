@@ -13,17 +13,23 @@ import (
 // that represents equinixmetal specific attributes that are stored in the API.
 // The namespace is meant to define who owns the schema and values.
 type Attributes struct {
-	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	EntityID   uuid.UUID `gorm:"<-:create;index:idx_attributes_entity;uniqueIndex:idx_attributes_entity_namespace;not null;"`
-	EntityType string    `gorm:"<-:create;index:idx_attributes_entity;uniqueIndex:idx_attributes_entity_namespace;not null;"`
-	Namespace  string    `gorm:"<-:create;index;uniqueIndex:idx_attributes_entity_namespace;not null;"`
-	Values     datatypes.JSON
+	ID                uuid.UUID
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	ServerID          *uuid.UUID
+	Server            *Server
+	ServerComponentID *uuid.UUID
+	ServerComponent   *ServerComponent
+	Namespace         string `gorm:"<-:create;"`
+	Data              datatypes.JSON
 }
 
 // BeforeSave ensures that the attributes passes validation checks
 func (a *Attributes) BeforeSave(tx *gorm.DB) (err error) {
+	if a.ID.String() == uuid.Nil.String() {
+		a.ID = uuid.New()
+	}
+
 	if a.Namespace == "" {
 		return requiredFieldMissing("attributes", "namespace")
 	}

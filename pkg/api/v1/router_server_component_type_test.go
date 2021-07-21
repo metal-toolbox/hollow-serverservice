@@ -12,7 +12,7 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-func TestIntegrationHWComponentTypeServiceCreate(t *testing.T) {
+func TestIntegrationServerComponentTypeServiceCreate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
@@ -30,7 +30,7 @@ func TestIntegrationHWComponentTypeServiceCreate(t *testing.T) {
 	})
 }
 
-func TestIntegrationHWComponentTypeServiceList(t *testing.T) {
+func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {

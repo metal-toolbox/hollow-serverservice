@@ -18,7 +18,7 @@ import (
 // The namespace is meant to define who owns the schema and values.
 type Attributes struct {
 	Namespace string          `json:"namespace"`
-	Values    json.RawMessage `json:"values"`
+	Data      json.RawMessage `json:"data"`
 }
 
 // AttributeListParams allow you to filter the results based on attributes
@@ -32,7 +32,7 @@ type AttributeListParams struct {
 
 func (a *Attributes) fromDBModel(dbA db.Attributes) error {
 	a.Namespace = dbA.Namespace
-	a.Values = json.RawMessage(dbA.Values)
+	a.Data = json.RawMessage(dbA.Data)
 
 	return nil
 }
@@ -40,7 +40,7 @@ func (a *Attributes) fromDBModel(dbA db.Attributes) error {
 func (a *Attributes) toDBModel() (db.Attributes, error) {
 	dbA := db.Attributes{
 		Namespace: a.Namespace,
-		Values:    datatypes.JSON(a.Values),
+		Data:      datatypes.JSON(a.Data),
 	}
 
 	return dbA, nil

@@ -25,7 +25,7 @@ var testServer = hollow.Server{
 			Attributes: []hollow.Attributes{
 				{
 					Namespace: "hollow.integration.test",
-					Values:    json.RawMessage([]byte(`{"firmware":1}`)),
+					Data:      json.RawMessage([]byte(`{"firmware":1}`)),
 				},
 			},
 			ComponentTypeUUID: db.FixtureSCTFins.ID,
@@ -34,13 +34,13 @@ var testServer = hollow.Server{
 	Attributes: []hollow.Attributes{
 		{
 			Namespace: "hollow.integration.test",
-			Values:    json.RawMessage([]byte(`{"plan_type":"large"}`)),
+			Data:      json.RawMessage([]byte(`{"plan_type":"large"}`)),
 		},
 	},
 	VersionedAttributes: []hollow.VersionedAttributes{
 		{
 			Namespace: "hollow.integration.settings",
-			Values:    json.RawMessage([]byte(`{"setting":"enabled"}`)),
+			Data:      json.RawMessage([]byte(`{"setting":"enabled"}`)),
 		},
 	},
 }
@@ -335,15 +335,15 @@ func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 
 	assert.Len(t, hc.Attributes, 1)
 	assert.Equal(t, "hollow.integration.test", hc.Attributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"firmware":1}`)), hc.Attributes[0].Values)
+	assert.Equal(t, json.RawMessage([]byte(`{"firmware":1}`)), hc.Attributes[0].Data)
 
 	assert.Len(t, rHW.Attributes, 1)
 	assert.Equal(t, "hollow.integration.test", rHW.Attributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), rHW.Attributes[0].Values)
+	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), rHW.Attributes[0].Data)
 
 	assert.Len(t, rHW.VersionedAttributes, 1)
 	assert.Equal(t, "hollow.integration.settings", rHW.VersionedAttributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), rHW.VersionedAttributes[0].Values)
+	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), rHW.VersionedAttributes[0].Data)
 }
 
 func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
@@ -352,7 +352,7 @@ func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Values: json.RawMessage([]byte(`{"test":"integration"}`))}
+		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
 
 		res, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
@@ -373,9 +373,9 @@ func TestIntegrationServerServiceGetVersionedAttributes(t *testing.T) {
 		if !expectError {
 			require.Len(t, res, 2)
 			assert.Equal(t, db.FixtureNamespaceVersioned, res[0].Namespace)
-			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Values)
+			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Data)
 			assert.Equal(t, db.FixtureNamespaceVersioned, res[1].Namespace)
-			assert.Equal(t, json.RawMessage([]byte(`{"name":"old"}`)), res[1].Values)
+			assert.Equal(t, json.RawMessage([]byte(`{"name":"old"}`)), res[1].Data)
 		}
 
 		return err

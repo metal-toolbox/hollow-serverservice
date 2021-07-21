@@ -15,13 +15,13 @@ var (
 
 	FixtureSCTFins = ServerComponentType{ID: uuid.New(), Name: "Fins"}
 
-	FixtureAttributesNemoMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "Fishbowl", "age": 6}`))}
-	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 12}`))}
-	FixtureAttributesMarlinMetadata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 10}`))}
+	FixtureAttributesNemoMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"location": "Fishbowl", "age": 6}`))}
+	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 12}`))}
+	FixtureAttributesMarlinMetadata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 10}`))}
 
-	FixtureAttributesNemoOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Values: datatypes.JSON([]byte(`{"enabled": true, "type": "clown", "lastUpdated": 1624960800, "nested": {"tag": "finding-nemo", "number": 1}}`))}
-	FixtureAttributesDoryOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Values: datatypes.JSON([]byte(`{"enabled": true, "type": "blue-tang", "lastUpdated": 1624960400, "nested": {"tag": "finding-nemo", "number": 2}}`))}
-	FixtureAttributesMarlinOtherdata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Values: datatypes.JSON([]byte(`{"enabled": false, "type": "clown", "lastUpdated": 1624960000, "nested": {"tag": "finding-nemo", "number": 3}}`))}
+	FixtureAttributesNemoOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": true, "type": "clown", "lastUpdated": 1624960800, "nested": {"tag": "finding-nemo", "number": 1}}`))}
+	FixtureAttributesDoryOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": true, "type": "blue-tang", "lastUpdated": 1624960400, "nested": {"tag": "finding-nemo", "number": 2}}`))}
+	FixtureAttributesMarlinOtherdata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": false, "type": "clown", "lastUpdated": 1624960000, "nested": {"tag": "finding-nemo", "number": 3}}`))}
 
 	FixtureSCNemoLeftFin    = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "Normal Fin", Serial: "Left"}
 	FixtureSCNemoRightFin   = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "A Lucky Fin", Serial: "Right"}
@@ -55,19 +55,17 @@ var (
 	}
 
 	FixtureVersionedAttributesOld = VersionedAttributes{
-		ID:         uuid.New(),
-		EntityType: "servers",
-		EntityID:   FixtureServerNemo.ID,
-		Namespace:  FixtureNamespaceVersioned,
-		Values:     datatypes.JSON([]byte(`{"name": "old"}`)),
+		ID:        uuid.New(),
+		ServerID:  FixtureServerNemo.ID,
+		Namespace: FixtureNamespaceVersioned,
+		Data:      datatypes.JSON([]byte(`{"name": "old"}`)),
 	}
 
 	FixtureVersionedAttributesNew = VersionedAttributes{
-		ID:         uuid.New(),
-		EntityType: "servers",
-		EntityID:   FixtureServerNemo.ID,
-		Namespace:  FixtureNamespaceVersioned,
-		Values:     datatypes.JSON([]byte(`{"name": "new"}`)),
+		ID:        uuid.New(),
+		ServerID:  FixtureServerNemo.ID,
+		Namespace: FixtureNamespaceVersioned,
+		Data:      datatypes.JSON([]byte(`{"name": "new"}`)),
 	}
 
 	FixtureServer = []Server{FixtureServerNemo, FixtureServerDory, FixtureServerMarlin}

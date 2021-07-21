@@ -19,24 +19,24 @@ type AttributesFilter struct {
 
 func (f *AttributesFilter) applyVersioned(d *gorm.DB, i int) *gorm.DB {
 	joinName := fmt.Sprintf("ver_attr_%d", i)
-	joinStr := fmt.Sprintf("JOIN versioned_attributes AS %s ON %s.entity_id = servers.id AND %s.entity_type = ? AND %s.created_at=(select max(created_at) from versioned_attributes where entity_id = servers.id AND entity_type = ? AND namespace = ?)", joinName, joinName, joinName, joinName)
+	joinStr := fmt.Sprintf("JOIN versioned_attributes AS %s ON %s.server_id = servers.id AND %s.created_at=(select max(created_at) from versioned_attributes where server_id = servers.id AND namespace = ?)", joinName, joinName, joinName)
 
-	d = d.Joins(joinStr, "servers", "servers", f.Namespace)
+	d = d.Joins(joinStr, f.Namespace)
 
 	return f.addFilter(d, joinName)
 }
 
 func (f *AttributesFilter) apply(d *gorm.DB, i int) *gorm.DB {
 	joinName := fmt.Sprintf("attr_%d", i)
-	joinStr := fmt.Sprintf("JOIN attributes AS %s ON %s.entity_id = servers.id AND %s.entity_type = ?", joinName, joinName, joinName)
+	joinStr := fmt.Sprintf("JOIN attributes AS %s ON %s.server_id = servers.id", joinName, joinName)
 
-	d = d.Joins(joinStr, "servers", "servers")
+	d = d.Joins(joinStr)
 
 	return f.addFilter(d, joinName)
 }
 
 func (f *AttributesFilter) addFilter(d *gorm.DB, joinName string) *gorm.DB {
-	column := fmt.Sprintf("%s.values", joinName)
+	column := fmt.Sprintf("%s.data", joinName)
 
 	// filter by the namespace
 	d = d.Where(fmt.Sprintf("%s.namespace = ?", joinName), f.Namespace)

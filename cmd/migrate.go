@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
-	"go.metalkube.net/hollow/internal/db"
 )
 
 // migrateCmd represents the serve command
@@ -24,12 +21,12 @@ func init() {
 }
 
 func migrate() {
-	store, err := db.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar())
-	if err != nil {
-		logger.Fatalw("failed to init data store", "error", err)
-	}
+	// store, err := db.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar())
+	// if err != nil {
+	// 	logger.Fatalw("failed to init data store", "error", err)
+	// }
 
-	if err := store.Migrate(); err != nil {
-		logger.Fatalw("failed to migrate data store", "error", err)
-	}
+	// if err := store.Migrate(); err != nil {
+	// 	logger.Fatalw("failed to migrate data store", "error", err)
+	// }
 }

@@ -13,16 +13,20 @@ import (
 // over Attributes when you want to store historical data on what the previous
 // values were.
 type VersionedAttributes struct {
-	ID         uuid.UUID      `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
-	EntityID   uuid.UUID      `gorm:"<-:create;index:idx_versioned_attributes_entity;index:idx_versioned_attributes_entity_namespace;not null;"`
-	EntityType string         `gorm:"<-:create;index:idx_versioned_attributes_entity;index:idx_versioned_attributes_entity_namespace;not null;"`
-	Namespace  string         `gorm:"<-:create;index;index:idx_versioned_attributes_entity_namespace;not null;"`
-	Values     datatypes.JSON `gorm:"<-:create;"`
-	CreatedAt  time.Time
+	ID        uuid.UUID
+	ServerID  uuid.UUID `gorm:"<-:create;"`
+	Server    Server
+	Namespace string         `gorm:"<-:create;"`
+	Data      datatypes.JSON `gorm:"<-:create;"`
+	CreatedAt time.Time
 }
 
 // BeforeSave ensures that the VersionedAttributes passes validation checks
 func (a *VersionedAttributes) BeforeSave(tx *gorm.DB) (err error) {
+	if a.ID.String() == uuid.Nil.String() {
+		a.ID = uuid.New()
+	}
+
 	if a.Namespace == "" {
 		return requiredFieldMissing("VersionedAttributes", "namespace")
 	}
@@ -40,7 +44,7 @@ func (s *Store) CreateVersionedAttributes(entity interface{}, a *VersionedAttrib
 // first
 func (s *Store) GetVersionedAttributes(srvUUID uuid.UUID) ([]VersionedAttributes, error) {
 	var al []VersionedAttributes
-	if err := s.db.Where(&VersionedAttributes{EntityType: "servers", EntityID: srvUUID}).Order("created_at desc").Find(&al).Error; err != nil {
+	if err := s.db.Where(&VersionedAttributes{ServerID: srvUUID}).Order("created_at desc").Find(&al).Error; err != nil {
 		return nil, err
 	}
 

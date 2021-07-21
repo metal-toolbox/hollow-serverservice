@@ -12,20 +12,29 @@ import (
 // Server represents a server in a facility. These are the details of the
 // physical server that is located in the facility.
 type Server struct {
-	ID                  uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
+	ID                  uuid.UUID
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	Name                string
 	FacilityCode        string
-	Attributes          []Attributes          `gorm:"polymorphic:Entity;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	ServerComponents    []ServerComponent     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	VersionedAttributes []VersionedAttributes `gorm:"polymorphic:Entity;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Attributes          []Attributes
+	ServerComponents    []ServerComponent
+	VersionedAttributes []VersionedAttributes
+}
+
+// BeforeSave ensures that the Server passes validation checks
+func (s *Server) BeforeSave(tx *gorm.DB) (err error) {
+	if s.ID.String() == uuid.Nil.String() {
+		s.ID = uuid.New()
+	}
+
+	return nil
 }
 
 func serverPreload(db *gorm.DB) *gorm.DB {
 	d := db.Preload("VersionedAttributes",
-		"(created_at, namespace, entity_id, entity_type) IN (?)",
-		db.Table("versioned_attributes").Select("max(created_at), namespace, entity_id, entity_type").Group("namespace").Group("entity_id").Group("entity_type"),
+		"(created_at, namespace, server_id) IN (?)",
+		db.Table("versioned_attributes").Select("max(created_at), namespace, server_id").Group("namespace").Group("server_id"),
 	)
 
 	return d.Preload("ServerComponents.ServerComponentType").Preload("ServerComponents.Attributes").Preload(clause.Associations)
