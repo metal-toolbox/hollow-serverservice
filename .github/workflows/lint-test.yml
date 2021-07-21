@@ -33,6 +33,9 @@ jobs:
       - name: Start test database
         run: make docker-up
 
+      - name: Install goose for database migrations
+        run: go install github.com/pressly/goose/cmd/goose@v2.7.0
+
       - name: Create test DB
         run: make test-database
 
