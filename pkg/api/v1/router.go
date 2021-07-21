@@ -39,7 +39,29 @@ func (r *Router) loadHardwareFromParams(c *gin.Context) (*db.Hardware, error) {
 		return nil, err
 	}
 
-	hw, err := r.Store.GetHardwareByUUID(hwUUID)
+	hw, err := r.Store.FindHardwareByUUID(hwUUID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			notFoundResponse(c, err)
+			return nil, err
+		}
+
+		dbFailureResponse(c, err)
+
+		return nil, err
+	}
+
+	return hw, nil
+}
+
+func (r *Router) loadOrCreateHardwareFromParams(c *gin.Context) (*db.Hardware, error) {
+	hwUUID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware uuid", "error": err.Error()})
+		return nil, err
+	}
+
+	hw, err := r.Store.FindOrCreateHardwareByUUID(hwUUID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			notFoundResponse(c, err)

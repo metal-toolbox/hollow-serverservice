@@ -66,7 +66,7 @@ func TestFindHardwareByUUID(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		res, err := s.GetHardwareByUUID(tt.searchUUID)
+		res, err := s.FindHardwareByUUID(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -105,16 +105,16 @@ func TestGetHardware(t *testing.T) {
 			"",
 		},
 		{
-			"search by age greater than 1 and facility code",
+			"search by age greater than 11 and facility code",
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:        db.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
-						GreaterThanValue: 1,
+						GreaterThanValue: 11,
 					},
 				},
-				FacilityCode: "Dory",
+				FacilityCode: "Ocean",
 			},
 			[]uuid.UUID{db.FixtureHardwareDory.ID},
 			false,
@@ -123,9 +123,9 @@ func TestGetHardware(t *testing.T) {
 		{
 			"search by facility",
 			&db.HardwareFilter{
-				FacilityCode: "Dory",
+				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
 			false,
 			"",
 		},

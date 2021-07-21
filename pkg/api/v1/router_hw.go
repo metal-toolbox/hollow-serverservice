@@ -158,7 +158,7 @@ func (r *Router) hardwareVersionedAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	hw, err := r.loadHardwareFromParams(c)
+	hw, err := r.loadOrCreateHardwareFromParams(c)
 	if err != nil {
 		return
 	}

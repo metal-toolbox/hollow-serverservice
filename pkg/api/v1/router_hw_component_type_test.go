@@ -2,7 +2,6 @@ package hollow_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -17,7 +16,6 @@ func TestIntegrationHWComponentTypeServiceCreate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
-		fmt.Printf("\n\nSetting the token to: \n\n%s\n\n", authToken)
 		s.Client.SetToken(authToken)
 
 		hct := hollow.HardwareComponentType{Name: "integration-test"}

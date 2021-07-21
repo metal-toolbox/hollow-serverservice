@@ -25,6 +25,11 @@ func testDatastore() error {
 		return err
 	}
 
+	err = s.Migrate()
+	if err != nil {
+		return err
+	}
+
 	testStore = s
 
 	cleanDB()
