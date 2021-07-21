@@ -34,7 +34,7 @@ jobs:
         run: make docker-up
 
       - name: Create test DB
-        run: make local-dev-databases
+        run: make test-database
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
