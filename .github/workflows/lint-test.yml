@@ -57,7 +57,7 @@ jobs:
           # only-new-issues: true
 
       - name: Run go tests and generate coverage report
-        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1
+        run: HOLLOW_TEST_DB="host=localhost port=26257 user=root sslmode=disable dbname=hollow_test" go test ./... -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1
 
       - name: Stop test database
         run: make docker-down
