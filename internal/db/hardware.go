@@ -42,7 +42,7 @@ func (s *Store) CreateHardware(h *Hardware) error {
 	return s.db.Create(h).Error
 }
 
-// DeleteHardware will "delete" hardware in the datastore.
+// DeleteHardware will delete hardware in the datastore.
 func (s *Store) DeleteHardware(h *Hardware) error {
 	return s.db.Delete(h).Error
 }
