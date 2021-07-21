@@ -15,19 +15,19 @@ func TestCreateVersionedAttributes(t *testing.T) {
 
 	var testCases = []struct {
 		testName    string
-		hw          db.Hardware
+		srv         db.Server
 		a           db.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing namespace", db.FixtureHardwareDory, db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttributes attribute"},
-		{"happy path", db.FixtureHardwareDory, db.VersionedAttributes{Namespace: "integration.test.createva"}, false, ""},
+		{"missing namespace", db.FixtureServerDory, db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttributes attribute"},
+		{"happy path", db.FixtureServerDory, db.VersionedAttributes{Namespace: "integration.test.createva"}, false, ""},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			va := &tt.a
-			err := s.CreateVersionedAttributes(&tt.hw, va)
+			err := s.CreateVersionedAttributes(&tt.srv, va)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -53,7 +53,7 @@ func TestGetVersionedAttributes(t *testing.T) {
 		errorMsg    string
 	}{
 		{"no results, bad uuid", uuid.New(), []db.VersionedAttributes{}, false, ""},
-		{"happy path", db.FixtureHardwareNemo.ID, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
+		{"happy path", db.FixtureServerNemo.ID, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -67,7 +67,7 @@ func TestGetVersionedAttributes(t *testing.T) {
 				assert.NoError(t, err, tt.testName)
 				for i, bc := range tt.expectList {
 					assert.Equal(t, bc.ID, res[i].ID)
-					assert.Equal(t, bc.Values, res[i].Values)
+					assert.Equal(t, bc.Data, res[i].Data)
 				}
 			}
 		})

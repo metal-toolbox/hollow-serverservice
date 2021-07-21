@@ -51,7 +51,8 @@ func TestNewClient(t *testing.T) {
 		} else {
 			assert.NoError(t, err, tt.testName)
 			assert.NotNil(t, c, tt.testName)
-			assert.NotNil(t, c.Hardware, tt.testName)
+			assert.NotNil(t, c.Server, tt.testName)
+			assert.NotNil(t, c.ServerComponentType, tt.testName)
 		}
 	}
 }

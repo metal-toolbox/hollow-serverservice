@@ -12,15 +12,15 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-func TestIntegrationHWComponentTypeServiceCreate(t *testing.T) {
+func TestIntegrationServerComponentTypeServiceCreate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		hct := hollow.HardwareComponentType{Name: "integration-test"}
+		hct := hollow.ServerComponentType{Name: "integration-test"}
 
-		res, err := s.Client.HardwareComponentType.Create(ctx, hct)
+		res, err := s.Client.ServerComponentType.Create(ctx, hct)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotEqual(t, uuid.Nil.String(), res.String())
@@ -30,18 +30,18 @@ func TestIntegrationHWComponentTypeServiceCreate(t *testing.T) {
 	})
 }
 
-func TestIntegrationHWComponentTypeServiceList(t *testing.T) {
+func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.HardwareComponentType.List(ctx, nil)
+		res, err := s.Client.ServerComponentType.List(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, res, 1)
-			assert.Equal(t, db.FixtureHCTFins.ID, res[0].UUID)
-			assert.Equal(t, db.FixtureHCTFins.Name, res[0].Name)
+			assert.Equal(t, db.FixtureSCTFins.ID, res[0].UUID)
+			assert.Equal(t, db.FixtureSCTFins.Name, res[0].Name)
 		}
 
 		return err

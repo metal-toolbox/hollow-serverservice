@@ -13,10 +13,10 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-var testHW = hollow.Hardware{
+var testServer = hollow.Server{
 	UUID:         uuid.New(),
 	FacilityCode: "int-test",
-	HardwareComponents: []hollow.HardwareComponent{
+	Components: []hollow.ServerComponent{
 		{
 			Name:   "Intel Xeon 123",
 			Model:  "Xeon 123",
@@ -25,33 +25,33 @@ var testHW = hollow.Hardware{
 			Attributes: []hollow.Attributes{
 				{
 					Namespace: "hollow.integration.test",
-					Values:    json.RawMessage([]byte(`{"firmware":1}`)),
+					Data:      json.RawMessage([]byte(`{"firmware":1}`)),
 				},
 			},
-			HardwareComponentTypeUUID: db.FixtureHCTFins.ID,
+			ComponentTypeUUID: db.FixtureSCTFins.ID,
 		},
 	},
 	Attributes: []hollow.Attributes{
 		{
 			Namespace: "hollow.integration.test",
-			Values:    json.RawMessage([]byte(`{"plan_type":"large"}`)),
+			Data:      json.RawMessage([]byte(`{"plan_type":"large"}`)),
 		},
 	},
 	VersionedAttributes: []hollow.VersionedAttributes{
 		{
 			Namespace: "hollow.integration.settings",
-			Values:    json.RawMessage([]byte(`{"setting":"enabled"}`)),
+			Data:      json.RawMessage([]byte(`{"setting":"enabled"}`)),
 		},
 	},
 }
 
-func TestIntegrationHardwareList(t *testing.T) {
+func TestIntegrationServerList(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.Hardware.List(ctx, nil)
+		res, err := s.Client.Server.List(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, res, 3)
@@ -60,17 +60,17 @@ func TestIntegrationHardwareList(t *testing.T) {
 		return err
 	})
 
-	// These are the same test cases used in db/hardware_test.go
+	// These are the same test cases used in db/server_test.go
 	var testCases = []struct {
 		testName      string
-		params        *hollow.HardwareListParams
+		params        *hollow.ServerListParams
 		expectedUUIDs []uuid.UUID
 		expectError   bool
 		errorMsg      string
 	}{
 		{
 			"search by age less than 7",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:     db.FixtureNamespaceMetadata,
@@ -79,13 +79,13 @@ func TestIntegrationHardwareList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by age greater than 11 and facility code",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:        db.FixtureNamespaceMetadata,
@@ -95,22 +95,22 @@ func TestIntegrationHardwareList(t *testing.T) {
 				},
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"search by facility",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search by type and location from different attributes",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -124,13 +124,13 @@ func TestIntegrationHardwareList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"search by nested tag",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -139,13 +139,13 @@ func TestIntegrationHardwareList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareNemo.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerNemo.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search by nested number greater than 1",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:        db.FixtureNamespaceOtherdata,
@@ -154,20 +154,20 @@ func TestIntegrationHardwareList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"empty search filter",
 			nil,
-			[]uuid.UUID{db.FixtureHardwareNemo.ID, db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"facility filter that doesn't match",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				FacilityCode: "Neverland",
 			},
 			[]uuid.UUID{},
@@ -176,7 +176,7 @@ func TestIntegrationHardwareList(t *testing.T) {
 		},
 		{
 			"search by type from attributes and name from versioned attributes",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -192,13 +192,13 @@ func TestIntegrationHardwareList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by type from attributes and name from versioned attributes, using the not current value, so nothing should return",
-			&hollow.HardwareListParams{
+			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -221,7 +221,7 @@ func TestIntegrationHardwareList(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.Client.Hardware.List(context.TODO(), tt.params)
+		r, err := s.Client.Server.List(context.TODO(), tt.params)
 		if tt.expectError {
 			assert.NoError(t, err)
 			continue
@@ -229,24 +229,24 @@ func TestIntegrationHardwareList(t *testing.T) {
 
 		var actual []uuid.UUID
 
-		for _, hw := range r {
-			actual = append(actual, hw.UUID)
+		for _, srv := range r {
+			actual = append(actual, srv.UUID)
 		}
 
 		assert.ElementsMatch(t, tt.expectedUUIDs, actual)
 	}
 }
 
-func TestIntegrationHardwareCreate(t *testing.T) {
+func TestIntegrationServerCreate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.Hardware.Create(ctx, testHW)
+		res, err := s.Client.Server.Create(ctx, testServer)
 		if !expectError {
 			assert.NotNil(t, res)
-			assert.Equal(t, testHW.UUID.String(), res.String())
+			assert.Equal(t, testServer.UUID.String(), res.String())
 		}
 
 		return err
@@ -254,13 +254,13 @@ func TestIntegrationHardwareCreate(t *testing.T) {
 
 	var testCases = []struct {
 		testName string
-		hw       *hollow.Hardware
+		srv      *hollow.Server
 		errorMsg string
 	}{
 		{
 			"fails on a duplicate uuid",
-			&hollow.Hardware{
-				UUID:         db.FixtureHardwareNemo.ID,
+			&hollow.Server{
+				UUID:         db.FixtureServerNemo.ID,
 				FacilityCode: "int-test",
 			},
 			"duplicate key",
@@ -269,20 +269,20 @@ func TestIntegrationHardwareCreate(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, err := s.Client.Hardware.Create(context.TODO(), *tt.hw)
+			_, err := s.Client.Server.Create(context.TODO(), *tt.srv)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
 	}
 }
 
-func TestIntegrationHardwareDelete(t *testing.T) {
+func TestIntegrationServerDelete(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		return s.Client.Hardware.Delete(ctx, hollow.Hardware{UUID: db.FixtureHardwareNemo.ID})
+		return s.Client.Server.Delete(ctx, hollow.Server{UUID: db.FixtureServerNemo.ID})
 	})
 
 	var testCases = []struct {
@@ -299,62 +299,62 @@ func TestIntegrationHardwareDelete(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			err := s.Client.Hardware.Delete(context.TODO(), hollow.Hardware{UUID: tt.uuid})
+			err := s.Client.Server.Delete(context.TODO(), hollow.Server{UUID: tt.uuid})
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
 	}
 }
 
-func TestIntegrationHardwareCreateAndFetchWithAllAttributes(t *testing.T) {
+func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 	s := serverTest(t)
 	s.Client.SetToken(validToken([]string{"read", "write"}))
 
 	// Attempt to get the testUUID (should return a failure unless somehow we got a collision with fixtures)
-	_, err := s.Client.Hardware.Get(context.TODO(), testHW.UUID)
+	_, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "resource not found")
 
-	_, err = s.Client.Hardware.Create(context.TODO(), testHW)
+	_, err = s.Client.Server.Create(context.TODO(), testServer)
 	assert.NoError(t, err)
 
-	// Get the hardware back and ensure all the things we set are returned
-	rHW, err := s.Client.Hardware.Get(context.TODO(), testHW.UUID)
+	// Get the server back and ensure all the things we set are returned
+	r, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
 	assert.NoError(t, err)
 
-	assert.Equal(t, rHW.FacilityCode, "int-test")
+	assert.Equal(t, r.FacilityCode, "int-test")
 
-	assert.Len(t, rHW.HardwareComponents, 1)
-	hc := rHW.HardwareComponents[0]
+	assert.Len(t, r.Components, 1)
+	hc := r.Components[0]
 	assert.Equal(t, "Intel Xeon 123", hc.Name)
 	assert.Equal(t, "Xeon 123", hc.Model)
 	assert.Equal(t, "Intel", hc.Vendor)
 	assert.Equal(t, "987654321", hc.Serial)
-	assert.Equal(t, db.FixtureHCTFins.ID, hc.HardwareComponentTypeUUID)
-	assert.Equal(t, "Fins", hc.HardwareComponentTypeName)
+	assert.Equal(t, db.FixtureSCTFins.ID, hc.ComponentTypeUUID)
+	assert.Equal(t, "Fins", hc.ComponentTypeName)
 
 	assert.Len(t, hc.Attributes, 1)
 	assert.Equal(t, "hollow.integration.test", hc.Attributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"firmware":1}`)), hc.Attributes[0].Values)
+	assert.Equal(t, json.RawMessage([]byte(`{"firmware":1}`)), hc.Attributes[0].Data)
 
-	assert.Len(t, rHW.Attributes, 1)
-	assert.Equal(t, "hollow.integration.test", rHW.Attributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), rHW.Attributes[0].Values)
+	assert.Len(t, r.Attributes, 1)
+	assert.Equal(t, "hollow.integration.test", r.Attributes[0].Namespace)
+	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), r.Attributes[0].Data)
 
-	assert.Len(t, rHW.VersionedAttributes, 1)
-	assert.Equal(t, "hollow.integration.settings", rHW.VersionedAttributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), rHW.VersionedAttributes[0].Values)
+	assert.Len(t, r.VersionedAttributes, 1)
+	assert.Equal(t, "hollow.integration.settings", r.VersionedAttributes[0].Namespace)
+	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), r.VersionedAttributes[0].Data)
 }
 
-func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
+func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Values: json.RawMessage([]byte(`{"test":"integration"}`))}
+		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
 
-		res, err := s.Client.Hardware.CreateVersionedAttributes(ctx, uuid.New(), va)
+		res, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
 			assert.NotNil(t, res)
 		}
@@ -363,19 +363,19 @@ func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
 	})
 }
 
-func TestIntegrationHardwareServiceGetVersionedAttributes(t *testing.T) {
+func TestIntegrationServerServiceGetVersionedAttributes(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.Hardware.GetVersionedAttributes(ctx, db.FixtureHardwareNemo.ID)
+		res, err := s.Client.Server.GetVersionedAttributes(ctx, db.FixtureServerNemo.ID)
 		if !expectError {
 			require.Len(t, res, 2)
 			assert.Equal(t, db.FixtureNamespaceVersioned, res[0].Namespace)
-			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Values)
+			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Data)
 			assert.Equal(t, db.FixtureNamespaceVersioned, res[1].Namespace)
-			assert.Equal(t, json.RawMessage([]byte(`{"name":"old"}`)), res[1].Values)
+			assert.Equal(t, json.RawMessage([]byte(`{"name":"old"}`)), res[1].Data)
 		}
 
 		return err

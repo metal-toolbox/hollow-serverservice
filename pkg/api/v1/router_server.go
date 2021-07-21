@@ -7,10 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *Router) hardwareList(c *gin.Context) {
+func (r *Router) serverList(c *gin.Context) {
 	pager := parsePagination(c)
 
-	var params HardwareListParams
+	var params ServerListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "invalid filter",
@@ -40,74 +40,74 @@ func (r *Router) hardwareList(c *gin.Context) {
 
 	dbFilter := params.dbFilter()
 
-	dbHW, err := r.Store.GetHardware(dbFilter, &pager)
+	dbSRV, err := r.Store.GetServers(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
 	}
 
-	hw := []Hardware{}
+	srvs := []Server{}
 
-	for _, dbH := range dbHW {
-		h := Hardware{}
-		if err := h.fromDBModel(dbH); err != nil {
+	for _, dbS := range dbSRV {
+		s := Server{}
+		if err := s.fromDBModel(dbS); err != nil {
 			failedConvertingToVersioned(c, err)
 			return
 		}
 
-		hw = append(hw, h)
+		srvs = append(srvs, s)
 	}
 
-	c.JSON(http.StatusOK, hw)
+	c.JSON(http.StatusOK, srvs)
 }
 
-func (r *Router) hardwareGet(c *gin.Context) {
-	dbHW, err := r.loadHardwareFromParams(c)
+func (r *Router) serverGet(c *gin.Context) {
+	dbSRV, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
 
-	var hw Hardware
-	if err = hw.fromDBModel(*dbHW); err != nil {
+	var srv Server
+	if err = srv.fromDBModel(*dbSRV); err != nil {
 		failedConvertingToVersioned(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, hw)
+	c.JSON(http.StatusOK, srv)
 }
 
-func (r *Router) hardwareCreate(c *gin.Context) {
-	var hw Hardware
-	if err := c.ShouldBindJSON(&hw); err != nil {
+func (r *Router) serverCreate(c *gin.Context) {
+	var srv Server
+	if err := c.ShouldBindJSON(&srv); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid hardware",
+			"message": "invalid server",
 			"error":   err.Error(),
 		})
 
 		return
 	}
 
-	dbHW, err := hw.toDBModel()
+	dbSRV, err := srv.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware", "error": err.Error})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server", "error": err.Error})
 		return
 	}
 
-	if err := r.Store.CreateHardware(dbHW); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create hardware", err))
+	if err := r.Store.CreateServer(dbSRV); err != nil {
+		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create server", err))
 		return
 	}
 
-	createdResponse(c, &dbHW.ID)
+	createdResponse(c, &dbSRV.ID)
 }
 
-func (r *Router) hardwareDelete(c *gin.Context) {
-	dbHW, err := r.loadHardwareFromParams(c)
+func (r *Router) serverDelete(c *gin.Context) {
+	dbSRV, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
 
-	if err = r.Store.DeleteHardware(dbHW); err != nil {
+	if err = r.Store.DeleteServer(dbSRV); err != nil {
 		c.JSON(http.StatusInternalServerError, newErrorResponse("failed deleting resource", err))
 		return
 	}
@@ -115,14 +115,14 @@ func (r *Router) hardwareDelete(c *gin.Context) {
 	deletedResponse(c)
 }
 
-func (r *Router) hardwareVersionedAttributesList(c *gin.Context) {
-	hwUUID, err := uuid.Parse(c.Param("uuid"))
+func (r *Router) serverVersionedAttributesList(c *gin.Context) {
+	srvUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware uuid", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server uuid", "error": err.Error()})
 		return
 	}
 
-	dbVA, err := r.Store.GetVersionedAttributes(hwUUID)
+	dbVA, err := r.Store.GetVersionedAttributes(srvUUID)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
@@ -143,7 +143,7 @@ func (r *Router) hardwareVersionedAttributesList(c *gin.Context) {
 	c.JSON(http.StatusOK, va)
 }
 
-func (r *Router) hardwareVersionedAttributesCreate(c *gin.Context) {
+func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 	var va VersionedAttributes
 	if err := c.ShouldBindJSON(&va); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -160,12 +160,12 @@ func (r *Router) hardwareVersionedAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	hw, err := r.loadOrCreateHardwareFromParams(c)
+	srv, err := r.loadOrCreateServerFromParams(c)
 	if err != nil {
 		return
 	}
 
-	err = r.Store.CreateVersionedAttributes(hw, dbVA)
+	err = r.Store.CreateVersionedAttributes(srv, dbVA)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return

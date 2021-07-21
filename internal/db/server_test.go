@@ -9,21 +9,20 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-func TestCreateHardware(t *testing.T) {
+func TestCreateServer(t *testing.T) {
 	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
-		hw          db.Hardware
+		srv         db.Server
 		expectError bool
 		errorMsg    string
 	}{
-		// {"missing name", db.Hardware{}, true, "validation failed: facility is a required hardware attribute"},
-		{"happy path", db.Hardware{FacilityCode: "TEST1"}, false, ""},
+		{"happy path", db.Server{FacilityCode: "TEST1"}, false, ""},
 	}
 
 	for _, tt := range testCases {
-		err := s.CreateHardware(&tt.hw)
+		err := s.CreateServer(&tt.srv)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -34,14 +33,14 @@ func TestCreateHardware(t *testing.T) {
 	}
 }
 
-func TestDeleteHardware(t *testing.T) {
+func TestDeleteServer(t *testing.T) {
 	s := db.DatabaseTest(t)
 
-	err := s.DeleteHardware(&db.FixtureHardwareNemo)
+	err := s.DeleteServer(&db.FixtureServerNemo)
 	assert.NoError(t, err)
 }
 
-func TestFindHardwareByUUID(t *testing.T) {
+func TestFindServerByUUID(t *testing.T) {
 	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
@@ -52,13 +51,13 @@ func TestFindHardwareByUUID(t *testing.T) {
 		errorMsg    string
 	}{
 		{
-			"happy path - existing hardware",
-			db.FixtureHardwareDory.ID,
+			"happy path - existing server",
+			db.FixtureServerDory.ID,
 			false,
 			"",
 		},
 		{
-			"happy path - hardware not found",
+			"happy path - server not found",
 			uuid.New(),
 			true,
 			"something not found",
@@ -66,7 +65,7 @@ func TestFindHardwareByUUID(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		res, err := s.FindHardwareByUUID(tt.searchUUID)
+		res, err := s.FindServerByUUID(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -80,7 +79,7 @@ func TestFindHardwareByUUID(t *testing.T) {
 	}
 }
 
-func TestFindOrCreateHardwareByUUID(t *testing.T) {
+func TestFindOrCreateServerByUUID(t *testing.T) {
 	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
@@ -91,13 +90,13 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 		errorMsg    string
 	}{
 		{
-			"happy path - existing hardware",
-			db.FixtureHardwareDory.ID,
+			"happy path - existing server",
+			db.FixtureServerDory.ID,
 			false,
 			"",
 		},
 		{
-			"happy path - hardware not found, new one created",
+			"happy path - server not found, new one created",
 			uuid.New(),
 			false,
 			"",
@@ -105,7 +104,7 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		res, err := s.FindOrCreateHardwareByUUID(tt.searchUUID)
+		res, err := s.FindOrCreateServerByUUID(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -119,19 +118,19 @@ func TestFindOrCreateHardwareByUUID(t *testing.T) {
 	}
 }
 
-func TestGetHardware(t *testing.T) {
+func TestGetServer(t *testing.T) {
 	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
-		filter        *db.HardwareFilter
+		filter        *db.ServerFilter
 		expectedUUIDs []uuid.UUID
 		expectError   bool
 		errorMsg      string
 	}{
 		{
 			"search by age less than 7",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:     db.FixtureNamespaceMetadata,
@@ -140,13 +139,13 @@ func TestGetHardware(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by age greater than 11 and facility code",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:        db.FixtureNamespaceMetadata,
@@ -156,22 +155,22 @@ func TestGetHardware(t *testing.T) {
 				},
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"search by facility",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search by type and location from different attributes",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -185,13 +184,13 @@ func TestGetHardware(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"search by nested tag",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -200,13 +199,13 @@ func TestGetHardware(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareNemo.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerNemo.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search by nested number greater than 1",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:        db.FixtureNamespaceOtherdata,
@@ -215,20 +214,20 @@ func TestGetHardware(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"empty search filter",
 			nil,
-			[]uuid.UUID{db.FixtureHardwareNemo.ID, db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"facility filter that doesn't match",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				FacilityCode: "Neverland",
 			},
 			[]uuid.UUID{},
@@ -237,7 +236,7 @@ func TestGetHardware(t *testing.T) {
 		},
 		{
 			"search by type from attributes and name from versioned attributes",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -253,13 +252,13 @@ func TestGetHardware(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by type from attributes and name from versioned attributes, using the not current value, so nothing should return",
-			&db.HardwareFilter{
+			&db.ServerFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:  db.FixtureNamespaceOtherdata,
@@ -282,7 +281,7 @@ func TestGetHardware(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetHardware(tt.filter, nil)
+		r, err := s.GetServers(tt.filter, nil)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -293,11 +292,11 @@ func TestGetHardware(t *testing.T) {
 			var rIDs []uuid.UUID
 			for _, h := range r {
 				rIDs = append(rIDs, h.ID)
-				// Ensure preload works. All Fixture data has 2 hardware components and 2 attributes
-				assert.Len(t, h.HardwareComponents, 2, tt.testName)
+				// Ensure preload works. All Fixture data has 2 server components and 2 attributes
+				assert.Len(t, h.ServerComponents, 2, tt.testName)
 				assert.Len(t, h.Attributes, 2, tt.testName)
 				// Nemo has two versioned attributes but only the most recent in a namespace should preload
-				if h.ID == db.FixtureHardwareNemo.ID {
+				if h.ID == db.FixtureServerNemo.ID {
 					assert.Len(t, h.VersionedAttributes, 1, tt.testName)
 				}
 			}
@@ -307,7 +306,7 @@ func TestGetHardware(t *testing.T) {
 	}
 }
 
-func TestGetHardwarePagination(t *testing.T) {
+func TestGetServerPagination(t *testing.T) {
 	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
@@ -324,7 +323,7 @@ func TestGetHardwarePagination(t *testing.T) {
 				Page:  1,
 				Sort:  "created_at DESC",
 			},
-			[]uuid.UUID{db.FixtureHardwareMarlin.ID},
+			[]uuid.UUID{db.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -335,7 +334,7 @@ func TestGetHardwarePagination(t *testing.T) {
 				Page:  2,
 				Sort:  "created_at DESC",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureServerDory.ID},
 			false,
 			"",
 		},
@@ -346,7 +345,7 @@ func TestGetHardwarePagination(t *testing.T) {
 				Page:  3,
 				Sort:  "created_at DESC",
 			},
-			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -364,7 +363,7 @@ func TestGetHardwarePagination(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetHardware(nil, &tt.pager)
+		r, err := s.GetServers(nil, &tt.pager)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

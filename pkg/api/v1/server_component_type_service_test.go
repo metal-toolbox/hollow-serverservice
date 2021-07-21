@@ -12,13 +12,13 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-func TestHWComponentTypeServiceCreate(t *testing.T) {
+func TestServerComponentTypeServiceCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		hct := hollow.HardwareComponentType{Name: "unit-test"}
+		hct := hollow.ServerComponentType{Name: "unit-test"}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.HardwareComponentType.Create(ctx, hct)
+		res, err := c.ServerComponentType.Create(ctx, hct)
 		if !expectError {
 			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
 		}
@@ -27,14 +27,14 @@ func TestHWComponentTypeServiceCreate(t *testing.T) {
 	})
 }
 
-func TestHWComponentTypeServiceList(t *testing.T) {
+func TestServerComponentTypeServiceList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		hct := []hollow.HardwareComponentType{{UUID: uuid.New(), Name: "unit-test-1"}, {UUID: uuid.New(), Name: "unit-test-2"}}
+		hct := []hollow.ServerComponentType{{UUID: uuid.New(), Name: "unit-test-1"}, {UUID: uuid.New(), Name: "unit-test-2"}}
 		jsonResponse, err := json.Marshal(hct)
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.HardwareComponentType.List(ctx, nil)
+		res, err := c.ServerComponentType.List(ctx, nil)
 		if !expectError {
 			assert.ElementsMatch(t, hct, res)
 		}
