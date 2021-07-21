@@ -8,6 +8,8 @@ import (
 )
 
 func (r *Router) hardwareList(c *gin.Context) {
+	pager := parsePagination(c)
+
 	var params HardwareListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -38,7 +40,7 @@ func (r *Router) hardwareList(c *gin.Context) {
 
 	dbFilter := params.dbFilter()
 
-	dbHW, err := r.Store.GetHardware(dbFilter)
+	dbHW, err := r.Store.GetHardware(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return

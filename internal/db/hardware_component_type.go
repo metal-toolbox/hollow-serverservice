@@ -37,7 +37,7 @@ func (s *Store) CreateHardwareComponentType(t *HardwareComponentType) error {
 
 // GetHardwareComponentTypes will return a list of hardware component types with the requested params, if no
 // filter is passed then it will return all hardware component types
-func (s *Store) GetHardwareComponentTypes(filter *HardwareComponentTypeFilter) ([]HardwareComponentType, error) {
+func (s *Store) GetHardwareComponentTypes(filter *HardwareComponentTypeFilter, pager *Pagination) ([]HardwareComponentType, error) {
 	var types []HardwareComponentType
 
 	d := s.db
@@ -46,7 +46,11 @@ func (s *Store) GetHardwareComponentTypes(filter *HardwareComponentTypeFilter) (
 		d = filter.apply(d)
 	}
 
-	if err := d.Find(&types).Error; err != nil {
+	if pager == nil {
+		pager = &Pagination{}
+	}
+
+	if err := d.Scopes(paginate(*pager)).Find(&types).Error; err != nil {
 		return nil, err
 	}
 

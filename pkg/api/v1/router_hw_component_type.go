@@ -34,11 +34,13 @@ func (r *Router) hardwareComponentTypeCreate(c *gin.Context) {
 }
 
 func (r *Router) hardwareComponentTypeList(c *gin.Context) {
+	pager := parsePagination(c)
+
 	dbFilter := &db.HardwareComponentTypeFilter{
 		Name: c.Query("name"),
 	}
 
-	dbTypes, err := r.Store.GetHardwareComponentTypes(dbFilter)
+	dbTypes, err := r.Store.GetHardwareComponentTypes(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return

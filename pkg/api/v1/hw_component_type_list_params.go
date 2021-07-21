@@ -4,6 +4,7 @@ import "net/url"
 
 // HardwareComponentTypeListParams allows you to filter the results
 type HardwareComponentTypeListParams struct {
+	pagination
 	Name string
 }
 

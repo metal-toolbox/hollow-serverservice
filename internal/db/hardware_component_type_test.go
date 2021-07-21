@@ -48,7 +48,7 @@ func TestGetHardwareComponentType(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetHardwareComponentTypes(tt.filter)
+		r, err := s.GetHardwareComponentTypes(tt.filter, nil)
 		assert.NoError(t, err, tt.testName)
 
 		var rIDs []uuid.UUID

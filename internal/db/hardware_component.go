@@ -20,5 +20,5 @@ type HardwareComponent struct {
 	HardwareComponentType   HardwareComponentType
 	HardwareID              uuid.UUID `gorm:"type:uuid;index"`
 	Hardware                Hardware
-	Attributes              []Attributes `gorm:"polymorphic:Entity;"`
+	Attributes              []Attributes `gorm:"polymorphic:Entity;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

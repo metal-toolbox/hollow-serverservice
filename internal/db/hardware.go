@@ -16,12 +16,11 @@ type Hardware struct {
 	ID                  uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid();"`
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
-	DeletedAt           gorm.DeletedAt `gorm:"index"`
 	Name                string
 	FacilityCode        string
-	Attributes          []Attributes `gorm:"polymorphic:Entity;"`
-	HardwareComponents  []HardwareComponent
-	VersionedAttributes []VersionedAttributes `gorm:"polymorphic:Entity;"`
+	Attributes          []Attributes          `gorm:"polymorphic:Entity;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	HardwareComponents  []HardwareComponent   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	VersionedAttributes []VersionedAttributes `gorm:"polymorphic:Entity;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // TableName overrides the table name used by Hardware to `hardware`
@@ -43,15 +42,14 @@ func (s *Store) CreateHardware(h *Hardware) error {
 	return s.db.Create(h).Error
 }
 
-// DeleteHardware will "delete" hardware in the datastore. Hardware is only soft deleted
-// so all records will still exists they just won't be accessible by default
+// DeleteHardware will "delete" hardware in the datastore.
 func (s *Store) DeleteHardware(h *Hardware) error {
 	return s.db.Delete(h).Error
 }
 
 // GetHardware will return a list of hardware with the requested params, if no
 // filter is passed then it will return all hardware
-func (s *Store) GetHardware(filter *HardwareFilter) ([]Hardware, error) {
+func (s *Store) GetHardware(filter *HardwareFilter, pager *Pagination) ([]Hardware, error) {
 	var hw []Hardware
 
 	d := hardwarePreload(s.db)
@@ -60,7 +58,11 @@ func (s *Store) GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 		d = filter.apply(d)
 	}
 
-	if err := d.Find(&hw).Error; err != nil {
+	if pager == nil {
+		pager = &Pagination{}
+	}
+
+	if err := d.Scopes(paginate(*pager)).Find(&hw).Error; err != nil {
 		return nil, err
 	}
 
