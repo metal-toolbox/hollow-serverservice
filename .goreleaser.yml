@@ -51,3 +51,5 @@ dockers:
     image_templates:
       - "quay.io/packet/{{.ProjectName}}:{{ .Tag }}"
     dockerfile: Dockerfile
+    extra_files:
+    - db/migrations
