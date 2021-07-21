@@ -11,7 +11,10 @@ import (
 	"gopkg.in/square/go-jose.v2/jwt"
 )
 
-const contextKeySubject = "jwt.subject"
+const (
+	contextKeySubject       = "jwt.subject"
+	expectedAuthHeaderParts = 2
+)
 
 // Middleware provides a gin compatible middleware that will authenticate JWT requests
 type Middleware struct {
@@ -47,7 +50,20 @@ func NewAuthMiddleware(aud, iss, jwksURI string) (*Middleware, error) {
 // AuthRequired provides a middleware that ensures a request has authentication
 func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeaderParts := strings.Split(c.Request.Header.Get("Authorization"), " ")
+		authHeader := c.Request.Header.Get("Authorization")
+
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "missing authorization header, expected format: \"Bearer token\""})
+			return
+		}
+
+		authHeaderParts := strings.SplitN(authHeader, " ", expectedAuthHeaderParts)
+
+		if !(len(authHeaderParts) == expectedAuthHeaderParts && strings.ToLower(authHeaderParts[0]) == "bearer") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "invalid authorization header, expected format: \"Bearer token\""})
+			return
+		}
+
 		rawToken := authHeaderParts[1]
 
 		tok, err := jwt.ParseSigned(rawToken)

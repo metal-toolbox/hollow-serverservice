@@ -195,3 +195,60 @@ func TestMiddlewareValidatesTokens(t *testing.T) {
 		})
 	}
 }
+
+func TestInvalidAuthHeader(t *testing.T) {
+	var testCases = []struct {
+		testName         string
+		authHeader       string
+		responseCode     int
+		responseContains string
+	}{
+		{
+			"no auth header",
+			"",
+			http.StatusUnauthorized,
+			"missing authorization header",
+		},
+		{
+			"wrong format",
+			"notbearer token",
+			http.StatusUnauthorized,
+			"invalid authorization header",
+		},
+		{
+			"invalid token",
+			"bearer token",
+			http.StatusUnauthorized,
+			"unable to parse auth token",
+		},
+		{
+			"token with no kid",
+			"bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJpc3N1ZXIiLCJzY29wZXMiOlsiczEiLCJzMiJdLCJzdWIiOiJzdWJqZWN0In0.UDDtyK9gC9kyHltcP7E_XODsnqcJWZIiXeGmSAH7SE9YKy3N0KSfFIN85dCNjTfs6zvy4rkrCHzLB7uKAtzMearh3q7jL4nxbhUMhlUcs_9QDVoN4q_j58XmRqBqRnBk-RmDu9TgcV8RbErP4awpIhwWb5UU-hR__4_iNbHdKqwSUPDKYGlf5eicuiYrPxH8mxivk4LRD-vyRdBZZKBt0XIDnEU4TdcNCzAXojkftqcFWYsczwS8R4JHd1qYsMyiaWl4trdHZkO4QkeLe34z4ZAaPMt3wE-gcU-VoqYTGxz-K3Le2VaZ0r3j_z6bOInsv0yngC_cD1dCXMyQJWnWjQ",
+			http.StatusUnauthorized,
+			"unable to parse auth token header",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.testName, func(t *testing.T) {
+			jwksURI := ginjwt.TestHelperJWKSProvider()
+			authMW, err := ginjwt.NewAuthMiddleware("aud", "iss", jwksURI)
+			require.NoError(t, err)
+
+			r := gin.New()
+			r.Use(authMW.AuthRequired([]string{"auth"}))
+			r.GET("/", func(c *gin.Context) {
+				c.JSON(http.StatusOK, "ok")
+			})
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "http://test/", nil)
+
+			req.Header.Set("Authorization", tt.authHeader)
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.responseCode, w.Code)
+			assert.Contains(t, w.Body.String(), tt.responseContains)
+		})
+	}
+}
