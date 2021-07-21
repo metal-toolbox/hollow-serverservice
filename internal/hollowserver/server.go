@@ -51,7 +51,7 @@ func (s *Server) setup() http.Handler {
 	r := gin.New()
 
 	// Health endpoints
-	// These are defined before prometheus zap so that they are not logged
+	// These are defined before zap so that they are not logged
 	r.GET("/healthz", s.livenessCheck)
 	r.GET("/healthz/liveness", s.livenessCheck)
 	r.GET("/healthz/readiness", s.readinessCheck)
