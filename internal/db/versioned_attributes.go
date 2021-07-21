@@ -40,7 +40,7 @@ func (s *Store) CreateVersionedAttributes(entity interface{}, a *VersionedAttrib
 	return s.db.Model(entity).Association("VersionedAttributes").Append(a)
 }
 
-// GetVersionedAttributes will return all the VersionedAttributes for a given Hardware UUID, the list will be sorted with the newest one
+// GetVersionedAttributes will return all the VersionedAttributes for a given server UUID, the list will be sorted with the newest one
 // first
 func (s *Store) GetVersionedAttributes(srvUUID uuid.UUID) ([]VersionedAttributes, error) {
 	var al []VersionedAttributes

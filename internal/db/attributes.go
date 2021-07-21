@@ -9,7 +9,7 @@ import (
 )
 
 // Attributes provide the ability to store namespaced values attached to an entity.
-// For example hardware could have attributes in the `com.equinixmetal.api` namespace
+// For example servers could have attributes in the `com.equinixmetal.api` namespace
 // that represents equinixmetal specific attributes that are stored in the API.
 // The namespace is meant to define who owns the schema and values.
 type Attributes struct {

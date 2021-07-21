@@ -21,12 +21,12 @@ type ServerComponentTypeServiceClient struct {
 	client *Client
 }
 
-// Create will attempt to create a hardware component type in Hollow
+// Create will attempt to create a server component type in Hollow
 func (c *ServerComponentTypeServiceClient) Create(ctx context.Context, t ServerComponentType) (*uuid.UUID, error) {
 	return c.client.post(ctx, serverComponentTypeEndpoint, t)
 }
 
-// List will return the hardware component types with optional params
+// List will return the server component types with optional params
 func (c *ServerComponentTypeServiceClient) List(ctx context.Context, params *ServerComponentTypeListParams) ([]ServerComponentType, error) {
 	var ct []ServerComponentType
 	if err := c.client.list(ctx, serverComponentTypeEndpoint, params, &ct); err != nil {

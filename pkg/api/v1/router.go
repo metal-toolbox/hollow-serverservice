@@ -61,13 +61,13 @@ func parsePagination(c *gin.Context) db.Pagination {
 }
 
 func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
-	hwUUID, err := uuid.Parse(c.Param("uuid"))
+	srvUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware uuid", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server uuid", "error": err.Error()})
 		return nil, err
 	}
 
-	hw, err := r.Store.FindServerByUUID(hwUUID)
+	srv, err := r.Store.FindServerByUUID(srvUUID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			notFoundResponse(c, err)
@@ -79,17 +79,17 @@ func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
 		return nil, err
 	}
 
-	return hw, nil
+	return srv, nil
 }
 
 func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*db.Server, error) {
-	hwUUID, err := uuid.Parse(c.Param("uuid"))
+	srvUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware uuid", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server uuid", "error": err.Error()})
 		return nil, err
 	}
 
-	hw, err := r.Store.FindOrCreateServerByUUID(hwUUID)
+	srv, err := r.Store.FindOrCreateServerByUUID(srvUUID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			notFoundResponse(c, err)
@@ -101,5 +101,5 @@ func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*db.Server, error
 		return nil, err
 	}
 
-	return hw, nil
+	return srv, nil
 }

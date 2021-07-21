@@ -8,13 +8,6 @@ import (
 	"moul.io/zapgorm2"
 )
 
-// Tabler provides an interface for GORM that allows use to change the name a table
-// uses. For example by default Hardware gets stored in a table called "hardwares"
-// but we want to store it in one called "hardware".
-type Tabler interface {
-	TableName() string
-}
-
 // Store provides access to the underlaying datastore
 type Store struct {
 	db *gorm.DB

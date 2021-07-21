@@ -14,7 +14,7 @@ func TestCreateAttributes(t *testing.T) {
 
 	var testCases = []struct {
 		testName    string
-		hw          *db.Attributes
+		a           *db.Attributes
 		expectError bool
 		errorMsg    string
 	}{
@@ -23,7 +23,7 @@ func TestCreateAttributes(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		err := s.CreateAttributes(tt.hw)
+		err := s.CreateAttributes(tt.a)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

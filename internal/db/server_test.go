@@ -14,16 +14,15 @@ func TestCreateServer(t *testing.T) {
 
 	var testCases = []struct {
 		testName    string
-		hw          db.Server
+		srv         db.Server
 		expectError bool
 		errorMsg    string
 	}{
-		// {"missing name", db.Server{}, true, "validation failed: facility is a required hardware attribute"},
 		{"happy path", db.Server{FacilityCode: "TEST1"}, false, ""},
 	}
 
 	for _, tt := range testCases {
-		err := s.CreateServer(&tt.hw)
+		err := s.CreateServer(&tt.srv)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -52,13 +51,13 @@ func TestFindServerByUUID(t *testing.T) {
 		errorMsg    string
 	}{
 		{
-			"happy path - existing hardware",
+			"happy path - existing server",
 			db.FixtureServerDory.ID,
 			false,
 			"",
 		},
 		{
-			"happy path - hardware not found",
+			"happy path - server not found",
 			uuid.New(),
 			true,
 			"something not found",
@@ -91,13 +90,13 @@ func TestFindOrCreateServerByUUID(t *testing.T) {
 		errorMsg    string
 	}{
 		{
-			"happy path - existing hardware",
+			"happy path - existing server",
 			db.FixtureServerDory.ID,
 			false,
 			"",
 		},
 		{
-			"happy path - hardware not found, new one created",
+			"happy path - server not found, new one created",
 			uuid.New(),
 			false,
 			"",
@@ -293,7 +292,7 @@ func TestGetServer(t *testing.T) {
 			var rIDs []uuid.UUID
 			for _, h := range r {
 				rIDs = append(rIDs, h.ID)
-				// Ensure preload works. All Fixture data has 2 hardware components and 2 attributes
+				// Ensure preload works. All Fixture data has 2 server components and 2 attributes
 				assert.Len(t, h.ServerComponents, 2, tt.testName)
 				assert.Len(t, h.Attributes, 2, tt.testName)
 				// Nemo has two versioned attributes but only the most recent in a namespace should preload

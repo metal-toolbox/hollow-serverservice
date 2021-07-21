@@ -229,8 +229,8 @@ func TestIntegrationServerList(t *testing.T) {
 
 		var actual []uuid.UUID
 
-		for _, hw := range r {
-			actual = append(actual, hw.UUID)
+		for _, srv := range r {
+			actual = append(actual, srv.UUID)
 		}
 
 		assert.ElementsMatch(t, tt.expectedUUIDs, actual)
@@ -318,14 +318,14 @@ func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 	_, err = s.Client.Server.Create(context.TODO(), testServer)
 	assert.NoError(t, err)
 
-	// Get the hardware back and ensure all the things we set are returned
-	rHW, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
+	// Get the server back and ensure all the things we set are returned
+	r, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
 	assert.NoError(t, err)
 
-	assert.Equal(t, rHW.FacilityCode, "int-test")
+	assert.Equal(t, r.FacilityCode, "int-test")
 
-	assert.Len(t, rHW.Components, 1)
-	hc := rHW.Components[0]
+	assert.Len(t, r.Components, 1)
+	hc := r.Components[0]
 	assert.Equal(t, "Intel Xeon 123", hc.Name)
 	assert.Equal(t, "Xeon 123", hc.Model)
 	assert.Equal(t, "Intel", hc.Vendor)
@@ -337,13 +337,13 @@ func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 	assert.Equal(t, "hollow.integration.test", hc.Attributes[0].Namespace)
 	assert.Equal(t, json.RawMessage([]byte(`{"firmware":1}`)), hc.Attributes[0].Data)
 
-	assert.Len(t, rHW.Attributes, 1)
-	assert.Equal(t, "hollow.integration.test", rHW.Attributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), rHW.Attributes[0].Data)
+	assert.Len(t, r.Attributes, 1)
+	assert.Equal(t, "hollow.integration.test", r.Attributes[0].Namespace)
+	assert.Equal(t, json.RawMessage([]byte(`{"plan_type":"large"}`)), r.Attributes[0].Data)
 
-	assert.Len(t, rHW.VersionedAttributes, 1)
-	assert.Equal(t, "hollow.integration.settings", rHW.VersionedAttributes[0].Namespace)
-	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), rHW.VersionedAttributes[0].Data)
+	assert.Len(t, r.VersionedAttributes, 1)
+	assert.Equal(t, "hollow.integration.settings", r.VersionedAttributes[0].Namespace)
+	assert.Equal(t, json.RawMessage([]byte(`{"setting":"enabled"}`)), r.VersionedAttributes[0].Data)
 }
 
 func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {

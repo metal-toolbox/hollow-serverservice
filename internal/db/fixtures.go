@@ -76,8 +76,8 @@ func (s *Store) setupTestData() error {
 		return err
 	}
 
-	for _, hw := range FixtureServer {
-		if err := s.CreateServer(&hw); err != nil {
+	for _, srv := range FixtureServer {
+		if err := s.CreateServer(&srv); err != nil {
 			return err
 		}
 	}
