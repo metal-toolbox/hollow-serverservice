@@ -8,6 +8,7 @@ import (
 
 // HardwareListParams allows you to filter the results
 type HardwareListParams struct {
+	pagination
 	FacilityCode                 string `form:"facility-code"`
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams

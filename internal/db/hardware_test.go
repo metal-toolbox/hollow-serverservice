@@ -282,7 +282,7 @@ func TestGetHardware(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetHardware(tt.filter)
+		r, err := s.GetHardware(tt.filter, nil)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -300,6 +300,81 @@ func TestGetHardware(t *testing.T) {
 				if h.ID == db.FixtureHardwareNemo.ID {
 					assert.Len(t, h.VersionedAttributes, 1, tt.testName)
 				}
+			}
+
+			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
+		}
+	}
+}
+
+func TestGetHardwarePagination(t *testing.T) {
+	s := db.DatabaseTest(t)
+
+	var testCases = []struct {
+		testName      string
+		pager         db.Pagination
+		expectedUUIDs []uuid.UUID
+		expectError   bool
+		errorMsg      string
+	}{
+		{
+			"limit 1 page 1",
+			db.Pagination{
+				Limit: 1,
+				Page:  1,
+				Sort:  "created_at DESC",
+			},
+			[]uuid.UUID{db.FixtureHardwareMarlin.ID},
+			false,
+			"",
+		},
+		{
+			"limit 1 page 2",
+			db.Pagination{
+				Limit: 1,
+				Page:  2,
+				Sort:  "created_at DESC",
+			},
+			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			false,
+			"",
+		},
+		{
+			"limit 1 page 3",
+			db.Pagination{
+				Limit: 1,
+				Page:  3,
+				Sort:  "created_at DESC",
+			},
+			[]uuid.UUID{db.FixtureHardwareNemo.ID},
+			false,
+			"",
+		},
+		{
+			"limit 1 page 4",
+			db.Pagination{
+				Limit: 1,
+				Page:  4,
+				Sort:  "created_at DESC",
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
+	}
+
+	for _, tt := range testCases {
+		r, err := s.GetHardware(nil, &tt.pager)
+
+		if tt.expectError {
+			assert.Error(t, err, tt.testName)
+			assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
+		} else {
+			assert.NoError(t, err)
+
+			var rIDs []uuid.UUID
+			for _, h := range r {
+				rIDs = append(rIDs, h.ID)
 			}
 
 			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)

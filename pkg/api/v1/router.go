@@ -3,6 +3,7 @@ package hollow
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -30,6 +31,33 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 
 	rg.GET("/hardware-component-types", amw.AuthRequired([]string{"read"}), r.hardwareComponentTypeList)
 	rg.POST("/hardware-component-types", amw.AuthRequired([]string{"create", "write"}), r.hardwareComponentTypeCreate)
+}
+
+func parsePagination(c *gin.Context) db.Pagination {
+	// Initializing default
+	limit := db.DefaultPaginationSize
+	page := 1
+	sort := ""
+	query := c.Request.URL.Query()
+
+	for key, value := range query {
+		queryValue := value[len(value)-1]
+
+		switch key {
+		case "limit":
+			limit, _ = strconv.Atoi(queryValue)
+		case "page":
+			page, _ = strconv.Atoi(queryValue)
+		case "sort":
+			sort = queryValue
+		}
+	}
+
+	return db.Pagination{
+		Limit: limit,
+		Page:  page,
+		Sort:  sort,
+	}
 }
 
 func (r *Router) loadHardwareFromParams(c *gin.Context) (*db.Hardware, error) {

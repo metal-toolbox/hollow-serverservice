@@ -53,7 +53,8 @@ func TestIntegrationHardwareList(t *testing.T) {
 
 		res, err := s.Client.Hardware.List(ctx, nil)
 		if !expectError {
-			require.Len(t, res, 3)
+			require.NoError(t, err)
+			assert.Len(t, res, 3)
 		}
 
 		return err
