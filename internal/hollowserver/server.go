@@ -49,6 +49,13 @@ func (s *Server) setup() http.Handler {
 
 	// Setup default gin router
 	r := gin.New()
+
+	// Health endpoints
+	// These are defined before prometheus zap so that they are not logged
+	r.GET("/healthz", s.livenessCheck)
+	r.GET("/healthz/liveness", s.livenessCheck)
+	r.GET("/healthz/readiness", s.readinessCheck)
+
 	p := ginprometheus.NewPrometheus("gin")
 
 	v1Rtr := v1api.Router{Store: s.Store, AuthMW: authMW}
@@ -81,11 +88,6 @@ func (s *Server) setup() http.Handler {
 	{
 		v1Rtr.Routes(v1)
 	}
-
-	// Health endpoints
-	r.GET("/healthz", s.livenessCheck)
-	r.GET("/healthz/liveness", s.livenessCheck)
-	r.GET("/healthz/readiness", s.readinessCheck)
 
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "invalid request - route not found"})
