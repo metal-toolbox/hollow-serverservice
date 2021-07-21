@@ -60,7 +60,7 @@ func cleanDB() {
 	// Make sure the deletion goes in order so you don't break the databases foreign key constraints
 	d.Delete(&Attributes{})
 	d.Delete(&VersionedAttributes{})
-	d.Delete(&HardwareComponent{})
-	d.Delete(&HardwareComponentType{})
-	d.Unscoped().Delete(&Hardware{})
+	d.Delete(&ServerComponent{})
+	d.Delete(&ServerComponentType{})
+	d.Unscoped().Delete(&Server{})
 }

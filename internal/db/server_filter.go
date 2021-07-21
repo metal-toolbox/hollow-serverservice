@@ -2,15 +2,15 @@ package db
 
 import "gorm.io/gorm"
 
-// HardwareFilter provides the ability to filter to hardware that is returned for
-// a query
-type HardwareFilter struct {
+// ServerFilter provides the ability to filter the list of servers that are
+// returned for a query
+type ServerFilter struct {
 	FacilityCode               string
 	AttributesFilters          []AttributesFilter
 	VersionedAttributesFilters []AttributesFilter
 }
 
-func (f *HardwareFilter) apply(d *gorm.DB) *gorm.DB {
+func (f *ServerFilter) apply(d *gorm.DB) *gorm.DB {
 	if f.FacilityCode != "" {
 		d = d.Where("facility_code = ?", f.FacilityCode)
 	}

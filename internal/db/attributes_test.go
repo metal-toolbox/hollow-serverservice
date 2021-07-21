@@ -19,7 +19,7 @@ func TestCreateAttributes(t *testing.T) {
 		errorMsg    string
 	}{
 		{"missing namespace", &db.Attributes{}, true, "validation failed: namespace is a required attributes attribute"},
-		{"happy path", &db.Attributes{EntityID: db.FixtureHardwareDory.ID, EntityType: "hardware", Namespace: "hollow.test", Values: datatypes.JSON([]byte(`{"value": "set"}`))}, false, ""},
+		{"happy path", &db.Attributes{EntityID: db.FixtureServerDory.ID, EntityType: "hardware", Namespace: "hollow.test", Values: datatypes.JSON([]byte(`{"value": "set"}`))}, false, ""},
 	}
 
 	for _, tt := range testCases {

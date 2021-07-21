@@ -13,11 +13,11 @@ var apiVersion = "v1"
 
 // Client has the ability to talk to a hollow server running at the given URI
 type Client struct {
-	url                   string
-	authToken             string
-	httpClient            Doer
-	Hardware              HardwareService
-	HardwareComponentType HardwareComponentTypeService
+	url                 string
+	authToken           string
+	httpClient          Doer
+	Server              ServerService
+	ServerComponentType ServerComponentTypeService
 }
 
 // Doer is an interface for an HTTP client that can make requests
@@ -46,8 +46,8 @@ func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
 		c.httpClient = http.DefaultClient
 	}
 
-	c.Hardware = &HardwareServiceClient{client: c}
-	c.HardwareComponentType = &HardwareComponentTypeServiceClient{client: c}
+	c.Server = &ServerServiceClient{client: c}
+	c.ServerComponentType = &ServerComponentTypeServiceClient{client: c}
 
 	return c, nil
 }

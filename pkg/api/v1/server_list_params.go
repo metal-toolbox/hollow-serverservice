@@ -6,15 +6,15 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-// HardwareListParams allows you to filter the results
-type HardwareListParams struct {
+// ServerListParams allows you to filter the results
+type ServerListParams struct {
 	pagination
 	FacilityCode                 string `form:"facility-code"`
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams
 }
 
-func (p *HardwareListParams) setQuery(q url.Values) {
+func (p *ServerListParams) setQuery(q url.Values) {
 	if p == nil {
 		return
 	}
@@ -27,8 +27,8 @@ func (p *HardwareListParams) setQuery(q url.Values) {
 	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
 }
 
-func (p *HardwareListParams) dbFilter() *db.HardwareFilter {
-	dbF := &db.HardwareFilter{
+func (p *ServerListParams) dbFilter() *db.ServerFilter {
+	dbF := &db.ServerFilter{
 		FacilityCode: p.FacilityCode,
 	}
 

@@ -38,9 +38,9 @@ func (s *Store) CreateVersionedAttributes(entity interface{}, a *VersionedAttrib
 
 // GetVersionedAttributes will return all the VersionedAttributes for a given Hardware UUID, the list will be sorted with the newest one
 // first
-func (s *Store) GetVersionedAttributes(hwUUID uuid.UUID) ([]VersionedAttributes, error) {
+func (s *Store) GetVersionedAttributes(srvUUID uuid.UUID) ([]VersionedAttributes, error) {
 	var al []VersionedAttributes
-	if err := s.db.Where(&VersionedAttributes{EntityType: "hardware", EntityID: hwUUID}).Order("created_at desc").Find(&al).Error; err != nil {
+	if err := s.db.Where(&VersionedAttributes{EntityType: "servers", EntityID: srvUUID}).Order("created_at desc").Find(&al).Error; err != nil {
 		return nil, err
 	}
 

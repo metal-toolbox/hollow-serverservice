@@ -8,11 +8,11 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-func (r *Router) hardwareComponentTypeCreate(c *gin.Context) {
-	var t HardwareComponentType
+func (r *Router) serverComponentTypeCreate(c *gin.Context) {
+	var t ServerComponentType
 	if err := c.ShouldBindJSON(&t); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid hardware component type",
+			"message": "invalid server component type",
 			"error":   err.Error(),
 		})
 
@@ -21,11 +21,11 @@ func (r *Router) hardwareComponentTypeCreate(c *gin.Context) {
 
 	dbT, err := t.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid hardware component type", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server component type", "error": err.Error()})
 		return
 	}
 
-	if err := r.Store.CreateHardwareComponentType(dbT); err != nil {
+	if err := r.Store.CreateServerComponentType(dbT); err != nil {
 		dbFailureResponse(c, err)
 		return
 	}
@@ -33,23 +33,23 @@ func (r *Router) hardwareComponentTypeCreate(c *gin.Context) {
 	createdResponse(c, &dbT.ID)
 }
 
-func (r *Router) hardwareComponentTypeList(c *gin.Context) {
+func (r *Router) serverComponentTypeList(c *gin.Context) {
 	pager := parsePagination(c)
 
-	dbFilter := &db.HardwareComponentTypeFilter{
+	dbFilter := &db.ServerComponentTypeFilter{
 		Name: c.Query("name"),
 	}
 
-	dbTypes, err := r.Store.GetHardwareComponentTypes(dbFilter, &pager)
+	dbTypes, err := r.Store.GetServerComponentTypes(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
 	}
 
-	types := []HardwareComponentType{}
+	types := []ServerComponentType{}
 
 	for _, dbT := range dbTypes {
-		t := HardwareComponentType{}
+		t := ServerComponentType{}
 		if err := t.fromDBModel(dbT); err != nil {
 			failedConvertingToVersioned(c, err)
 			return

@@ -64,8 +64,8 @@ func (s *Store) Migrate() error {
 	return s.db.AutoMigrate(
 		&Attributes{},
 		&VersionedAttributes{},
-		&Hardware{},
-		&HardwareComponent{},
-		&HardwareComponentType{},
+		&Server{},
+		&ServerComponent{},
+		&ServerComponentType{},
 	)
 }

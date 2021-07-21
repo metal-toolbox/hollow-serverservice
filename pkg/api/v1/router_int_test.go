@@ -17,12 +17,12 @@ import (
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
 
-type testServer struct {
+type integrationServer struct {
 	h      http.Handler
 	Client *hollow.Client
 }
 
-func serverTest(t *testing.T) *testServer {
+func serverTest(t *testing.T) *integrationServer {
 	jwksURI := ginjwt.TestHelperJWKSProvider()
 
 	store := db.DatabaseTest(t)
@@ -38,7 +38,7 @@ func serverTest(t *testing.T) *testServer {
 	}
 	s := hs.NewServer()
 
-	ts := &testServer{
+	ts := &integrationServer{
 		h: s.Handler,
 	}
 
@@ -50,7 +50,7 @@ func serverTest(t *testing.T) *testServer {
 	return ts
 }
 
-func (s *testServer) Do(req *http.Request) (*http.Response, error) {
+func (s *integrationServer) Do(req *http.Request) (*http.Response, error) {
 	// if the context is expired return the error, used for timeout tests
 	if err := req.Context().Err(); err != nil {
 		return nil, err
