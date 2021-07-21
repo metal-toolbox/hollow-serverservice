@@ -12,6 +12,7 @@ import (
 // details of the physical hardware
 type Hardware struct {
 	UUID                uuid.UUID             `json:"uuid"`
+	Name                string                `json:"name"`
 	FacilityCode        string                `json:"facility"`
 	Attributes          []Attributes          `json:"attributes"`
 	HardwareComponents  []HardwareComponent   `json:"hardware_components"`
@@ -25,6 +26,7 @@ func (h *Hardware) fromDBModel(dbH db.Hardware) error {
 	var err error
 
 	h.UUID = dbH.ID
+	h.Name = dbH.Name
 	h.FacilityCode = dbH.FacilityCode
 	h.CreatedAt = dbH.CreatedAt
 	h.UpdatedAt = dbH.UpdatedAt
@@ -54,6 +56,7 @@ func (h *Hardware) fromDBModel(dbH db.Hardware) error {
 func (h *Hardware) toDBModel() (*db.Hardware, error) {
 	dbC := &db.Hardware{
 		ID:           h.UUID,
+		Name:         h.Name,
 		FacilityCode: h.FacilityCode,
 	}
 

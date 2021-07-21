@@ -17,6 +17,7 @@ type Hardware struct {
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	DeletedAt           gorm.DeletedAt `gorm:"index"`
+	Name                string
 	FacilityCode        string
 	Attributes          []Attributes `gorm:"polymorphic:Entity;"`
 	HardwareComponents  []HardwareComponent
@@ -66,9 +67,9 @@ func (s *Store) GetHardware(filter *HardwareFilter) ([]Hardware, error) {
 	return hw, nil
 }
 
-// GetHardwareByUUID will return an existing hardware instance if one
+// FindHardwareByUUID will return an existing hardware instance if one
 // already exists for the given UUID.
-func (s *Store) GetHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
+func (s *Store) FindHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
 	var hw Hardware
 
 	err := hardwarePreload(s.db).First(&hw, Hardware{ID: hwUUID}).Error
@@ -77,6 +78,19 @@ func (s *Store) GetHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
 			return nil, ErrNotFound
 		}
 
+		return nil, err
+	}
+
+	return &hw, nil
+}
+
+// FindOrCreateHardwareByUUID will return an existing hardware instance if one
+// already exists for the given UUID, if one doesn't exist a new one will be created
+func (s *Store) FindOrCreateHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) {
+	var hw Hardware
+
+	err := hardwarePreload(s.db).FirstOrCreate(&hw, Hardware{ID: hwUUID}).Error
+	if err != nil {
 		return nil, err
 	}
 

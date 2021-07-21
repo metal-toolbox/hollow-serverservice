@@ -83,16 +83,16 @@ func TestIntegrationHardwareList(t *testing.T) {
 			"",
 		},
 		{
-			"search by age greater than 1 and facility code",
+			"search by age greater than 11 and facility code",
 			&hollow.HardwareListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
 						Namespace:        db.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
-						GreaterThanValue: 1,
+						GreaterThanValue: 11,
 					},
 				},
-				FacilityCode: "Dory",
+				FacilityCode: "Ocean",
 			},
 			[]uuid.UUID{db.FixtureHardwareDory.ID},
 			false,
@@ -101,9 +101,9 @@ func TestIntegrationHardwareList(t *testing.T) {
 		{
 			"search by facility",
 			&hollow.HardwareListParams{
-				FacilityCode: "Dory",
+				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
 			false,
 			"",
 		},
@@ -353,7 +353,7 @@ func TestIntegrationHardwareServiceCreateVersionedAttributes(t *testing.T) {
 
 		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Values: json.RawMessage([]byte(`{"test":"integration"}`))}
 
-		res, err := s.Client.Hardware.CreateVersionedAttributes(ctx, db.FixtureHardwareDory.ID, va)
+		res, err := s.Client.Hardware.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
 			assert.NotNil(t, res)
 		}

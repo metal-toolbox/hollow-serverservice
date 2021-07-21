@@ -16,7 +16,7 @@ var (
 	FixtureHCTFins = HardwareComponentType{ID: uuid.New(), Name: "Fins"}
 
 	FixtureAttributesNemoMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "Fishbowl", "age": 6}`))}
-	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 10}`))}
+	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 12}`))}
 	FixtureAttributesMarlinMetadata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Values: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 10}`))}
 
 	FixtureAttributesNemoOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Values: datatypes.JSON([]byte(`{"enabled": true, "type": "clown", "lastUpdated": 1624960800, "nested": {"tag": "finding-nemo", "number": 1}}`))}
@@ -32,21 +32,24 @@ var (
 
 	FixtureHardwareNemo = Hardware{
 		ID:                 uuid.New(),
-		FacilityCode:       "Nemo",
+		Name:               "Nemo",
+		FacilityCode:       "Sydney",
 		Attributes:         []Attributes{FixtureAttributesNemoMetadata, FixtureAttributesNemoOtherdata},
 		HardwareComponents: []HardwareComponent{FixtureHCNemoLeftFin, FixtureHCNemoRightFin},
 	}
 
 	FixtureHardwareDory = Hardware{
 		ID:                 uuid.New(),
-		FacilityCode:       "Dory",
+		Name:               "Dory",
+		FacilityCode:       "Ocean",
 		Attributes:         []Attributes{FixtureAttributesDoryMetadata, FixtureAttributesDoryOtherdata},
 		HardwareComponents: []HardwareComponent{FixtureHCDoryLeftFin, FixtureHCDoryRightFin},
 	}
 
 	FixtureHardwareMarlin = Hardware{
 		ID:                 uuid.New(),
-		FacilityCode:       "Marlin",
+		Name:               "Marlin",
+		FacilityCode:       "Ocean",
 		Attributes:         []Attributes{FixtureAttributesMarlinMetadata, FixtureAttributesMarlinOtherdata},
 		HardwareComponents: []HardwareComponent{FixtureHCMarlinLeftFin, FixtureHCMarlinRightFin},
 	}

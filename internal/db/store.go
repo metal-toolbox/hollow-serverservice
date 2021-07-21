@@ -40,15 +40,9 @@ func NewPostgresStore(uri string, lg *zap.Logger) (*Store, error) {
 		return nil, err
 	}
 
-	s := &Store{
+	return &Store{
 		db: db,
-	}
-
-	if err := s.migrate(); err != nil {
-		return nil, err
-	}
-
-	return s, nil
+	}, nil
 }
 
 // Ping checks to ensure that the database is available and processing queries
@@ -65,7 +59,8 @@ func (s *Store) Ping() bool {
 	return sqlDB.Ping() == nil
 }
 
-func (s *Store) migrate() error {
+// Migrate will migrate the database to ensure the schema matches what is expected
+func (s *Store) Migrate() error {
 	return s.db.AutoMigrate(
 		&Attributes{},
 		&VersionedAttributes{},

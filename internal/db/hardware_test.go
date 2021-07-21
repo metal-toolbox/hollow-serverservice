@@ -66,7 +66,7 @@ func TestFindHardwareByUUID(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		res, err := s.GetHardwareByUUID(tt.searchUUID)
+		res, err := s.FindHardwareByUUID(tt.searchUUID)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -75,6 +75,46 @@ func TestFindHardwareByUUID(t *testing.T) {
 			assert.NoError(t, err, tt.testName)
 			assert.NotNil(t, res, tt.testName)
 			assert.NotNil(t, res.CreatedAt, tt.testName)
+			assert.Equal(t, tt.searchUUID.String(), res.ID.String())
+		}
+	}
+}
+
+func TestFindOrCreateHardwareByUUID(t *testing.T) {
+	s := db.DatabaseTest(t)
+
+	var testCases = []struct {
+		testName   string
+		searchUUID uuid.UUID
+
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			"happy path - existing hardware",
+			db.FixtureHardwareDory.ID,
+			false,
+			"",
+		},
+		{
+			"happy path - hardware not found, new one created",
+			uuid.New(),
+			false,
+			"",
+		},
+	}
+
+	for _, tt := range testCases {
+		res, err := s.FindOrCreateHardwareByUUID(tt.searchUUID)
+
+		if tt.expectError {
+			assert.Error(t, err, tt.testName)
+			assert.Errorf(t, err, tt.errorMsg, tt.testName)
+		} else {
+			assert.NoError(t, err, tt.testName)
+			assert.NotNil(t, res, tt.testName)
+			assert.NotNil(t, res.CreatedAt, tt.testName)
+			assert.Equal(t, tt.searchUUID.String(), res.ID.String())
 		}
 	}
 }
@@ -105,16 +145,16 @@ func TestGetHardware(t *testing.T) {
 			"",
 		},
 		{
-			"search by age greater than 1 and facility code",
+			"search by age greater than 11 and facility code",
 			&db.HardwareFilter{
 				AttributesFilters: []db.AttributesFilter{
 					{
 						Namespace:        db.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
-						GreaterThanValue: 1,
+						GreaterThanValue: 11,
 					},
 				},
-				FacilityCode: "Dory",
+				FacilityCode: "Ocean",
 			},
 			[]uuid.UUID{db.FixtureHardwareDory.ID},
 			false,
@@ -123,9 +163,9 @@ func TestGetHardware(t *testing.T) {
 		{
 			"search by facility",
 			&db.HardwareFilter{
-				FacilityCode: "Dory",
+				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureHardwareDory.ID},
+			[]uuid.UUID{db.FixtureHardwareDory.ID, db.FixtureHardwareMarlin.ID},
 			false,
 			"",
 		},
