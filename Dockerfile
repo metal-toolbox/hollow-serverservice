@@ -8,4 +8,5 @@ RUN apk add --no-cache ca-certificates
 COPY hollow /hollow
 
 # Run the web service on container startup.
-CMD ["/hollow", "serve"]
+ENTRYPOINT ["/hollow"]
+CMD ["serve"]
