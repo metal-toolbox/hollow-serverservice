@@ -75,6 +75,46 @@ func TestFindHardwareByUUID(t *testing.T) {
 			assert.NoError(t, err, tt.testName)
 			assert.NotNil(t, res, tt.testName)
 			assert.NotNil(t, res.CreatedAt, tt.testName)
+			assert.Equal(t, tt.searchUUID.String(), res.ID.String())
+		}
+	}
+}
+
+func TestFindOrCreateHardwareByUUID(t *testing.T) {
+	s := db.DatabaseTest(t)
+
+	var testCases = []struct {
+		testName   string
+		searchUUID uuid.UUID
+
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			"happy path - existing hardware",
+			db.FixtureHardwareDory.ID,
+			false,
+			"",
+		},
+		{
+			"happy path - hardware not found, new one created",
+			uuid.New(),
+			false,
+			"",
+		},
+	}
+
+	for _, tt := range testCases {
+		res, err := s.FindOrCreateHardwareByUUID(tt.searchUUID)
+
+		if tt.expectError {
+			assert.Error(t, err, tt.testName)
+			assert.Errorf(t, err, tt.errorMsg, tt.testName)
+		} else {
+			assert.NoError(t, err, tt.testName)
+			assert.NotNil(t, res, tt.testName)
+			assert.NotNil(t, res.CreatedAt, tt.testName)
+			assert.Equal(t, tt.searchUUID.String(), res.ID.String())
 		}
 	}
 }
