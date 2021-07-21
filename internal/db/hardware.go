@@ -91,10 +91,6 @@ func (s *Store) FindOrCreateHardwareByUUID(hwUUID uuid.UUID) (*Hardware, error) 
 
 	err := hardwarePreload(s.db).FirstOrCreate(&hw, Hardware{ID: hwUUID}).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrNotFound
-		}
-
 		return nil, err
 	}
 
