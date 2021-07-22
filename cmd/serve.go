@@ -54,9 +54,8 @@ func serve() {
 			JWKSURI:  viper.GetString("jwt.jwksuri"),
 		},
 	}
-	s := hs.NewServer()
 
-	if err := s.ListenAndServe(); err != nil {
+	if err := hs.Run(); err != nil {
 		logger.Fatalw("failed starting server", "error", err)
 	}
 }

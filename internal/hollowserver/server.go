@@ -36,7 +36,7 @@ var (
 	writeTimeout = 20 * time.Second
 )
 
-func (s *Server) setup() http.Handler {
+func (s *Server) setup() *gin.Engine {
 	var (
 		authMW *ginjwt.Middleware
 		err    error
@@ -108,6 +108,15 @@ func (s *Server) NewServer() *http.Server {
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 	}
+}
+
+// Run will start the server listening on the specified address
+func (s *Server) Run() error {
+	if !s.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	return s.setup().Run(s.Listen)
 }
 
 // livenessCheck ensures that the server is up and responding
