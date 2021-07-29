@@ -278,6 +278,158 @@ func TestGetServer(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search by multiple components of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Right",
+					},
+					{
+						Model:  "Normal Fin",
+						Serial: "Left",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"ensure both components have to match when searching by multiple components of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Left",
+					},
+					{
+						Model:  "Normal Fin",
+						Serial: "Left",
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
+		{
+			"search by a single component and versioned attributes of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Right",
+					},
+				},
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a single component and versioned attributes of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Right",
+					},
+				},
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a single component and it's versioned attributes of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model: "A Lucky Fin",
+						VersionedAttributesFilters: []db.AttributesFilter{
+							{
+								Namespace:  db.FixtureNamespaceVersioned,
+								Keys:       []string{"something"},
+								EqualValue: "cool",
+							},
+						},
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a component and server versioned attributes of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model: "A Lucky Fin",
+						VersionedAttributesFilters: []db.AttributesFilter{
+							{
+								Namespace:  db.FixtureNamespaceVersioned,
+								Keys:       []string{"something"},
+								EqualValue: "cool",
+							},
+						},
+					},
+				},
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a component and server versioned attributes of the server",
+			&db.ServerFilter{
+				ComponentFilters: []db.ServerComponentFilter{
+					{
+						Model: "A Lucky Fin",
+						VersionedAttributesFilters: []db.AttributesFilter{
+							{
+								Namespace:  db.FixtureNamespaceVersioned,
+								Keys:       []string{"something"},
+								EqualValue: "cool",
+							},
+						},
+					},
+				},
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "old",
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {

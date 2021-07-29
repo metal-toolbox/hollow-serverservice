@@ -23,12 +23,33 @@ var (
 	FixtureAttributesDoryOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": true, "type": "blue-tang", "lastUpdated": 1624960400, "nested": {"tag": "finding-nemo", "number": 2}}`))}
 	FixtureAttributesMarlinOtherdata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": false, "type": "clown", "lastUpdated": 1624960000, "nested": {"tag": "finding-nemo", "number": 3}}`))}
 
-	FixtureSCNemoLeftFin    = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "Normal Fin", Serial: "Left"}
-	FixtureSCNemoRightFin   = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "A Lucky Fin", Serial: "Right"}
 	FixtureSCDoryLeftFin    = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "Normal Fin", Serial: "Left"}
 	FixtureSCDoryRightFin   = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "Normal Fin", Serial: "Right"}
 	FixtureSCMarlinLeftFin  = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "Normal Fin", Serial: "Left"}
 	FixtureSCMarlinRightFin = ServerComponent{ID: uuid.New(), ServerComponentTypeID: FixtureSCTFins.ID, Model: "Normal Fin", Serial: "Right"}
+
+	FixtureVersionedAttributesNemoRightFin = VersionedAttributes{
+		ID:        uuid.New(),
+		Namespace: FixtureNamespaceVersioned,
+		Data:      datatypes.JSON([]byte(`{"something": "cool"}`)),
+	}
+
+	FixtureSCNemoLeftFin = ServerComponent{
+		ID:                    uuid.New(),
+		ServerComponentTypeID: FixtureSCTFins.ID,
+		Model:                 "Normal Fin",
+		Serial:                "Left",
+	}
+
+	FixtureSCNemoRightFin = ServerComponent{
+		ID:                    uuid.New(),
+		ServerComponentTypeID: FixtureSCTFins.ID,
+		Model:                 "A Lucky Fin",
+		Serial:                "Right",
+		VersionedAttributes: []VersionedAttributes{
+			FixtureVersionedAttributesNemoRightFin,
+		},
+	}
 
 	FixtureServerNemo = Server{
 		ID:               uuid.New(),

@@ -21,10 +21,12 @@ func testDatastore() error {
 		return nil
 	}
 
-	l, err := zap.NewDevelopment()
-	if err != nil {
-		return err
-	}
+	// l, err := zap.NewDevelopment()
+	// if err != nil {
+	// 	return err
+	// }
+
+	l := zap.NewNop()
 
 	s, err := NewPostgresStore(TestDBURI, l)
 	if err != nil {

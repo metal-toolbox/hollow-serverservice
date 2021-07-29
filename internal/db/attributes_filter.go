@@ -26,6 +26,24 @@ func (f *AttributesFilter) applyVersioned(d *gorm.DB, i int) *gorm.DB {
 	return f.addFilter(d, joinName)
 }
 
+func (f *AttributesFilter) applyServerComponent(d *gorm.DB, componentJoin string, i int) *gorm.DB {
+	joinName := fmt.Sprintf("sc_attr_%d", i)
+	joinStr := fmt.Sprintf("JOIN attributes AS %s ON %s.server_component_id = %s.id", joinName, joinName, componentJoin)
+
+	d = d.Joins(joinStr)
+
+	return f.addFilter(d, joinName)
+}
+
+func (f *AttributesFilter) applyVersionedServerComponent(d *gorm.DB, componentJoin string, i int) *gorm.DB {
+	joinName := fmt.Sprintf("sc_attr_%d", i)
+	joinStr := fmt.Sprintf("JOIN versioned_attributes AS %s ON %s.server_component_id = %s.id AND %s.created_at=(select max(created_at) from versioned_attributes where server_component_id = %s.id AND namespace = ?)", joinName, joinName, componentJoin, joinName, componentJoin)
+
+	d = d.Joins(joinStr, f.Namespace)
+
+	return f.addFilter(d, joinName)
+}
+
 func (f *AttributesFilter) apply(d *gorm.DB, i int) *gorm.DB {
 	joinName := fmt.Sprintf("attr_%d", i)
 	joinStr := fmt.Sprintf("JOIN attributes AS %s ON %s.server_id = servers.id", joinName, joinName)

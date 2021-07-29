@@ -6,6 +6,7 @@ import "gorm.io/gorm"
 // returned for a query
 type ServerFilter struct {
 	FacilityCode               string
+	ComponentFilters           []ServerComponentFilter
 	AttributesFilters          []AttributesFilter
 	VersionedAttributesFilters []AttributesFilter
 }
@@ -24,6 +25,12 @@ func (f *ServerFilter) apply(d *gorm.DB) *gorm.DB {
 	if f.VersionedAttributesFilters != nil {
 		for i, af := range f.VersionedAttributesFilters {
 			d = af.applyVersioned(d, i)
+		}
+	}
+
+	if f.ComponentFilters != nil {
+		for i, cf := range f.ComponentFilters {
+			d = cf.apply(d, i)
 		}
 	}
 
