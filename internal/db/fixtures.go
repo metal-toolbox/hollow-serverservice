@@ -44,6 +44,8 @@ var (
 	FixtureSCNemoRightFin = ServerComponent{
 		ID:                    uuid.New(),
 		ServerComponentTypeID: FixtureSCTFins.ID,
+		Name:                  "My Lucky Fin",
+		Vendor:                "Barracuda",
 		Model:                 "A Lucky Fin",
 		Serial:                "Right",
 		VersionedAttributes: []VersionedAttributes{

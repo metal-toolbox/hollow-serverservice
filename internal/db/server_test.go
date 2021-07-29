@@ -301,6 +301,8 @@ func TestGetServer(t *testing.T) {
 			&db.ServerFilter{
 				ComponentFilters: []db.ServerComponentFilter{
 					{
+						Name:   "My Lucky Fin",
+						Vendor: "Barracuda",
 						Model:  "A Lucky Fin",
 						Serial: "Left",
 					},
