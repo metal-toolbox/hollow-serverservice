@@ -56,14 +56,14 @@ var (
 
 	FixtureVersionedAttributesOld = VersionedAttributes{
 		ID:        uuid.New(),
-		ServerID:  FixtureServerNemo.ID,
+		ServerID:  &FixtureServerNemo.ID,
 		Namespace: FixtureNamespaceVersioned,
 		Data:      datatypes.JSON([]byte(`{"name": "old"}`)),
 	}
 
 	FixtureVersionedAttributesNew = VersionedAttributes{
 		ID:        uuid.New(),
-		ServerID:  FixtureServerNemo.ID,
+		ServerID:  &FixtureServerNemo.ID,
 		Namespace: FixtureNamespaceVersioned,
 		Data:      datatypes.JSON([]byte(`{"name": "new"}`)),
 	}
