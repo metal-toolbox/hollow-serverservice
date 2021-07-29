@@ -1,6 +1,7 @@
 package db_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -432,9 +433,65 @@ func TestGetServer(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search for devices with a versioned attributes in a namespace with key that exists",
+			&db.ServerFilter{
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices with a versioned attributes in a namespace with key that doesn't exists",
+			&db.ServerFilter{
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+						Keys:      []string{"doesntExist"},
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
+		{
+			"search for devices that have versioned attributes in a namespace - no filters",
+			&db.ServerFilter{
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices that have attributes in a namespace - no filters",
+			&db.ServerFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceMetadata,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
+		fmt.Println(tt.testName)
+
 		r, err := s.GetServers(tt.filter, nil)
 
 		if tt.expectError {

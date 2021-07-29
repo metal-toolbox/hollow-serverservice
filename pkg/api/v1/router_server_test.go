@@ -372,22 +372,78 @@ func TestIntegrationServerList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search for devices with a versioned attributes in a namespace with key that exists",
+			&hollow.ServerListParams{
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices with a versioned attributes in a namespace with key that doesn't exists",
+			&hollow.ServerListParams{
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+						Keys:      []string{"doesntExist"},
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
+		{
+			"search for devices that have versioned attributes in a namespace - no filters",
+			&hollow.ServerListParams{
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices that have attributes in a namespace - no filters",
+			&hollow.ServerListParams{
+				AttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace: db.FixtureNamespaceMetadata,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
-		r, err := s.Client.Server.List(context.TODO(), tt.params)
-		if tt.expectError {
-			assert.NoError(t, err)
-			continue
-		}
+		t.Run(tt.testName, func(t *testing.T) {
+			r, err := s.Client.Server.List(context.TODO(), tt.params)
+			if tt.expectError {
+				assert.NoError(t, err)
+				return
+			}
 
-		var actual []uuid.UUID
+			var actual []uuid.UUID
 
-		for _, srv := range r {
-			actual = append(actual, srv.UUID)
-		}
+			for _, srv := range r {
+				actual = append(actual, srv.UUID)
+			}
 
-		assert.ElementsMatch(t, tt.expectedUUIDs, actual)
+			assert.ElementsMatch(t, tt.expectedUUIDs, actual)
+		})
 	}
 }
 
