@@ -38,7 +38,23 @@ func (r *Router) serverList(c *gin.Context) {
 
 	params.VersionedAttributeListParams = valp
 
-	dbFilter := params.dbFilter()
+	sclp, err := parseQueryServerComponentsListParams(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid server component list params",
+			"error":   err.Error(),
+		})
+	}
+
+	params.ComponentListParams = sclp
+
+	dbFilter, err := params.dbFilter()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid list params",
+			"error":   err.Error(),
+		})
+	}
 
 	dbSRV, err := r.Store.GetServers(dbFilter, &pager)
 	if err != nil {

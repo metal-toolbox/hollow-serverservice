@@ -10,6 +10,7 @@ import (
 type ServerListParams struct {
 	pagination
 	FacilityCode                 string `form:"facility-code"`
+	ComponentListParams          []ServerComponentListParams
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams
 }
@@ -25,34 +26,30 @@ func (p *ServerListParams) setQuery(q url.Values) {
 
 	encodeAttributesListParams(p.AttributeListParams, "attr", q)
 	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
+	encodeServerComponentListParams(p.ComponentListParams, q)
 }
 
-func (p *ServerListParams) dbFilter() *db.ServerFilter {
+func (p *ServerListParams) dbFilter() (*db.ServerFilter, error) {
+	var err error
+
 	dbF := &db.ServerFilter{
 		FacilityCode: p.FacilityCode,
 	}
 
-	for _, aF := range p.AttributeListParams {
-		a := db.AttributesFilter{
-			Namespace:        aF.Namespace,
-			Keys:             aF.Keys,
-			EqualValue:       aF.EqualValue,
-			LessThanValue:    aF.LessThanValue,
-			GreaterThanValue: aF.GreaterThanValue,
-		}
-		dbF.AttributesFilters = append(dbF.AttributesFilters, a)
+	dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, aF := range p.VersionedAttributeListParams {
-		a := db.AttributesFilter{
-			Namespace:        aF.Namespace,
-			Keys:             aF.Keys,
-			EqualValue:       aF.EqualValue,
-			LessThanValue:    aF.LessThanValue,
-			GreaterThanValue: aF.GreaterThanValue,
-		}
-		dbF.VersionedAttributesFilters = append(dbF.VersionedAttributesFilters, a)
+	dbF.VersionedAttributesFilters, err = convertToDBAttributesFilter(p.VersionedAttributeListParams)
+	if err != nil {
+		return nil, err
 	}
 
-	return dbF
+	dbF.ComponentFilters, err = convertToDBComponentFilter(p.ComponentListParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return dbF, nil
 }

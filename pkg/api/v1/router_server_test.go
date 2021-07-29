@@ -218,6 +218,160 @@ func TestIntegrationServerList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search by multiple components of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Right",
+					},
+					{
+						Model:  "Normal Fin",
+						Serial: "Left",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"ensure both components have to match when searching by multiple components of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Name:   "My Lucky Fin",
+						Vendor: "Barracuda",
+						Model:  "A Lucky Fin",
+						Serial: "Left",
+					},
+					{
+						Model:  "Normal Fin",
+						Serial: "Left",
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
+		{
+			"search by a single component and versioned attributes of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Right",
+					},
+				},
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a single component and versioned attributes of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Model:  "A Lucky Fin",
+						Serial: "Right",
+					},
+				},
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a single component and it's versioned attributes of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Model: "A Lucky Fin",
+						VersionedAttributeListParams: []hollow.AttributeListParams{
+							{
+								Namespace:  db.FixtureNamespaceVersioned,
+								Keys:       []string{"something"},
+								EqualValue: "cool",
+							},
+						},
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a component and server versioned attributes of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Model: "A Lucky Fin",
+						VersionedAttributeListParams: []hollow.AttributeListParams{
+							{
+								Namespace:  db.FixtureNamespaceVersioned,
+								Keys:       []string{"something"},
+								EqualValue: "cool",
+							},
+						},
+					},
+				},
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "new",
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search by a component and server versioned attributes of the server",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						Model: "A Lucky Fin",
+						VersionedAttributeListParams: []hollow.AttributeListParams{
+							{
+								Namespace:  db.FixtureNamespaceVersioned,
+								Keys:       []string{"something"},
+								EqualValue: "cool",
+							},
+						},
+					},
+				},
+				VersionedAttributeListParams: []hollow.AttributeListParams{
+					{
+						Namespace:  db.FixtureNamespaceVersioned,
+						Keys:       []string{"name"},
+						EqualValue: "old",
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
