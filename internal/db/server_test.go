@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -490,30 +489,30 @@ func TestGetServer(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		fmt.Println(tt.testName)
+		t.Run(tt.testName, func(t *testing.T) {
+			r, err := s.GetServers(tt.filter, nil)
 
-		r, err := s.GetServers(tt.filter, nil)
+			if tt.expectError {
+				assert.Error(t, err, tt.testName)
+				assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
+			} else {
+				assert.NoError(t, err)
 
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
-		} else {
-			assert.NoError(t, err)
-
-			var rIDs []uuid.UUID
-			for _, h := range r {
-				rIDs = append(rIDs, h.ID)
-				// Ensure preload works. All Fixture data has 2 server components and 2 attributes
-				assert.Len(t, h.ServerComponents, 2, tt.testName)
-				assert.Len(t, h.Attributes, 2, tt.testName)
-				// Nemo has two versioned attributes but only the most recent in a namespace should preload
-				if h.ID == db.FixtureServerNemo.ID {
-					assert.Len(t, h.VersionedAttributes, 1, tt.testName)
+				var rIDs []uuid.UUID
+				for _, h := range r {
+					rIDs = append(rIDs, h.ID)
+					// Ensure preload works. All Fixture data has 2 server components and 2 attributes
+					assert.Len(t, h.ServerComponents, 2, tt.testName)
+					assert.Len(t, h.Attributes, 2, tt.testName)
+					// Nemo has two versioned attributes but only the most recent in a namespace should preload
+					if h.ID == db.FixtureServerNemo.ID {
+						assert.Len(t, h.VersionedAttributes, 1, tt.testName)
+					}
 				}
-			}
 
-			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
-		}
+				assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
+			}
+		})
 	}
 }
 
