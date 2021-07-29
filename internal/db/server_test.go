@@ -432,31 +432,87 @@ func TestGetServer(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search for devices with a versioned attributes in a namespace with key that exists",
+			&db.ServerFilter{
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices with a versioned attributes in a namespace with key that doesn't exists",
+			&db.ServerFilter{
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+						Keys:      []string{"doesntExist"},
+					},
+				},
+			},
+			[]uuid.UUID{},
+			false,
+			"",
+		},
+		{
+			"search for devices that have versioned attributes in a namespace - no filters",
+			&db.ServerFilter{
+				VersionedAttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceVersioned,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices that have attributes in a namespace - no filters",
+			&db.ServerFilter{
+				AttributesFilters: []db.AttributesFilter{
+					{
+						Namespace: db.FixtureNamespaceMetadata,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetServers(tt.filter, nil)
+		t.Run(tt.testName, func(t *testing.T) {
+			r, err := s.GetServers(tt.filter, nil)
 
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
-		} else {
-			assert.NoError(t, err)
+			if tt.expectError {
+				assert.Error(t, err, tt.testName)
+				assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
+			} else {
+				assert.NoError(t, err)
 
-			var rIDs []uuid.UUID
-			for _, h := range r {
-				rIDs = append(rIDs, h.ID)
-				// Ensure preload works. All Fixture data has 2 server components and 2 attributes
-				assert.Len(t, h.ServerComponents, 2, tt.testName)
-				assert.Len(t, h.Attributes, 2, tt.testName)
-				// Nemo has two versioned attributes but only the most recent in a namespace should preload
-				if h.ID == db.FixtureServerNemo.ID {
-					assert.Len(t, h.VersionedAttributes, 1, tt.testName)
+				var rIDs []uuid.UUID
+				for _, h := range r {
+					rIDs = append(rIDs, h.ID)
+					// Ensure preload works. All Fixture data has 2 server components and 2 attributes
+					assert.Len(t, h.ServerComponents, 2, tt.testName)
+					assert.Len(t, h.Attributes, 2, tt.testName)
+					// Nemo has two versioned attributes but only the most recent in a namespace should preload
+					if h.ID == db.FixtureServerNemo.ID {
+						assert.Len(t, h.VersionedAttributes, 1, tt.testName)
+					}
 				}
-			}
 
-			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
-		}
+				assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
+			}
+		})
 	}
 }
 

@@ -108,7 +108,7 @@ func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Val
 			q.Set(keyPrefix+"less-than", fmt.Sprint(ap.LessThanValue))
 		case ap.GreaterThanValue != 0:
 			q.Set(keyPrefix+"greater-than", fmt.Sprint(ap.GreaterThanValue))
-		default:
+		case ap.EqualValue != "":
 			q.Set(keyPrefix+"equals", ap.EqualValue)
 		}
 	}

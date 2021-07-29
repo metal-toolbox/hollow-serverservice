@@ -73,8 +73,12 @@ func (f *AttributesFilter) addFilter(d *gorm.DB, joinName string) *gorm.DB {
 	case f.GreaterThanValue != 0:
 		queryArgs = append(queryArgs, f.GreaterThanValue)
 		d = d.Where(fmt.Sprintf("(%s)::int > ?", jsonKeys), queryArgs...)
-	default:
+	case f.EqualValue != nil && f.EqualValue != "":
 		d = d.Where(datatypes.JSONQuery(column).Equals(f.EqualValue, f.Keys...))
+	default:
+		if len(f.Keys) != 0 {
+			d = d.Where(datatypes.JSONQuery(column).HasKey(f.Keys...))
+		}
 	}
 
 	return d
