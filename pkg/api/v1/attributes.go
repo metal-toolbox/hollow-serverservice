@@ -76,6 +76,23 @@ func convertToDBAttributes(attrs []Attributes) ([]db.Attributes, error) {
 	return dbAttrs, nil
 }
 
+func convertToDBAttributesFilter(attrs []AttributeListParams) ([]db.AttributesFilter, error) {
+	dbFilter := []db.AttributesFilter{}
+
+	for _, aF := range attrs {
+		f := db.AttributesFilter{
+			Namespace:        aF.Namespace,
+			Keys:             aF.Keys,
+			EqualValue:       aF.EqualValue,
+			LessThanValue:    aF.LessThanValue,
+			GreaterThanValue: aF.GreaterThanValue,
+		}
+		dbFilter = append(dbFilter, f)
+	}
+
+	return dbFilter, nil
+}
+
 func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Values) {
 	for i, ap := range alp {
 		keyPrefix := fmt.Sprintf("%s_%d_", key, i)
