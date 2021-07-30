@@ -41,8 +41,11 @@ func (s *Store) CreateServerComponentType(t *ServerComponentType) error {
 
 // GetServerComponentTypes will return a list of server component types with the requested params, if no
 // filter is passed then it will return all server component types
-func (s *Store) GetServerComponentTypes(filter *ServerComponentTypeFilter, pager *Pagination) ([]ServerComponentType, error) {
-	var types []ServerComponentType
+func (s *Store) GetServerComponentTypes(filter *ServerComponentTypeFilter, pager *Pagination) ([]ServerComponentType, int64, error) {
+	var (
+		types []ServerComponentType
+		count int64
+	)
 
 	d := s.db
 
@@ -54,11 +57,11 @@ func (s *Store) GetServerComponentTypes(filter *ServerComponentTypeFilter, pager
 		pager = &Pagination{}
 	}
 
-	if err := d.Scopes(paginate(*pager)).Find(&types).Error; err != nil {
-		return nil, err
+	if err := d.Scopes(paginate(*pager)).Find(&types).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return types, nil
+	return types, count, nil
 }
 
 func (f *ServerComponentTypeFilter) apply(d *gorm.DB) *gorm.DB {

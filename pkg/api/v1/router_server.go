@@ -6,7 +6,11 @@ import (
 )
 
 func (r *Router) serverList(c *gin.Context) {
-	pager := parsePagination(c)
+	pager, err := parsePagination(c)
+	if err != nil {
+		badRequestResponse(c, "invalid pagination", err)
+		return
+	}
 
 	var params ServerListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
@@ -44,7 +48,7 @@ func (r *Router) serverList(c *gin.Context) {
 		return
 	}
 
-	dbSRV, err := r.Store.GetServers(dbFilter, &pager)
+	dbSRV, count, err := r.Store.GetServers(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
@@ -62,7 +66,21 @@ func (r *Router) serverList(c *gin.Context) {
 		srvs = append(srvs, s)
 	}
 
-	listResponse(c, srvs)
+	nextCursor := ""
+
+	sz := len(srvs)
+	if sz != 0 {
+		nextCursor = encodeCursor(srvs[sz-1].CreatedAt)
+	}
+
+	pd := paginationData{
+		pageCount:  len(srvs),
+		totalCount: count,
+		nextCursor: nextCursor,
+		pager:      pager,
+	}
+
+	listResponse(c, srvs, pd)
 }
 
 func (r *Router) serverGet(c *gin.Context) {
@@ -116,13 +134,19 @@ func (r *Router) serverDelete(c *gin.Context) {
 }
 
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
+	pager, err := parsePagination(c)
+	if err != nil {
+		badRequestResponse(c, "invalid pagination", err)
+		return
+	}
+
 	srvUUID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		badRequestResponse(c, "invalid server uuid", err)
 		return
 	}
 
-	dbVA, err := r.Store.GetVersionedAttributes(srvUUID)
+	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
@@ -140,7 +164,21 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 		va = append(va, a)
 	}
 
-	listResponse(c, va)
+	nextCursor := ""
+
+	sz := len(va)
+	if sz != 0 {
+		nextCursor = encodeCursor(va[sz-1].CreatedAt)
+	}
+
+	pd := paginationData{
+		pageCount:  len(va),
+		totalCount: count,
+		nextCursor: nextCursor,
+		pager:      pager,
+	}
+
+	listResponse(c, va, pd)
 }
 
 func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {

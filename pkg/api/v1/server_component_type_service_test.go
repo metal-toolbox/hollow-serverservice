@@ -30,7 +30,7 @@ func TestServerComponentTypeServiceCreate(t *testing.T) {
 func TestServerComponentTypeServiceList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		hct := []hollow.ServerComponentType{{UUID: uuid.New(), Name: "unit-test-1"}, {UUID: uuid.New(), Name: "unit-test-2"}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Items: hct})
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: hct})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)

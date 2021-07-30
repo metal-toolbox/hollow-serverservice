@@ -41,7 +41,7 @@ func (c *ServerServiceClient) Delete(ctx context.Context, srv Server) error {
 func (c *ServerServiceClient) Get(ctx context.Context, srvUUID uuid.UUID) (*Server, error) {
 	path := fmt.Sprintf("%s/%s", serversEndpoint, srvUUID)
 	srv := &Server{}
-	r := ServerResponse{Item: srv}
+	r := ServerResponse{Record: srv}
 
 	if err := c.client.get(ctx, path, &r); err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (c *ServerServiceClient) Get(ctx context.Context, srvUUID uuid.UUID) (*Serv
 // List will return all servers with optional params to filter the results
 func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams) ([]Server, error) {
 	servers := &[]Server{}
-	r := ServerResponse{Items: servers}
+	r := ServerResponse{Records: servers}
 
 	if err := c.client.list(ctx, serversEndpoint, params, &r); err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams
 func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUID uuid.UUID) ([]VersionedAttributes, error) {
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
 	val := &[]VersionedAttributes{}
-	r := ServerResponse{Items: val}
+	r := ServerResponse{Records: val}
 
 	if err := c.client.list(ctx, path, nil, &r); err != nil {
 		return nil, err

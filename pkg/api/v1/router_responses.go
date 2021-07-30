@@ -1,7 +1,10 @@
 package hollow
 
 import (
+	"math"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -9,11 +12,33 @@ import (
 
 // ServerResponse represents the data that the server will return on any given call
 type ServerResponse struct {
-	Message string      `json:"message"`
-	Error   string      `json:"error,omitempty"`
-	UUID    *uuid.UUID  `json:"uuid,omitempty"`
-	Item    interface{} `json:"item,omitempty"`
-	Items   interface{} `json:"items,omitempty"`
+	PageSize         int                 `json:"page_size,omitempty"`
+	Page             int                 `json:"page,omitempty"`
+	PageCount        int                 `json:"page_count,omitempty"`
+	TotalPages       int                 `json:"total_pages,omitempty"`
+	TotalRecordCount int64               `json:"total_record_count,omitempty"`
+	NextCursor       string              `json:"next_cursor,omitempty"`
+	Links            ServerResponseLinks `json:"_links,omitempty"`
+	Message          string              `json:"message,omitempty"`
+	Error            string              `json:"error,omitempty"`
+	UUID             *uuid.UUID          `json:"uuid,omitempty"`
+	Record           interface{}         `json:"record,omitempty"`
+	Records          interface{}         `json:"records,omitempty"`
+}
+
+// ServerResponseLinks represent links that could be returned on a page
+type ServerResponseLinks struct {
+	Self       *Link `json:"self,omitempty"`
+	NextCursor *Link `json:"next_cursor,omitempty"`
+	First      *Link `json:"first,omitempty"`
+	Previous   *Link `json:"previous,omitempty"`
+	Next       *Link `json:"next,omitempty"`
+	Last       *Link `json:"last,omitempty"`
+}
+
+// Link represents an address to a page
+type Link struct {
+	Href string `json:"href,omitempty"`
 }
 
 func newErrorResponse(m string, err error) *ServerResponse {
@@ -47,10 +72,54 @@ func failedConvertingToVersioned(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the datastore results", err))
 }
 
-func listResponse(c *gin.Context, i interface{}) {
-	c.JSON(http.StatusOK, &ServerResponse{Items: i})
+func listResponse(c *gin.Context, i interface{}, p paginationData) {
+	uri := c.Request.URL
+
+	r := &ServerResponse{
+		PageSize:  p.pager.LimitUsed(),
+		PageCount: p.pageCount,
+		Records:   i,
+		Links: ServerResponseLinks{
+			Self: &Link{Href: uri.String()},
+		},
+	}
+
+	// Only include total counts if we are not using a cursor, otherwise counts will be wrong
+	if p.pager.Cursor == nil {
+		d := float64(p.totalCount) / float64(p.pager.LimitUsed())
+		r.TotalPages = int(math.Ceil(d))
+		r.Page = p.pager.Page
+		r.TotalRecordCount = p.totalCount
+
+		r.Links.First = &Link{Href: getURIWithQuerySet(*uri, "page", "1")}
+		r.Links.Last = &Link{Href: getURIWithQuerySet(*uri, "page", strconv.Itoa(r.TotalPages))}
+
+		if r.Page < r.TotalPages {
+			r.Links.Next = &Link{Href: getURIWithQuerySet(*uri, "page", strconv.Itoa(r.Page+1))}
+		}
+
+		if r.Page != 1 {
+			r.Links.Previous = &Link{Href: getURIWithQuerySet(*uri, "page", strconv.Itoa(r.Page-1))}
+		}
+	}
+
+	if p.nextCursor != "" && p.pageCount == p.pager.LimitUsed() {
+		r.NextCursor = p.nextCursor
+		r.Links.NextCursor = &Link{Href: getURIWithQuerySet(*uri, "cursor", p.nextCursor)}
+	}
+
+	c.JSON(http.StatusOK, r)
 }
 
 func itemResponse(c *gin.Context, i interface{}) {
-	c.JSON(http.StatusOK, &ServerResponse{Item: i})
+	c.JSON(http.StatusOK, &ServerResponse{Record: i})
+}
+
+func getURIWithQuerySet(uri url.URL, key, value string) string {
+	q := uri.Query()
+	q.Del(key)
+	q.Add(key, value)
+	uri.RawQuery = q.Encode()
+
+	return uri.String()
 }

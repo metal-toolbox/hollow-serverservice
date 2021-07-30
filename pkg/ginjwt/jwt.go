@@ -13,6 +13,7 @@ import (
 
 const (
 	contextKeySubject       = "jwt.subject"
+	contextKeyEmail         = "jwt.email"
 	expectedAuthHeaderParts = 2
 )
 
@@ -26,6 +27,7 @@ type Middleware struct {
 
 type customClaims struct {
 	Scope string `json:"scope"`
+	Email string `json:"https://equinixmetal.com/email"`
 }
 
 func (c *customClaims) Scopes() []string {
@@ -107,6 +109,7 @@ func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 		}
 
 		c.Set(contextKeySubject, cl.Subject)
+		c.Set(contextKeyEmail, sc.Email)
 	}
 }
 
@@ -158,4 +161,10 @@ func hasScope(have, needed []string) bool {
 // whatever value was in the JWT subject field and might not be a human readable value
 func GetSubject(c *gin.Context) string {
 	return c.GetString(contextKeySubject)
+}
+
+// GetEmail will return the JWT email that is saved in the request. This requires that authentication of the request
+// has already occurred. If authentication failed or there isn't an email an empty string is returned.
+func GetEmail(c *gin.Context) string {
+	return c.GetString(contextKeyEmail)
 }

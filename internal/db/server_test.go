@@ -490,13 +490,14 @@ func TestGetServer(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			r, err := s.GetServers(tt.filter, nil)
+			r, count, err := s.GetServers(tt.filter, nil)
 
 			if tt.expectError {
 				assert.Error(t, err, tt.testName)
 				assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
 			} else {
 				assert.NoError(t, err)
+				assert.EqualValues(t, len(tt.expectedUUIDs), count)
 
 				var rIDs []uuid.UUID
 				for _, h := range r {
@@ -531,7 +532,6 @@ func TestGetServerPagination(t *testing.T) {
 			db.Pagination{
 				Limit: 1,
 				Page:  1,
-				Sort:  "created_at DESC",
 			},
 			[]uuid.UUID{db.FixtureServerMarlin.ID},
 			false,
@@ -542,7 +542,6 @@ func TestGetServerPagination(t *testing.T) {
 			db.Pagination{
 				Limit: 1,
 				Page:  2,
-				Sort:  "created_at DESC",
 			},
 			[]uuid.UUID{db.FixtureServerDory.ID},
 			false,
@@ -553,7 +552,6 @@ func TestGetServerPagination(t *testing.T) {
 			db.Pagination{
 				Limit: 1,
 				Page:  3,
-				Sort:  "created_at DESC",
 			},
 			[]uuid.UUID{db.FixtureServerNemo.ID},
 			false,
@@ -564,7 +562,6 @@ func TestGetServerPagination(t *testing.T) {
 			db.Pagination{
 				Limit: 1,
 				Page:  4,
-				Sort:  "created_at DESC",
 			},
 			[]uuid.UUID{},
 			false,
@@ -573,20 +570,23 @@ func TestGetServerPagination(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetServers(nil, &tt.pager)
+		t.Run(tt.testName, func(t *testing.T) {
+			r, count, err := s.GetServers(nil, &tt.pager)
 
-		if tt.expectError {
-			assert.Error(t, err, tt.testName)
-			assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
-		} else {
-			assert.NoError(t, err)
+			if tt.expectError {
+				assert.Error(t, err, tt.testName)
+				assert.Contains(t, err.Error(), tt.errorMsg, tt.testName)
+			} else {
+				assert.NoError(t, err)
+				assert.EqualValues(t, 3, count)
 
-			var rIDs []uuid.UUID
-			for _, h := range r {
-				rIDs = append(rIDs, h.ID)
+				var rIDs []uuid.UUID
+				for _, h := range r {
+					rIDs = append(rIDs, h.ID)
+				}
+
+				assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
 			}
-
-			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
-		}
+		})
 	}
 }

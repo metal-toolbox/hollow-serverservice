@@ -58,13 +58,14 @@ func TestGetVersionedAttributes(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			res, err := s.GetVersionedAttributes(tt.searchUUID)
+			res, count, err := s.GetVersionedAttributes(tt.searchUUID, nil)
 
 			if tt.expectError {
 				assert.Error(t, err, tt.testName)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 			} else {
 				assert.NoError(t, err, tt.testName)
+				assert.EqualValues(t, len(tt.expectList), count)
 				for i, bc := range tt.expectList {
 					assert.Equal(t, bc.ID, res[i].ID)
 					assert.Equal(t, bc.Data, res[i].Data)

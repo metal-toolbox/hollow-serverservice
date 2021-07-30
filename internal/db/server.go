@@ -52,8 +52,11 @@ func (s *Store) DeleteServer(srv *Server) error {
 
 // GetServers will return a list of servers with the requested params, if no
 // filter is passed then it will return all servers
-func (s *Store) GetServers(filter *ServerFilter, pager *Pagination) ([]Server, error) {
-	var srvs []Server
+func (s *Store) GetServers(filter *ServerFilter, pager *Pagination) ([]Server, int64, error) {
+	var (
+		srvs  []Server
+		count int64
+	)
 
 	d := serverPreload(s.db)
 
@@ -65,11 +68,11 @@ func (s *Store) GetServers(filter *ServerFilter, pager *Pagination) ([]Server, e
 		pager = &Pagination{}
 	}
 
-	if err := d.Scopes(paginate(*pager)).Find(&srvs).Error; err != nil {
-		return nil, err
+	if err := d.Scopes(paginate(*pager)).Find(&srvs).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+		return nil, 0, err
 	}
 
-	return srvs, nil
+	return srvs, count, nil
 }
 
 // FindServerByUUID will return an existing server if one already exists for the
