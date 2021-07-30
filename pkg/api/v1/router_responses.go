@@ -1,6 +1,7 @@
 package hollow
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	"go.metalkube.net/hollow/internal/db"
 )
 
 // ServerResponse represents the data that the server will return on any given call
@@ -75,6 +78,14 @@ func deletedResponse(c *gin.Context) {
 
 func dbFailureResponse(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, newErrorResponse("datastore error", err))
+}
+
+func dbErrorResponse(c *gin.Context, err error) {
+	if errors.Is(err, db.ErrNotFound) {
+		notFoundResponse(c, err)
+	} else {
+		dbFailureResponse(c, err)
+	}
 }
 
 func failedConvertingToVersioned(c *gin.Context, err error) {

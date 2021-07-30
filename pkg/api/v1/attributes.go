@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
@@ -19,6 +20,8 @@ import (
 type Attributes struct {
 	Namespace string          `json:"namespace"`
 	Data      json.RawMessage `json:"data"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
 }
 
 // AttributeListParams allow you to filter the results based on attributes
@@ -33,6 +36,8 @@ type AttributeListParams struct {
 func (a *Attributes) fromDBModel(dbA db.Attributes) error {
 	a.Namespace = dbA.Namespace
 	a.Data = json.RawMessage(dbA.Data)
+	a.CreatedAt = dbA.CreatedAt
+	a.UpdatedAt = dbA.UpdatedAt
 
 	return nil
 }
