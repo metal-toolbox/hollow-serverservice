@@ -1,8 +1,6 @@
 package hollow
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	"go.metalkube.net/hollow/internal/db"
@@ -11,17 +9,13 @@ import (
 func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 	var t ServerComponentType
 	if err := c.ShouldBindJSON(&t); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid server component type",
-			"error":   err.Error(),
-		})
-
+		badRequestResponse(c, "invalid server component type", err)
 		return
 	}
 
 	dbT, err := t.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server component type", "error": err.Error()})
+		badRequestResponse(c, "invalid server component type", err)
 		return
 	}
 
@@ -58,5 +52,5 @@ func (r *Router) serverComponentTypeList(c *gin.Context) {
 		types = append(types, t)
 	}
 
-	c.JSON(http.StatusOK, types)
+	listResponse(c, types)
 }

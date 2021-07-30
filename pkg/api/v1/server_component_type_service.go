@@ -28,10 +28,12 @@ func (c *ServerComponentTypeServiceClient) Create(ctx context.Context, t ServerC
 
 // List will return the server component types with optional params
 func (c *ServerComponentTypeServiceClient) List(ctx context.Context, params *ServerComponentTypeListParams) ([]ServerComponentType, error) {
-	var ct []ServerComponentType
-	if err := c.client.list(ctx, serverComponentTypeEndpoint, params, &ct); err != nil {
+	cts := &[]ServerComponentType{}
+	resp := ServerResponse{Items: cts}
+
+	if err := c.client.list(ctx, serverComponentTypeEndpoint, params, &resp); err != nil {
 		return nil, err
 	}
 
-	return ct, nil
+	return *cts, nil
 }

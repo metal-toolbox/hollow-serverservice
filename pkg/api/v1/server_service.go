@@ -40,35 +40,39 @@ func (c *ServerServiceClient) Delete(ctx context.Context, srv Server) error {
 // Get will return a server by it's UUID
 func (c *ServerServiceClient) Get(ctx context.Context, srvUUID uuid.UUID) (*Server, error) {
 	path := fmt.Sprintf("%s/%s", serversEndpoint, srvUUID)
+	srv := &Server{}
+	r := ServerResponse{Item: srv}
 
-	var srv Server
-	if err := c.client.get(ctx, path, &srv); err != nil {
-		return nil, err
-	}
-
-	return &srv, nil
-}
-
-// List will return all servers with optional params to filter the results
-func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams) ([]Server, error) {
-	var srv []Server
-	if err := c.client.list(ctx, serversEndpoint, params, &srv); err != nil {
+	if err := c.client.get(ctx, path, &r); err != nil {
 		return nil, err
 	}
 
 	return srv, nil
 }
 
-// GetVersionedAttributes will return all the versioned attributes for a given server
-func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUID uuid.UUID) ([]VersionedAttributes, error) {
-	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
+// List will return all servers with optional params to filter the results
+func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams) ([]Server, error) {
+	servers := &[]Server{}
+	r := ServerResponse{Items: servers}
 
-	var val []VersionedAttributes
-	if err := c.client.list(ctx, path, nil, &val); err != nil {
+	if err := c.client.list(ctx, serversEndpoint, params, &r); err != nil {
 		return nil, err
 	}
 
-	return val, nil
+	return *servers, nil
+}
+
+// GetVersionedAttributes will return all the versioned attributes for a given server
+func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUID uuid.UUID) ([]VersionedAttributes, error) {
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
+	val := &[]VersionedAttributes{}
+	r := ServerResponse{Items: val}
+
+	if err := c.client.list(ctx, path, nil, &r); err != nil {
+		return nil, err
+	}
+
+	return *val, nil
 }
 
 // CreateVersionedAttributes will create a new versioned attribute for a given server

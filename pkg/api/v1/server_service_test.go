@@ -38,7 +38,7 @@ func TestServerServiceDelete(t *testing.T) {
 func TestServerServiceGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		srv := hollow.Server{UUID: uuid.New(), FacilityCode: "Test1"}
-		jsonResponse, err := json.Marshal(srv)
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Item: srv})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -55,7 +55,7 @@ func TestServerServiceGet(t *testing.T) {
 func TestServerServiceList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		srv := []hollow.Server{{UUID: uuid.New(), FacilityCode: "Test1"}}
-		jsonResponse, err := json.Marshal(srv)
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Items: srv})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -86,7 +86,7 @@ func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 func TestServerServiceListVersionedAttributess(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		va := []hollow.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
-		jsonResponse, err := json.Marshal(va)
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Items: va})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)

@@ -7,17 +7,24 @@ import (
 	"github.com/google/uuid"
 )
 
-type serverResponse struct {
-	Message string     `json:"message"`
-	UUID    *uuid.UUID `json:"uuid,omitempty"`
-	Error   string     `json:"error,omitempty"`
+// ServerResponse represents the data that the server will return on any given call
+type ServerResponse struct {
+	Message string      `json:"message"`
+	Error   string      `json:"error,omitempty"`
+	UUID    *uuid.UUID  `json:"uuid,omitempty"`
+	Item    interface{} `json:"item,omitempty"`
+	Items   interface{} `json:"items,omitempty"`
 }
 
-func newErrorResponse(m string, err error) *serverResponse {
-	return &serverResponse{
+func newErrorResponse(m string, err error) *ServerResponse {
+	return &ServerResponse{
 		Message: m,
 		Error:   err.Error(),
 	}
+}
+
+func badRequestResponse(c *gin.Context, message string, err error) {
+	c.JSON(http.StatusBadRequest, newErrorResponse(message, err))
 }
 
 func notFoundResponse(c *gin.Context, err error) {
@@ -25,11 +32,11 @@ func notFoundResponse(c *gin.Context, err error) {
 }
 
 func createdResponse(c *gin.Context, u *uuid.UUID) {
-	c.JSON(http.StatusOK, &serverResponse{Message: "resource created", UUID: u})
+	c.JSON(http.StatusOK, &ServerResponse{Message: "resource created", UUID: u})
 }
 
 func deletedResponse(c *gin.Context) {
-	c.JSON(http.StatusOK, &serverResponse{Message: "resource deleted"})
+	c.JSON(http.StatusOK, &ServerResponse{Message: "resource deleted"})
 }
 
 func dbFailureResponse(c *gin.Context, err error) {
@@ -38,4 +45,12 @@ func dbFailureResponse(c *gin.Context, err error) {
 
 func failedConvertingToVersioned(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the datastore results", err))
+}
+
+func listResponse(c *gin.Context, i interface{}) {
+	c.JSON(http.StatusOK, &ServerResponse{Items: i})
+}
+
+func itemResponse(c *gin.Context, i interface{}) {
+	c.JSON(http.StatusOK, &ServerResponse{Item: i})
 }
