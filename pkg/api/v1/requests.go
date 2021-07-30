@@ -74,9 +74,20 @@ func userAgentString() string {
 	return fmt.Sprintf("hollow/%s (%s)", version.Version(), version.String())
 }
 
-func (c *Client) do(req *http.Request) (*http.Response, error) {
+func (c *Client) do(req *http.Request, result interface{}) error {
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", c.authToken))
 	req.Header.Set("User-Agent", userAgentString())
 
-	return c.httpClient.Do(req)
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if err := ensureValidServerResponse(resp); err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	return json.NewDecoder(resp.Body).Decode(&result)
 }

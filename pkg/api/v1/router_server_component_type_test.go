@@ -2,6 +2,7 @@ package hollow_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -20,10 +21,13 @@ func TestIntegrationServerComponentTypeServiceCreate(t *testing.T) {
 
 		hct := hollow.ServerComponentType{Name: "integration-test"}
 
-		res, err := s.Client.ServerComponentType.Create(ctx, hct)
+		r, resp, err := s.Client.ServerComponentType.Create(ctx, hct)
 		if !expectError {
 			require.NoError(t, err)
-			assert.NotEqual(t, uuid.Nil.String(), res.String())
+			assert.NotEqual(t, uuid.Nil.String(), r.String())
+			assert.NotNil(t, resp)
+			assert.NotNil(t, resp.Links.Self)
+			assert.Equal(t, fmt.Sprintf("/api/v1/server-component-types/%s", r.String()), resp.Links.Self.Href)
 		}
 
 		return err
@@ -36,12 +40,14 @@ func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.ServerComponentType.List(ctx, nil)
+		r, resp, err := s.Client.ServerComponentType.List(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
-			assert.Len(t, res, 1)
-			assert.Equal(t, db.FixtureSCTFins.ID, res[0].UUID)
-			assert.Equal(t, db.FixtureSCTFins.Name, res[0].Name)
+			assert.Len(t, r, 1)
+			assert.Equal(t, db.FixtureSCTFins.ID, r[0].UUID)
+			assert.Equal(t, db.FixtureSCTFins.Name, r[0].Name)
+			assert.NotNil(t, resp)
+			assert.NotNil(t, resp.Links.Self)
 		}
 
 		return err

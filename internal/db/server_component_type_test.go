@@ -48,14 +48,17 @@ func TestGetServerComponentType(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		r, err := s.GetServerComponentTypes(tt.filter, nil)
-		assert.NoError(t, err, tt.testName)
+		t.Run(tt.testName, func(t *testing.T) {
+			r, count, err := s.GetServerComponentTypes(tt.filter, nil)
+			assert.NoError(t, err, tt.testName)
+			assert.EqualValues(t, len(tt.expectedUUIDs), count)
 
-		var rIDs []uuid.UUID
-		for _, h := range r {
-			rIDs = append(rIDs, h.ID)
-		}
+			var rIDs []uuid.UUID
+			for _, h := range r {
+				rIDs = append(rIDs, h.ID)
+			}
 
-		assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
+			assert.ElementsMatch(t, rIDs, tt.expectedUUIDs, tt.testName)
+		})
 	}
 }

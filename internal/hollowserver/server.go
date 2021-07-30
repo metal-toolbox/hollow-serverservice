@@ -80,6 +80,7 @@ func (s *Server) setup() *gin.Engine {
 		ginzap.WithUTC(true),
 		ginzap.WithCustomFields(
 			func(c *gin.Context) zap.Field { return zap.String("jwt_subject", ginjwt.GetSubject(c)) },
+			func(c *gin.Context) zap.Field { return zap.String("jwt_email", ginjwt.GetEmail(c)) },
 		),
 	))
 	r.Use(ginzap.RecoveryWithZap(s.Logger, true))

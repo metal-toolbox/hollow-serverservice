@@ -12,8 +12,8 @@ const (
 
 // ServerComponentTypeService provides the ability to interact with server component types via Hollow
 type ServerComponentTypeService interface {
-	Create(context.Context, ServerComponentType) (*uuid.UUID, error)
-	List(context.Context, *ServerComponentTypeListParams) ([]ServerComponentType, error)
+	Create(context.Context, ServerComponentType) (*uuid.UUID, *ServerResponse, error)
+	List(context.Context, *ServerComponentTypeListParams) ([]ServerComponentType, *ServerResponse, error)
 }
 
 // ServerComponentTypeServiceClient implements ServerComponentTypeService
@@ -22,16 +22,18 @@ type ServerComponentTypeServiceClient struct {
 }
 
 // Create will attempt to create a server component type in Hollow
-func (c *ServerComponentTypeServiceClient) Create(ctx context.Context, t ServerComponentType) (*uuid.UUID, error) {
+func (c *ServerComponentTypeServiceClient) Create(ctx context.Context, t ServerComponentType) (*uuid.UUID, *ServerResponse, error) {
 	return c.client.post(ctx, serverComponentTypeEndpoint, t)
 }
 
 // List will return the server component types with optional params
-func (c *ServerComponentTypeServiceClient) List(ctx context.Context, params *ServerComponentTypeListParams) ([]ServerComponentType, error) {
-	var ct []ServerComponentType
-	if err := c.client.list(ctx, serverComponentTypeEndpoint, params, &ct); err != nil {
-		return nil, err
+func (c *ServerComponentTypeServiceClient) List(ctx context.Context, params *ServerComponentTypeListParams) ([]ServerComponentType, *ServerResponse, error) {
+	cts := &[]ServerComponentType{}
+	resp := ServerResponse{Records: cts}
+
+	if err := c.client.list(ctx, serverComponentTypeEndpoint, params, &resp); err != nil {
+		return nil, nil, err
 	}
 
-	return ct, nil
+	return *cts, &resp, nil
 }

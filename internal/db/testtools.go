@@ -21,6 +21,8 @@ func testDatastore() error {
 		return nil
 	}
 
+	// Uncomment when you are having database issues with your tests and need to see the db logs
+	// Hidden by default because it can be noisy and make it harder to read normal failures
 	// l, err := zap.NewDevelopment()
 	// if err != nil {
 	// 	return err

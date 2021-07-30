@@ -1,62 +1,54 @@
 package hollow
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 func (r *Router) serverList(c *gin.Context) {
-	pager := parsePagination(c)
+	pager, err := parsePagination(c)
+	if err != nil {
+		badRequestResponse(c, "invalid pagination", err)
+		return
+	}
 
 	var params ServerListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid filter",
-			"error":   err.Error(),
-		})
+		badRequestResponse(c, "invalid filter", err)
+		return
 	}
 
 	alp, err := parseQueryAttributesListParams(c, "attr")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid attributes list params",
-			"error":   err.Error(),
-		})
+		badRequestResponse(c, "invalid attributes list params", err)
+		return
 	}
 
 	params.AttributeListParams = alp
 
 	valp, err := parseQueryAttributesListParams(c, "ver_attr")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid versioned attributes list params",
-			"error":   err.Error(),
-		})
+		badRequestResponse(c, "invalid versioned attributes list params", err)
+		return
 	}
 
 	params.VersionedAttributeListParams = valp
 
 	sclp, err := parseQueryServerComponentsListParams(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid server component list params",
-			"error":   err.Error(),
-		})
+		badRequestResponse(c, "invalid server component list params", err)
+		return
 	}
 
 	params.ComponentListParams = sclp
 
 	dbFilter, err := params.dbFilter()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid list params",
-			"error":   err.Error(),
-		})
+		badRequestResponse(c, "invalid list params", err)
+		return
 	}
 
-	dbSRV, err := r.Store.GetServers(dbFilter, &pager)
+	dbSRV, count, err := r.Store.GetServers(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
@@ -74,7 +66,21 @@ func (r *Router) serverList(c *gin.Context) {
 		srvs = append(srvs, s)
 	}
 
-	c.JSON(http.StatusOK, srvs)
+	nextCursor := ""
+
+	sz := len(srvs)
+	if sz != 0 {
+		nextCursor = encodeCursor(srvs[sz-1].CreatedAt)
+	}
+
+	pd := paginationData{
+		pageCount:  len(srvs),
+		totalCount: count,
+		nextCursor: nextCursor,
+		pager:      pager,
+	}
+
+	listResponse(c, srvs, pd)
 }
 
 func (r *Router) serverGet(c *gin.Context) {
@@ -89,28 +95,24 @@ func (r *Router) serverGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, srv)
+	itemResponse(c, srv)
 }
 
 func (r *Router) serverCreate(c *gin.Context) {
 	var srv Server
 	if err := c.ShouldBindJSON(&srv); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid server",
-			"error":   err.Error(),
-		})
-
+		badRequestResponse(c, "invalid server", err)
 		return
 	}
 
 	dbSRV, err := srv.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server", "error": err.Error})
+		badRequestResponse(c, "invalid server", err)
 		return
 	}
 
 	if err := r.Store.CreateServer(dbSRV); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed to create server", err))
+		dbFailureResponse(c, err)
 		return
 	}
 
@@ -124,7 +126,7 @@ func (r *Router) serverDelete(c *gin.Context) {
 	}
 
 	if err = r.Store.DeleteServer(dbSRV); err != nil {
-		c.JSON(http.StatusInternalServerError, newErrorResponse("failed deleting resource", err))
+		dbFailureResponse(c, err)
 		return
 	}
 
@@ -132,13 +134,19 @@ func (r *Router) serverDelete(c *gin.Context) {
 }
 
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
-	srvUUID, err := uuid.Parse(c.Param("uuid"))
+	pager, err := parsePagination(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server uuid", "error": err.Error()})
+		badRequestResponse(c, "invalid pagination", err)
 		return
 	}
 
-	dbVA, err := r.Store.GetVersionedAttributes(srvUUID)
+	srvUUID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		badRequestResponse(c, "invalid server uuid", err)
+		return
+	}
+
+	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
@@ -156,17 +164,27 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 		va = append(va, a)
 	}
 
-	c.JSON(http.StatusOK, va)
+	nextCursor := ""
+
+	sz := len(va)
+	if sz != 0 {
+		nextCursor = encodeCursor(va[sz-1].CreatedAt)
+	}
+
+	pd := paginationData{
+		pageCount:  len(va),
+		totalCount: count,
+		nextCursor: nextCursor,
+		pager:      pager,
+	}
+
+	listResponse(c, va, pd)
 }
 
 func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 	var va VersionedAttributes
 	if err := c.ShouldBindJSON(&va); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid versioned attributes",
-			"error":   err.Error(),
-		})
-
+		badRequestResponse(c, "invalid versioned attributes", err)
 		return
 	}
 

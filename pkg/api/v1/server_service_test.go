@@ -18,7 +18,7 @@ func TestServerServiceCreate(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.Server.Create(ctx, srv)
+		res, _, err := c.Server.Create(ctx, srv)
 		if !expectError {
 			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
 		}
@@ -31,18 +31,19 @@ func TestServerServiceDelete(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource deleted"}`))
 		c := mockClient(string(jsonResponse), respCode)
+		_, err := c.Server.Delete(ctx, hollow.Server{UUID: uuid.New()})
 
-		return c.Server.Delete(ctx, hollow.Server{UUID: uuid.New()})
+		return err
 	})
 }
 func TestServerServiceGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		srv := hollow.Server{UUID: uuid.New(), FacilityCode: "Test1"}
-		jsonResponse, err := json.Marshal(srv)
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: srv})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.Server.Get(ctx, srv.UUID)
+		res, _, err := c.Server.Get(ctx, srv.UUID)
 		if !expectError {
 			assert.Equal(t, srv.UUID, res.UUID)
 			assert.Equal(t, srv.FacilityCode, res.FacilityCode)
@@ -55,11 +56,11 @@ func TestServerServiceGet(t *testing.T) {
 func TestServerServiceList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		srv := []hollow.Server{{UUID: uuid.New(), FacilityCode: "Test1"}}
-		jsonResponse, err := json.Marshal(srv)
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: srv})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.Server.List(ctx, nil)
+		res, _, err := c.Server.List(ctx, nil)
 		if !expectError {
 			assert.ElementsMatch(t, srv, res)
 		}
@@ -74,7 +75,7 @@ func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
+		res, _, err := c.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
 			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
 		}
@@ -86,11 +87,11 @@ func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 func TestServerServiceListVersionedAttributess(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		va := []hollow.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
-		jsonResponse, err := json.Marshal(va)
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: va})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.Server.GetVersionedAttributes(ctx, uuid.New())
+		res, _, err := c.Server.GetVersionedAttributes(ctx, uuid.New())
 		if !expectError {
 			assert.ElementsMatch(t, va, res)
 		}

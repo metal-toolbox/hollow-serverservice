@@ -2,7 +2,6 @@ package hollow
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/url"
 
@@ -58,55 +57,35 @@ func (c *Client) SetToken(token string) {
 }
 
 // post provides a reusable method for a standard POST to a hollow server
-func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid.UUID, error) {
+func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid.UUID, *ServerResponse, error) {
 	request, err := newPostRequest(ctx, c.url, path, body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := c.do(request)
-	if err != nil {
-		return nil, err
+	r := ServerResponse{}
+
+	if err := c.do(request, &r); err != nil {
+		return nil, nil, err
 	}
 
-	if err := ensureValidServerResponse(resp); err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	var r serverResponse
-	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return nil, err
-	}
-
-	return r.UUID, nil
+	return r.UUID, &r, nil
 }
 
 // put provides a reusable method for a standard PUT to a hollow server
-func (c *Client) put(ctx context.Context, path string, body interface{}) (*uuid.UUID, error) {
+func (c *Client) put(ctx context.Context, path string, body interface{}) (*uuid.UUID, *ServerResponse, error) {
 	request, err := newPutRequest(ctx, c.url, path, body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := c.do(request)
-	if err != nil {
-		return nil, err
+	r := ServerResponse{}
+
+	if err := c.do(request, &r); err != nil {
+		return nil, nil, err
 	}
 
-	if err := ensureValidServerResponse(resp); err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	var r serverResponse
-	if err = json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return nil, err
-	}
-
-	return r.UUID, nil
+	return r.UUID, &r, nil
 }
 
 type queryParams interface {
@@ -114,7 +93,7 @@ type queryParams interface {
 }
 
 // list provides a reusable method for a standard list to a hollow server
-func (c *Client) list(ctx context.Context, path string, params queryParams, results interface{}) error {
+func (c *Client) list(ctx context.Context, path string, params queryParams, resp interface{}) error {
 	request, err := newGetRequest(ctx, c.url, path)
 	if err != nil {
 		return err
@@ -126,52 +105,27 @@ func (c *Client) list(ctx context.Context, path string, params queryParams, resu
 		request.URL.RawQuery = q.Encode()
 	}
 
-	resp, err := c.do(request)
-	if err != nil {
-		return err
-	}
-
-	if err := ensureValidServerResponse(resp); err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	return json.NewDecoder(resp.Body).Decode(&results)
+	return c.do(request, &resp)
 }
 
 // get provides a reusable method for a standard GET of a single item
-func (c *Client) get(ctx context.Context, path string, results interface{}) error {
+func (c *Client) get(ctx context.Context, path string, resp interface{}) error {
 	request, err := newGetRequest(ctx, c.url, path)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.do(request)
-	if err != nil {
-		return err
-	}
-
-	if err := ensureValidServerResponse(resp); err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	return json.NewDecoder(resp.Body).Decode(&results)
+	return c.do(request, &resp)
 }
 
 // post provides a reusable method for a standard post to a hollow server
-func (c *Client) delete(ctx context.Context, path string) error {
+func (c *Client) delete(ctx context.Context, path string) (*ServerResponse, error) {
 	request, err := newDeleteRequest(ctx, c.url, path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	resp, err := c.do(request)
-	if err != nil {
-		return err
-	}
+	var r ServerResponse
 
-	return ensureValidServerResponse(resp)
+	return &r, c.do(request, &r)
 }

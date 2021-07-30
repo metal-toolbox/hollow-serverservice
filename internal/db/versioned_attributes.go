@@ -44,11 +44,21 @@ func (s *Store) CreateVersionedAttributes(entity interface{}, a *VersionedAttrib
 
 // GetVersionedAttributes will return all the VersionedAttributes for a given server UUID, the list will be sorted with the newest one
 // first
-func (s *Store) GetVersionedAttributes(srvUUID uuid.UUID) ([]VersionedAttributes, error) {
-	var al []VersionedAttributes
-	if err := s.db.Where(&VersionedAttributes{ServerID: &srvUUID}).Order("created_at desc").Find(&al).Error; err != nil {
-		return nil, err
+func (s *Store) GetVersionedAttributes(srvUUID uuid.UUID, pager *Pagination) ([]VersionedAttributes, int64, error) {
+	var (
+		al    []VersionedAttributes
+		count int64
+	)
+
+	if pager == nil {
+		pager = &Pagination{}
 	}
 
-	return al, nil
+	d := s.db.Where(&VersionedAttributes{ServerID: &srvUUID})
+
+	if err := d.Scopes(paginate(*pager)).Order("created_at desc").Find(&al).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return al, count, nil
 }

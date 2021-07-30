@@ -1,8 +1,6 @@
 package hollow
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	"go.metalkube.net/hollow/internal/db"
@@ -11,17 +9,13 @@ import (
 func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 	var t ServerComponentType
 	if err := c.ShouldBindJSON(&t); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid server component type",
-			"error":   err.Error(),
-		})
-
+		badRequestResponse(c, "invalid server component type", err)
 		return
 	}
 
 	dbT, err := t.toDBModel()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server component type", "error": err.Error()})
+		badRequestResponse(c, "invalid server component type", err)
 		return
 	}
 
@@ -34,13 +28,17 @@ func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 }
 
 func (r *Router) serverComponentTypeList(c *gin.Context) {
-	pager := parsePagination(c)
+	pager, err := parsePagination(c)
+	if err != nil {
+		badRequestResponse(c, "invalid pagination", err)
+		return
+	}
 
 	dbFilter := &db.ServerComponentTypeFilter{
 		Name: c.Query("name"),
 	}
 
-	dbTypes, err := r.Store.GetServerComponentTypes(dbFilter, &pager)
+	dbTypes, count, err := r.Store.GetServerComponentTypes(dbFilter, &pager)
 	if err != nil {
 		dbFailureResponse(c, err)
 		return
@@ -58,5 +56,20 @@ func (r *Router) serverComponentTypeList(c *gin.Context) {
 		types = append(types, t)
 	}
 
-	c.JSON(http.StatusOK, types)
+	nextCursor := ""
+
+	// Use dbTypes since we don't expose CreatedAt
+	sz := len(dbTypes)
+	if sz != 0 {
+		nextCursor = encodeCursor(dbTypes[sz-1].CreatedAt)
+	}
+
+	pd := paginationData{
+		pageCount:  len(types),
+		totalCount: count,
+		nextCursor: nextCursor,
+		pager:      pager,
+	}
+
+	listResponse(c, types, pd)
 }

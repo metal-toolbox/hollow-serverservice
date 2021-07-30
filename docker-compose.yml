@@ -5,7 +5,7 @@ services:
     image: cockroachdb/cockroach:latest-v21.1
     hostname: 'db'
     volumes:
-      - ./.dev-data/compose/db:/cockroach/cockroach-data
+      - db:/cockroach/cockroach-data
     command: start-single-node --insecure
     ports:
         - "26257:26257"
@@ -15,8 +15,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    environment:
+      - HOLLOW_JWT_AUDIENCE=https://staging.hollow.platformequinix.net
     ports:
       - "8000:8000"
     links:
       - db
     restart: unless-stopped
+volumes:
+  db:

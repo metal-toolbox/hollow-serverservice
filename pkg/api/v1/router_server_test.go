@@ -51,10 +51,19 @@ func TestIntegrationServerList(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.Server.List(ctx, nil)
+		r, resp, err := s.Client.Server.List(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
-			assert.Len(t, res, 3)
+			assert.Len(t, r, 3)
+
+			assert.EqualValues(t, 3, resp.PageCount)
+			assert.EqualValues(t, 1, resp.TotalPages)
+			assert.EqualValues(t, 3, resp.TotalRecordCount)
+			// We returned everything, so we shouldnt have a next page info
+			assert.Empty(t, resp.NextCursor)
+			assert.Nil(t, resp.Links.NextCursor)
+			assert.Nil(t, resp.Links.Next)
+			assert.Nil(t, resp.Links.Previous)
 		}
 
 		return err
@@ -430,7 +439,7 @@ func TestIntegrationServerList(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			r, err := s.Client.Server.List(context.TODO(), tt.params)
+			r, _, err := s.Client.Server.List(context.TODO(), tt.params)
 			if tt.expectError {
 				assert.NoError(t, err)
 				return
@@ -453,7 +462,7 @@ func TestIntegrationServerCreate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.Server.Create(ctx, testServer)
+		res, _, err := s.Client.Server.Create(ctx, testServer)
 		if !expectError {
 			assert.NotNil(t, res)
 			assert.Equal(t, testServer.UUID.String(), res.String())
@@ -479,7 +488,7 @@ func TestIntegrationServerCreate(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, err := s.Client.Server.Create(context.TODO(), *tt.srv)
+			_, _, err := s.Client.Server.Create(context.TODO(), *tt.srv)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
@@ -491,8 +500,9 @@ func TestIntegrationServerDelete(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
+		_, err := s.Client.Server.Delete(ctx, hollow.Server{UUID: db.FixtureServerNemo.ID})
 
-		return s.Client.Server.Delete(ctx, hollow.Server{UUID: db.FixtureServerNemo.ID})
+		return err
 	})
 
 	var testCases = []struct {
@@ -509,7 +519,7 @@ func TestIntegrationServerDelete(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			err := s.Client.Server.Delete(context.TODO(), hollow.Server{UUID: tt.uuid})
+			_, err := s.Client.Server.Delete(context.TODO(), hollow.Server{UUID: tt.uuid})
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
@@ -521,15 +531,15 @@ func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 	s.Client.SetToken(validToken([]string{"read", "write"}))
 
 	// Attempt to get the testUUID (should return a failure unless somehow we got a collision with fixtures)
-	_, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
+	_, _, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "resource not found")
 
-	_, err = s.Client.Server.Create(context.TODO(), testServer)
+	_, _, err = s.Client.Server.Create(context.TODO(), testServer)
 	assert.NoError(t, err)
 
 	// Get the server back and ensure all the things we set are returned
-	r, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
+	r, _, err := s.Client.Server.Get(context.TODO(), testServer.UUID)
 	assert.NoError(t, err)
 
 	assert.Equal(t, r.FacilityCode, "int-test")
@@ -564,7 +574,7 @@ func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
 
 		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
 
-		res, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
+		res, _, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
 			assert.NotNil(t, res)
 		}
@@ -579,7 +589,7 @@ func TestIntegrationServerServiceGetVersionedAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, err := s.Client.Server.GetVersionedAttributes(ctx, db.FixtureServerNemo.ID)
+		res, _, err := s.Client.Server.GetVersionedAttributes(ctx, db.FixtureServerNemo.ID)
 		if !expectError {
 			require.Len(t, res, 2)
 			assert.Equal(t, db.FixtureNamespaceVersioned, res[0].Namespace)
