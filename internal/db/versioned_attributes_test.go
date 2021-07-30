@@ -34,9 +34,12 @@ func TestCreateVersionedAttributes(t *testing.T) {
 				assert.Contains(t, err.Error(), tt.errorMsg)
 			} else {
 				assert.NoError(t, err)
-				// ensure the record is updated with it's attributes
+				// ensure the record is updated with it's attributes and that the server get's it's updated_at timestamp changed
 				assert.NotEqual(t, uuid.Nil.String(), va.ID)
-				assert.WithinDuration(t, time.Now(), va.CreatedAt, 10*time.Millisecond)
+
+				s, err := s.FindServerByUUID(tt.srv.ID)
+				assert.NoError(t, err)
+				assert.WithinDuration(t, va.CreatedAt, s.UpdatedAt, 5*time.Millisecond)
 			}
 		})
 	}
