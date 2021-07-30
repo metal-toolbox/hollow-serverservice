@@ -18,9 +18,9 @@ unit-test: | lint
 
 coverage: | docker-up test-database
 	@echo Generating coverage report...
-	@go test ./... -race -coverprofile=.dev-data/coverage.out -covermode=atomic -tags testtools -p 1
-	@go tool cover -func=.dev-data/coverage.out
-	@go tool cover -html=.dev-data/coverage.out
+	@HOLLOW_TEST_DB="${TEST_DB}" go test ./... -race -coverprofile=coverage.out -covermode=atomic -tags testtools -p 1
+	@go tool cover -func=coverage.out
+	@go tool cover -html=coverage.out
 
 lint: golint
 
@@ -28,11 +28,10 @@ golint: | vendor
 	@echo Linting Go files...
 	@golangci-lint run
 
-clean: docker-down
+clean: docker-clean
 	@echo Cleaning...
 	@rm -rf ./dist/
-	@rm -rf ./.dev-data/coverage.out
-	@rm -rf ./.dev-data/compose/db/*
+	@rm -rf coverage.out
 	@go clean -testcache
 
 vendor:
@@ -43,6 +42,9 @@ docker-up:
 
 docker-down:
 	@docker-compose down
+
+docker-clean:
+	@docker-compose down --volumes
 
 dev-database:
 	@docker exec hollow_db_1 cockroach sql --insecure -e "drop database if exists hollow_dev"

@@ -63,13 +63,7 @@ func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*db.Server, error
 
 	srv, err := r.Store.FindOrCreateServerByUUID(srvUUID)
 	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			notFoundResponse(c, err)
-			return nil, err
-		}
-
 		dbFailureResponse(c, err)
-
 		return nil, err
 	}
 

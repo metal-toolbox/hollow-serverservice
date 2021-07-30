@@ -7,4 +7,3 @@
 *.test
 *.out
 /dist
-.dev-data/*

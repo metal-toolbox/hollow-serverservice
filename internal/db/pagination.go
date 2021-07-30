@@ -18,11 +18,12 @@ type Pagination struct {
 	Limit  int        `json:"limit"`
 	Page   int        `json:"page"`
 	Cursor *time.Time `json:"cursor"`
-	// Sort  string `json:"sort"`
 }
 
 func paginate(p Pagination) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
+		// Sorting is currently forced to created_at to ensure the cursor works. Eventually this will be updated to support
+		// additional fields
 		db = db.Order("created_at DESC").Limit(p.LimitUsed())
 
 		switch {

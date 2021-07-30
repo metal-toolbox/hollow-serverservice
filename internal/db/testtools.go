@@ -21,12 +21,14 @@ func testDatastore() error {
 		return nil
 	}
 
-	l, err := zap.NewDevelopment()
-	if err != nil {
-		return err
-	}
+	// Uncomment when you are having database issues with your tests and need to see the db logs
+	// Hidden by default because it can be noisy and make it harder to read normal failures
+	// l, err := zap.NewDevelopment()
+	// if err != nil {
+	// 	return err
+	// }
 
-	// l := zap.NewNop()
+	l := zap.NewNop()
 
 	s, err := NewPostgresStore(TestDBURI, l)
 	if err != nil {

@@ -18,7 +18,7 @@ func TestServerComponentTypeServiceCreate(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.ServerComponentType.Create(ctx, hct)
+		res, _, err := c.ServerComponentType.Create(ctx, hct)
 		if !expectError {
 			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
 		}
@@ -34,7 +34,7 @@ func TestServerComponentTypeServiceList(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.ServerComponentType.List(ctx, nil)
+		res, _, err := c.ServerComponentType.List(ctx, nil)
 		if !expectError {
 			assert.ElementsMatch(t, hct, res)
 		}

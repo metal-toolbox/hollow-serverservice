@@ -1,6 +1,7 @@
 package hollow
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"net/url"
@@ -57,7 +58,15 @@ func notFoundResponse(c *gin.Context, err error) {
 }
 
 func createdResponse(c *gin.Context, u *uuid.UUID) {
-	c.JSON(http.StatusOK, &ServerResponse{Message: "resource created", UUID: u})
+	r := &ServerResponse{
+		Message: "resource created",
+		UUID:    u,
+		Links: ServerResponseLinks{
+			Self: &Link{Href: fmt.Sprintf("%s/%s", c.FullPath(), u)},
+		},
+	}
+
+	c.JSON(http.StatusOK, r)
 }
 
 func deletedResponse(c *gin.Context) {
@@ -112,7 +121,13 @@ func listResponse(c *gin.Context, i interface{}, p paginationData) {
 }
 
 func itemResponse(c *gin.Context, i interface{}) {
-	c.JSON(http.StatusOK, &ServerResponse{Record: i})
+	r := &ServerResponse{
+		Record: i,
+		Links: ServerResponseLinks{
+			Self: &Link{Href: c.Request.URL.String()},
+		},
+	}
+	c.JSON(http.StatusOK, r)
 }
 
 func getURIWithQuerySet(uri url.URL, key, value string) string {
