@@ -116,7 +116,7 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
-	createdResponse(c, &dbSRV.ID)
+	createdResponse(c, dbSRV.ID.String())
 }
 
 func (r *Router) serverDelete(c *gin.Context) {
@@ -205,5 +205,5 @@ func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	createdResponse(c, &dbVA.ID)
+	createdResponse(c, dbVA.ID.String())
 }

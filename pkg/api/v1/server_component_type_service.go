@@ -2,8 +2,6 @@ package hollow
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -12,7 +10,7 @@ const (
 
 // ServerComponentTypeService provides the ability to interact with server component types via Hollow
 type ServerComponentTypeService interface {
-	Create(context.Context, ServerComponentType) (*uuid.UUID, *ServerResponse, error)
+	Create(context.Context, ServerComponentType) (*ServerResponse, error)
 	List(context.Context, *ServerComponentTypeListParams) ([]ServerComponentType, *ServerResponse, error)
 }
 
@@ -22,7 +20,7 @@ type ServerComponentTypeServiceClient struct {
 }
 
 // Create will attempt to create a server component type in Hollow
-func (c *ServerComponentTypeServiceClient) Create(ctx context.Context, t ServerComponentType) (*uuid.UUID, *ServerResponse, error) {
+func (c *ServerComponentTypeServiceClient) Create(ctx context.Context, t ServerComponentType) (*ServerResponse, error) {
 	return c.client.post(ctx, serverComponentTypeEndpoint, t)
 }
 

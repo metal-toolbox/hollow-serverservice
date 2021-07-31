@@ -20,8 +20,12 @@ type ServerService interface {
 	Delete(context.Context, Server) (*ServerResponse, error)
 	Get(context.Context, uuid.UUID) (*Server, *ServerResponse, error)
 	List(context.Context, *ServerListParams) ([]Server, *ServerResponse, error)
-	// CreateAttributes(context.Context, uuid.UUID, Attributes) (*uuid.UUID, *ServerResponse, error)
-	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) error
+	CreateAttributes(context.Context, uuid.UUID, Attributes) (*ServerResponse, error)
+	// DeleteAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) error
+	// GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
+	// ListAttributes(context.Context, uuid.UUID) ([]Attributes, *ServerResponse, error)
+	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error)
+
 	GetVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*uuid.UUID, *ServerResponse, error)
 }
@@ -33,7 +37,17 @@ type ServerServiceClient struct {
 
 // Create will attempt to create a server in Hollow and return the new server's UUID
 func (c *ServerServiceClient) Create(ctx context.Context, srv Server) (*uuid.UUID, *ServerResponse, error) {
-	return c.client.post(ctx, serversEndpoint, srv)
+	resp, err := c.client.post(ctx, serversEndpoint, srv)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	u, err := uuid.Parse(resp.Slug)
+	if err != nil {
+		return nil, resp, nil
+	}
+
+	return &u, resp, nil
 }
 
 // Delete will attempt to delete a server in Hollow and return an error on failure
@@ -66,12 +80,16 @@ func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams
 	return *servers, &r, nil
 }
 
-// UpdateAttributes will to update the data stored in a given namespace for a specific server
-func (c *ServerServiceClient) UpdateAttributes(ctx context.Context, srvUUID uuid.UUID, ns string, data json.RawMessage) error {
-	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint, ns)
-	_, _, err := c.client.put(ctx, path, Attributes{Data: data})
+// CreateAttributes will to create the given attributes for a given server
+func (c *ServerServiceClient) CreateAttributes(ctx context.Context, srvUUID uuid.UUID, attr Attributes) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint)
+	return c.client.post(ctx, path, attr)
+}
 
-	return err
+// UpdateAttributes will to update the data stored in a given namespace for a given server
+func (c *ServerServiceClient) UpdateAttributes(ctx context.Context, srvUUID uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint, ns)
+	return c.client.put(ctx, path, Attributes{Data: data})
 }
 
 // GetVersionedAttributes will return all the versioned attributes for a given server
@@ -90,5 +108,16 @@ func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUI
 // CreateVersionedAttributes will create a new versioned attribute for a given server
 func (c *ServerServiceClient) CreateVersionedAttributes(ctx context.Context, srvUUID uuid.UUID, va VersionedAttributes) (*uuid.UUID, *ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
-	return c.client.post(ctx, path, va)
+
+	resp, err := c.client.post(ctx, path, va)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	u, err := uuid.Parse(resp.Slug)
+	if err != nil {
+		return nil, resp, nil
+	}
+
+	return &u, resp, nil
 }

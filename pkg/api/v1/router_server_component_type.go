@@ -24,7 +24,7 @@ func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 		return
 	}
 
-	createdResponse(c, &dbT.ID)
+	createdResponse(c, dbT.Slug)
 }
 
 func (r *Router) serverComponentTypeList(c *gin.Context) {

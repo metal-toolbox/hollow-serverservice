@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"go.metalkube.net/hollow/internal/db"
 )
@@ -25,7 +24,7 @@ type ServerResponse struct {
 	Links            ServerResponseLinks `json:"_links,omitempty"`
 	Message          string              `json:"message,omitempty"`
 	Error            string              `json:"error,omitempty"`
-	UUID             *uuid.UUID          `json:"uuid,omitempty"`
+	Slug             string              `json:"slug,omitempty"`
 	Record           interface{}         `json:"record,omitempty"`
 	Records          interface{}         `json:"records,omitempty"`
 }
@@ -60,12 +59,12 @@ func notFoundResponse(c *gin.Context, err error) {
 	c.JSON(http.StatusNotFound, newErrorResponse("resource not found", err))
 }
 
-func createdResponse(c *gin.Context, u *uuid.UUID) {
+func createdResponse(c *gin.Context, slug string) {
 	r := &ServerResponse{
 		Message: "resource created",
-		UUID:    u,
+		Slug:    slug,
 		Links: ServerResponseLinks{
-			Self: &Link{Href: fmt.Sprintf("%s/%s", c.FullPath(), u)},
+			Self: &Link{Href: fmt.Sprintf("%s/%s", uriWithoutQueryParams(c), slug)},
 		},
 	}
 
@@ -146,6 +145,13 @@ func getURIWithQuerySet(uri url.URL, key, value string) string {
 	q.Del(key)
 	q.Add(key, value)
 	uri.RawQuery = q.Encode()
+
+	return uri.String()
+}
+
+func uriWithoutQueryParams(c *gin.Context) string {
+	uri := c.Request.URL
+	uri.RawQuery = ""
 
 	return uri.String()
 }

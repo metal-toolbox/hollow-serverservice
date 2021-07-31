@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,7 @@ type ServerComponentType struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string
+	Slug      string
 }
 
 // ServerComponentTypeFilter provides the ability to filter the server components
@@ -29,6 +31,10 @@ func (t *ServerComponentType) BeforeSave(tx *gorm.DB) (err error) {
 
 	if t.Name == "" {
 		return requiredFieldMissing("server component type", "name")
+	}
+
+	if t.Slug == "" {
+		t.Slug = slug.Make(t.Name)
 	}
 
 	return nil

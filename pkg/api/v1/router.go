@@ -26,8 +26,8 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 	rg.GET("/servers/:uuid", amw.AuthRequired(readScopes("servers")), r.serverGet)
 	rg.DELETE("/servers/:uuid", amw.AuthRequired(deleteScopes("servers")), r.serverDelete)
 
-	rg.GET("/servers/:uuid/attributes/", amw.AuthRequired(readScopes("servers", "servers:attributes")), r.serverAttributesList)
-	rg.POST("/servers/:uuid/attributes/", amw.AuthRequired(createScopes("servers", "servers:attributes")), r.serverAttributesCreate)
+	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(readScopes("servers", "servers:attributes")), r.serverAttributesList)
+	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(createScopes("servers", "servers:attributes")), r.serverAttributesCreate)
 	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(readScopes("servers", "servers:attributes")), r.serverAttributesGet)
 	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(updateScopes("servers", "servers:attributes")), r.serverAttributesUpdate)
 	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(deleteScopes("servers", "servers:attributes")), r.serverAttributesDelete)

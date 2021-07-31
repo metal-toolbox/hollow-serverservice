@@ -74,8 +74,6 @@ func (r *Router) serverAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	ns := c.Param("namespace")
-
 	var attr Attributes
 	if err := c.ShouldBindJSON(&attr); err != nil {
 		badRequestResponse(c, "invalid attributes", err)
@@ -89,14 +87,13 @@ func (r *Router) serverAttributesCreate(c *gin.Context) {
 	}
 
 	dbAttr.ServerID = &u
-	dbAttr.Namespace = ns
 
 	if err := r.Store.CreateAttributes(&dbAttr); err != nil {
 		dbFailureResponse(c, err)
 		return
 	}
 
-	createdResponse(c, &dbAttr.ID)
+	createdResponse(c, dbAttr.Namespace)
 }
 
 func (r *Router) serverAttributesUpdate(c *gin.Context) {

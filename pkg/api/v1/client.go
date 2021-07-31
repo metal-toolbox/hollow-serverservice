@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-
-	"github.com/google/uuid"
 )
 
 var apiVersion = "v1"
@@ -57,35 +55,35 @@ func (c *Client) SetToken(token string) {
 }
 
 // post provides a reusable method for a standard POST to a hollow server
-func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid.UUID, *ServerResponse, error) {
+func (c *Client) post(ctx context.Context, path string, body interface{}) (*ServerResponse, error) {
 	request, err := newPostRequest(ctx, c.url, path, body)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	r := ServerResponse{}
 
 	if err := c.do(request, &r); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return r.UUID, &r, nil
+	return &r, nil
 }
 
 // put provides a reusable method for a standard PUT to a hollow server
-func (c *Client) put(ctx context.Context, path string, body interface{}) (*uuid.UUID, *ServerResponse, error) {
+func (c *Client) put(ctx context.Context, path string, body interface{}) (*ServerResponse, error) {
 	request, err := newPutRequest(ctx, c.url, path, body)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	r := ServerResponse{}
 
 	if err := c.do(request, &r); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return r.UUID, &r, nil
+	return &r, nil
 }
 
 type queryParams interface {
