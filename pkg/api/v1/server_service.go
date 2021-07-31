@@ -21,9 +21,9 @@ type ServerService interface {
 	Get(context.Context, uuid.UUID) (*Server, *ServerResponse, error)
 	List(context.Context, *ServerListParams) ([]Server, *ServerResponse, error)
 	CreateAttributes(context.Context, uuid.UUID, Attributes) (*ServerResponse, error)
-	// DeleteAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) error
-	// GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
-	// ListAttributes(context.Context, uuid.UUID) ([]Attributes, *ServerResponse, error)
+	DeleteAttributes(ctx context.Context, u uuid.UUID, ns string) (*ServerResponse, error)
+	GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
+	ListAttributes(context.Context, uuid.UUID) ([]Attributes, *ServerResponse, error)
 	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error)
 
 	GetVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
@@ -84,6 +84,38 @@ func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams
 func (c *ServerServiceClient) CreateAttributes(ctx context.Context, srvUUID uuid.UUID, attr Attributes) (*ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint)
 	return c.client.post(ctx, path, attr)
+}
+
+// GetAttributes will get all the attributes in a namespace for a given server
+func (c *ServerServiceClient) GetAttributes(ctx context.Context, srvUUID uuid.UUID, ns string) (*Attributes, *ServerResponse, error) {
+	attrs := &Attributes{}
+	r := ServerResponse{Record: attrs}
+
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint, ns)
+	if err := c.client.get(ctx, path, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return attrs, &r, nil
+}
+
+// DeleteAttributes will attempt to delete attributes by server uuid and namespace return an error on failure
+func (c *ServerServiceClient) DeleteAttributes(ctx context.Context, srvUUID uuid.UUID, ns string) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint, ns)
+	return c.client.delete(ctx, path)
+}
+
+// ListAttributes will get all the attributes for a given server
+func (c *ServerServiceClient) ListAttributes(ctx context.Context, srvUUID uuid.UUID) ([]Attributes, *ServerResponse, error) {
+	attrs := &[]Attributes{}
+	r := ServerResponse{Records: attrs}
+
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint)
+	if err := c.client.list(ctx, path, nil, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *attrs, &r, nil
 }
 
 // UpdateAttributes will to update the data stored in a given namespace for a given server
