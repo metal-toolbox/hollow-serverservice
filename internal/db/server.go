@@ -104,3 +104,23 @@ func (s *Store) FindOrCreateServerByUUID(srvUUID uuid.UUID) (*Server, error) {
 
 	return &srv, nil
 }
+
+// UpdateServer allows you to update the name and facility of a server
+func (s *Store) UpdateServer(srvUUID uuid.UUID, newS Server) error {
+	srv, err := s.FindServerByUUID(srvUUID)
+	if err != nil {
+		return err
+	}
+
+	values := map[string]interface{}{}
+
+	if newS.Name != "" && newS.Name != srv.Name {
+		values["name"] = newS.Name
+	}
+
+	if newS.FacilityCode != "" && newS.FacilityCode != srv.FacilityCode {
+		values["facility_code"] = newS.FacilityCode
+	}
+
+	return s.db.Model(&srv).Updates(values).Error
+}

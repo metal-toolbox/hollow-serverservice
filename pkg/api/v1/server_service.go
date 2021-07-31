@@ -20,6 +20,7 @@ type ServerService interface {
 	Delete(context.Context, Server) (*ServerResponse, error)
 	Get(context.Context, uuid.UUID) (*Server, *ServerResponse, error)
 	List(context.Context, *ServerListParams) ([]Server, *ServerResponse, error)
+	Update(context.Context, uuid.UUID, Server) (*ServerResponse, error)
 	CreateAttributes(context.Context, uuid.UUID, Attributes) (*ServerResponse, error)
 	DeleteAttributes(ctx context.Context, u uuid.UUID, ns string) (*ServerResponse, error)
 	GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
@@ -78,6 +79,12 @@ func (c *ServerServiceClient) List(ctx context.Context, params *ServerListParams
 	}
 
 	return *servers, &r, nil
+}
+
+// Update will to update a server with the new values passed in
+func (c *ServerServiceClient) Update(ctx context.Context, srvUUID uuid.UUID, srv Server) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s", serversEndpoint, srvUUID)
+	return c.client.put(ctx, path, srv)
 }
 
 // CreateAttributes will to create the given attributes for a given server

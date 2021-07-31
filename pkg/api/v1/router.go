@@ -24,6 +24,7 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 	rg.GET("/servers", amw.AuthRequired(readScopes("servers")), r.serverList)
 	rg.POST("/servers", amw.AuthRequired(createScopes("servers")), r.serverCreate)
 	rg.GET("/servers/:uuid", amw.AuthRequired(readScopes("servers")), r.serverGet)
+	rg.PUT("/servers/:uuid", amw.AuthRequired(updateScopes("servers")), r.serverUpdate)
 	rg.DELETE("/servers/:uuid", amw.AuthRequired(deleteScopes("servers")), r.serverDelete)
 
 	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(readScopes("servers", "servers:attributes")), r.serverAttributesList)

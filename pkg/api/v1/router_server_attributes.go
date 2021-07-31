@@ -116,7 +116,7 @@ func (r *Router) serverAttributesUpdate(c *gin.Context) {
 		return
 	}
 
-	deletedResponse(c)
+	updatedResponse(c, ns)
 }
 
 func (r *Router) serverAttributesDelete(c *gin.Context) {

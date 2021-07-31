@@ -75,6 +75,18 @@ func deletedResponse(c *gin.Context) {
 	c.JSON(http.StatusOK, &ServerResponse{Message: "resource deleted"})
 }
 
+func updatedResponse(c *gin.Context, slug string) {
+	r := &ServerResponse{
+		Message: "resource updated",
+		Slug:    slug,
+		Links: ServerResponseLinks{
+			Self: &Link{Href: uriWithoutQueryParams(c)},
+		},
+	}
+
+	c.JSON(http.StatusOK, r)
+}
+
 func dbFailureResponse(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, newErrorResponse("datastore error", err))
 }

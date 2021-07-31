@@ -3,6 +3,7 @@ package hollow_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -524,6 +525,23 @@ func TestIntegrationServerDelete(t *testing.T) {
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
 	}
+}
+
+func TestIntegrationServerUpdate(t *testing.T) {
+	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
+		resp, err := s.Client.Server.Update(ctx, db.FixtureServerDory.ID, hollow.Server{Name: "The New Dory"})
+		if !expectError {
+			require.NoError(t, err)
+			assert.NotNil(t, resp.Links.Self)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s", db.FixtureServerDory.ID), resp.Links.Self.Href)
+		}
+
+		return err
+	})
 }
 
 func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {

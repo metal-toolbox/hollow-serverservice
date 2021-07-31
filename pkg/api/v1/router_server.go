@@ -133,6 +133,32 @@ func (r *Router) serverDelete(c *gin.Context) {
 	deletedResponse(c)
 }
 
+func (r *Router) serverUpdate(c *gin.Context) {
+	u, err := r.parseUUID(c)
+	if err != nil {
+		return
+	}
+
+	var srv Server
+	if err := c.ShouldBindJSON(&srv); err != nil {
+		badRequestResponse(c, "invalid server", err)
+		return
+	}
+
+	dbSRV, err := srv.toDBModel()
+	if err != nil {
+		badRequestResponse(c, "invalid server", err)
+		return
+	}
+
+	if err := r.Store.UpdateServer(u, *dbSRV); err != nil {
+		dbFailureResponse(c, err)
+		return
+	}
+
+	updatedResponse(c, u.String())
+}
+
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 	pager, err := parsePagination(c)
 	if err != nil {
