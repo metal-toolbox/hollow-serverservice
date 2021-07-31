@@ -50,7 +50,7 @@ func (r *Router) serverList(c *gin.Context) {
 
 	dbSRV, count, err := r.Store.GetServers(dbFilter, &pager)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -112,7 +112,7 @@ func (r *Router) serverCreate(c *gin.Context) {
 	}
 
 	if err := r.Store.CreateServer(dbSRV); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -126,7 +126,7 @@ func (r *Router) serverDelete(c *gin.Context) {
 	}
 
 	if err = r.Store.DeleteServer(dbSRV); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (r *Router) serverUpdate(c *gin.Context) {
 	}
 
 	if err := r.Store.UpdateServer(u, *dbSRV); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -174,7 +174,7 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 
 	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, &pager)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -227,7 +227,7 @@ func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 
 	err = r.Store.CreateVersionedAttributes(srv, dbVA)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 

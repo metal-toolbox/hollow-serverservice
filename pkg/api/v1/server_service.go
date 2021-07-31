@@ -11,6 +11,7 @@ import (
 const (
 	serversEndpoint                   = "servers"
 	serverAttributesEndpoint          = "attributes"
+	serverComponentsEndpoint          = "components"
 	serverVersionedAttributesEndpoint = "versioned-attributes"
 )
 
@@ -26,7 +27,7 @@ type ServerService interface {
 	GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
 	ListAttributes(context.Context, uuid.UUID) ([]Attributes, *ServerResponse, error)
 	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error)
-
+	ListComponents(context.Context, uuid.UUID) ([]ServerComponent, *ServerResponse, error)
 	GetVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*uuid.UUID, *ServerResponse, error)
 }
@@ -142,6 +143,19 @@ func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUI
 	}
 
 	return *val, &r, nil
+}
+
+// ListComponents will get all the components for a given server
+func (c *ServerServiceClient) ListComponents(ctx context.Context, srvUUID uuid.UUID) ([]ServerComponent, *ServerResponse, error) {
+	sc := &[]ServerComponent{}
+	r := ServerResponse{Records: sc}
+
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
+	if err := c.client.list(ctx, path, nil, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *sc, &r, nil
 }
 
 // CreateVersionedAttributes will create a new versioned attribute for a given server

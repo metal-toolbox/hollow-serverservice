@@ -18,7 +18,7 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 
 	dbAttrs, count, err := r.Store.GetAttributesByServerUUID(u, &pager)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (r *Router) serverAttributesCreate(c *gin.Context) {
 	dbAttr.ServerID = &u
 
 	if err := r.Store.CreateAttributes(&dbAttr); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -134,7 +134,7 @@ func (r *Router) serverAttributesDelete(c *gin.Context) {
 	}
 
 	if err = r.Store.DeleteAttributes(dbAttr); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 

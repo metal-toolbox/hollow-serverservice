@@ -92,6 +92,12 @@ func (s *Store) FindServerByUUID(srvUUID uuid.UUID) (*Server, error) {
 	return &srv, nil
 }
 
+// ServerExists will return if a server exists by the uuid in the datastore
+func (s *Store) ServerExists(srvUUID uuid.UUID) bool {
+	res := s.db.Select("id").First(&Server{}, srvUUID)
+	return res.RowsAffected == 1
+}
+
 // FindOrCreateServerByUUID will return an existing server if one already exists
 //  for the given UUID, if one doesn't exist a new one will be created
 func (s *Store) FindOrCreateServerByUUID(srvUUID uuid.UUID) (*Server, error) {

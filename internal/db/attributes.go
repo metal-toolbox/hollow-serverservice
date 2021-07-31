@@ -54,6 +54,11 @@ func (s *Store) DeleteAttributes(a *Attributes) error {
 
 // GetAttributesByServerUUID will return all the attributes for a given server UUID
 func (s *Store) GetAttributesByServerUUID(u uuid.UUID, pager *Pagination) ([]Attributes, int64, error) {
+	// if server uuid is unknown return NotFound
+	if !s.ServerExists(u) {
+		return nil, 0, ErrNotFound
+	}
+
 	var (
 		attrs []Attributes
 		count int64

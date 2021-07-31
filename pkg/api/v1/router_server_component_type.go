@@ -20,7 +20,7 @@ func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 	}
 
 	if err := r.Store.CreateServerComponentType(dbT); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -40,7 +40,7 @@ func (r *Router) serverComponentTypeList(c *gin.Context) {
 
 	dbTypes, count, err := r.Store.GetServerComponentTypes(dbFilter, &pager)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 

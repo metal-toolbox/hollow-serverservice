@@ -1,7 +1,6 @@
 package hollow
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -21,20 +20,24 @@ type Router struct {
 func (r *Router) Routes(rg *gin.RouterGroup) {
 	amw := r.AuthMW
 
-	rg.GET("/servers", amw.AuthRequired(readScopes("servers")), r.serverList)
-	rg.POST("/servers", amw.AuthRequired(createScopes("servers")), r.serverCreate)
-	rg.GET("/servers/:uuid", amw.AuthRequired(readScopes("servers")), r.serverGet)
-	rg.PUT("/servers/:uuid", amw.AuthRequired(updateScopes("servers")), r.serverUpdate)
-	rg.DELETE("/servers/:uuid", amw.AuthRequired(deleteScopes("servers")), r.serverDelete)
+	rg.GET("/servers", amw.AuthRequired(readScopes("server")), r.serverList)
+	rg.POST("/servers", amw.AuthRequired(createScopes("server")), r.serverCreate)
+	rg.GET("/servers/:uuid", amw.AuthRequired(readScopes("server")), r.serverGet)
+	rg.PUT("/servers/:uuid", amw.AuthRequired(updateScopes("server")), r.serverUpdate)
+	rg.DELETE("/servers/:uuid", amw.AuthRequired(deleteScopes("server")), r.serverDelete)
 
-	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(readScopes("servers", "servers:attributes")), r.serverAttributesList)
-	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(createScopes("servers", "servers:attributes")), r.serverAttributesCreate)
-	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(readScopes("servers", "servers:attributes")), r.serverAttributesGet)
-	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(updateScopes("servers", "servers:attributes")), r.serverAttributesUpdate)
-	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(deleteScopes("servers", "servers:attributes")), r.serverAttributesDelete)
+	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(readScopes("server", "server:attributes")), r.serverAttributesList)
+	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(createScopes("server", "server:attributes")), r.serverAttributesCreate)
+	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(readScopes("server", "server:attributes")), r.serverAttributesGet)
+	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
+	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
 
-	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(readScopes("servers", "servers:versioned-attributes")), r.serverVersionedAttributesList)
-	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(createScopes("servers", "servers:versioned-attributes")), r.serverVersionedAttributesCreate)
+	rg.GET("/servers/:uuid/components", amw.AuthRequired(readScopes("server", "server:component")), r.serverComponentList)
+	// rg.POST("/servers/:uuid/components", amw.AuthRequired(createScopes("server", "server:component")))
+	// rg.PUT("/servers/:uuid/components", amw.AuthRequired(updateScopes("server", "server:component")))
+
+	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
+	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
 
 	rg.GET("/server-component-types", amw.AuthRequired(readScopes("server-component-types")), r.serverComponentTypeList)
 	rg.POST("/server-component-types", amw.AuthRequired(updateScopes("server-component-types")), r.serverComponentTypeCreate)
@@ -93,13 +96,7 @@ func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
 
 	srv, err := r.Store.FindServerByUUID(srvUUID)
 	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			notFoundResponse(c, err)
-			return nil, err
-		}
-
-		dbFailureResponse(c, err)
-
+		dbErrorResponse(c, err)
 		return nil, err
 	}
 
@@ -114,7 +111,7 @@ func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*db.Server, error
 
 	srv, err := r.Store.FindOrCreateServerByUUID(srvUUID)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return nil, err
 	}
 

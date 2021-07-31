@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -52,6 +53,26 @@ func TestIntegrationServerListAttributes(t *testing.T) {
 
 		return err
 	})
+
+	var testCases = []struct {
+		testName string
+		srvUUID  uuid.UUID
+		errorMsg string
+	}{
+		{
+			"returns not found on missing server uuid",
+			uuid.New(),
+			"response code: 404",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.testName, func(t *testing.T) {
+			_, _, err := s.Client.Server.ListAttributes(context.TODO(), tt.srvUUID)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.errorMsg)
+		})
+	}
 }
 
 func TestIntegrationServerGetAttributes(t *testing.T) {

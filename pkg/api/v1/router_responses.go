@@ -44,19 +44,8 @@ type Link struct {
 	Href string `json:"href,omitempty"`
 }
 
-func newErrorResponse(m string, err error) *ServerResponse {
-	return &ServerResponse{
-		Message: m,
-		Error:   err.Error(),
-	}
-}
-
 func badRequestResponse(c *gin.Context, message string, err error) {
-	c.JSON(http.StatusBadRequest, newErrorResponse(message, err))
-}
-
-func notFoundResponse(c *gin.Context, err error) {
-	c.JSON(http.StatusNotFound, newErrorResponse("resource not found", err))
+	c.JSON(http.StatusBadRequest, &ServerResponse{Message: message, Error: err.Error()})
 }
 
 func createdResponse(c *gin.Context, slug string) {
@@ -89,20 +78,16 @@ func updatedResponse(c *gin.Context, slug string) {
 	c.JSON(http.StatusOK, r)
 }
 
-func dbFailureResponse(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, newErrorResponse("datastore error", err))
-}
-
 func dbErrorResponse(c *gin.Context, err error) {
 	if errors.Is(err, db.ErrNotFound) {
-		notFoundResponse(c, err)
+		c.JSON(http.StatusNotFound, &ServerResponse{Message: "resource not found", Error: err.Error()})
 	} else {
-		dbFailureResponse(c, err)
+		c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "datastore error", Error: err.Error()})
 	}
 }
 
 func failedConvertingToVersioned(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the datastore results", err))
+	c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "failed parsing the datastore results", Error: err.Error()})
 }
 
 func listResponse(c *gin.Context, i interface{}, p paginationData) {

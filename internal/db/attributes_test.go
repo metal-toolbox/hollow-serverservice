@@ -47,27 +47,45 @@ func TestGetAttributesByServerUUID(t *testing.T) {
 	s := db.DatabaseTest(t)
 
 	var testCases = []struct {
-		testName    string
-		u           uuid.UUID
-		expectUUIDs []uuid.UUID
+		testName         string
+		u                uuid.UUID
+		expectUUIDs      []uuid.UUID
+		expectedNotFound bool
 	}{
-		{"happy path", db.FixtureServerDory.ID, []uuid.UUID{db.FixtureAttributesDoryMetadata.ID, db.FixtureAttributesDoryOtherdata.ID}},
-		{"not found server uuid", uuid.New(), []uuid.UUID{}},
+		{
+			"happy path",
+			db.FixtureServerDory.ID,
+			[]uuid.UUID{
+				db.FixtureAttributesDoryMetadata.ID,
+				db.FixtureAttributesDoryOtherdata.ID,
+			},
+			false,
+		},
+		{
+			"not found server uuid",
+			uuid.New(),
+			[]uuid.UUID{},
+			true,
+		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			attrs, count, err := s.GetAttributesByServerUUID(tt.u, nil)
+			if tt.expectedNotFound {
+				assert.Error(t, err)
+				assert.ErrorIs(t, err, db.ErrNotFound)
+			} else {
+				assert.NoError(t, err)
+				assert.Len(t, attrs, int(count))
 
-			assert.NoError(t, err)
-			assert.Len(t, attrs, int(count))
+				var respIDs []uuid.UUID
+				for _, a := range attrs {
+					respIDs = append(respIDs, a.ID)
+				}
 
-			var respIDs []uuid.UUID
-			for _, a := range attrs {
-				respIDs = append(respIDs, a.ID)
+				assert.ElementsMatch(t, tt.expectUUIDs, respIDs)
 			}
-
-			assert.ElementsMatch(t, tt.expectUUIDs, respIDs)
 		})
 	}
 }
