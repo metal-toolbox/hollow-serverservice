@@ -25,9 +25,9 @@ type ServerService interface {
 	CreateAttributes(context.Context, uuid.UUID, Attributes) (*ServerResponse, error)
 	DeleteAttributes(ctx context.Context, u uuid.UUID, ns string) (*ServerResponse, error)
 	GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
-	ListAttributes(context.Context, uuid.UUID) ([]Attributes, *ServerResponse, error)
+	ListAttributes(context.Context, uuid.UUID, *PaginationParams) ([]Attributes, *ServerResponse, error)
 	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error)
-	ListComponents(context.Context, uuid.UUID) ([]ServerComponent, *ServerResponse, error)
+	ListComponents(context.Context, uuid.UUID, *PaginationParams) ([]ServerComponent, *ServerResponse, error)
 	GetVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*uuid.UUID, *ServerResponse, error)
 }
@@ -114,12 +114,12 @@ func (c *ServerServiceClient) DeleteAttributes(ctx context.Context, srvUUID uuid
 }
 
 // ListAttributes will get all the attributes for a given server
-func (c *ServerServiceClient) ListAttributes(ctx context.Context, srvUUID uuid.UUID) ([]Attributes, *ServerResponse, error) {
+func (c *ServerServiceClient) ListAttributes(ctx context.Context, srvUUID uuid.UUID, params *PaginationParams) ([]Attributes, *ServerResponse, error) {
 	attrs := &[]Attributes{}
 	r := ServerResponse{Records: attrs}
 
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverAttributesEndpoint)
-	if err := c.client.list(ctx, path, nil, &r); err != nil {
+	if err := c.client.list(ctx, path, params, &r); err != nil {
 		return nil, nil, err
 	}
 
@@ -146,12 +146,12 @@ func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUI
 }
 
 // ListComponents will get all the components for a given server
-func (c *ServerServiceClient) ListComponents(ctx context.Context, srvUUID uuid.UUID) ([]ServerComponent, *ServerResponse, error) {
+func (c *ServerServiceClient) ListComponents(ctx context.Context, srvUUID uuid.UUID, params *PaginationParams) ([]ServerComponent, *ServerResponse, error) {
 	sc := &[]ServerComponent{}
 	r := ServerResponse{Records: sc}
 
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
-	if err := c.client.list(ctx, path, nil, &r); err != nil {
+	if err := c.client.list(ctx, path, params, &r); err != nil {
 		return nil, nil, err
 	}
 

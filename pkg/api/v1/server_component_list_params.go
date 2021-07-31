@@ -19,6 +19,7 @@ type ServerComponentListParams struct {
 	ServerComponentTypeUUID      uuid.UUID
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams
+	Pagination                   *PaginationParams
 }
 
 func (p *ServerComponentListParams) empty() bool {

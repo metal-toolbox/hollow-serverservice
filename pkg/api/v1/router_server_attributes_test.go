@@ -43,7 +43,7 @@ func TestIntegrationServerListAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs, resp, err := s.Client.Server.ListAttributes(ctx, db.FixtureServerNemo.ID)
+		attrs, resp, err := s.Client.Server.ListAttributes(ctx, db.FixtureServerNemo.ID, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -68,7 +68,7 @@ func TestIntegrationServerListAttributes(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.Server.ListAttributes(context.TODO(), tt.srvUUID)
+			_, _, err := s.Client.Server.ListAttributes(context.TODO(), tt.srvUUID, nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})

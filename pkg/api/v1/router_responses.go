@@ -44,6 +44,11 @@ type Link struct {
 	Href string `json:"href,omitempty"`
 }
 
+// HasNextPage will return if there are additional resources to load on additional pages
+func (r *ServerResponse) HasNextPage() bool {
+	return r.Records != nil && (r.Links.NextCursor != nil || r.Links.Next != nil)
+}
+
 func badRequestResponse(c *gin.Context, message string, err error) {
 	c.JSON(http.StatusBadRequest, &ServerResponse{Message: message, Error: err.Error()})
 }
@@ -123,7 +128,7 @@ func listResponse(c *gin.Context, i interface{}, p paginationData) {
 
 	if p.nextCursor != "" && p.pageCount == p.pager.LimitUsed() {
 		r.NextCursor = p.nextCursor
-		r.Links.NextCursor = &Link{Href: getURIWithQuerySet(*uri, "cursor", p.nextCursor)}
+		r.Links.NextCursor = &Link{Href: getURIWithCursor(*uri, p.nextCursor)}
 	}
 
 	c.JSON(http.StatusOK, r)
@@ -143,6 +148,16 @@ func getURIWithQuerySet(uri url.URL, key, value string) string {
 	q := uri.Query()
 	q.Del(key)
 	q.Add(key, value)
+	uri.RawQuery = q.Encode()
+
+	return uri.String()
+}
+
+func getURIWithCursor(uri url.URL, value string) string {
+	q := uri.Query()
+	q.Del("cursor")
+	q.Del("page")
+	q.Add("cursor", value)
 	uri.RawQuery = q.Encode()
 
 	return uri.String()

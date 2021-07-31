@@ -17,7 +17,7 @@ func TestIntegrationServerListComponents(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs, _, err := s.Client.Server.ListComponents(ctx, db.FixtureServerNemo.ID)
+		attrs, _, err := s.Client.Server.ListComponents(ctx, db.FixtureServerNemo.ID, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, attrs, 2)
@@ -40,7 +40,7 @@ func TestIntegrationServerListComponents(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.Server.ListComponents(context.TODO(), tt.srvUUID)
+			_, _, err := s.Client.Server.ListComponents(context.TODO(), tt.srvUUID, nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})

@@ -4,16 +4,18 @@ import "net/url"
 
 // ServerComponentTypeListParams allows you to filter the results
 type ServerComponentTypeListParams struct {
-	pagination
-	Name string
+	Name             string
+	PaginationParams *PaginationParams
 }
 
-func (f *ServerComponentTypeListParams) setQuery(q url.Values) {
-	if f == nil {
+func (p *ServerComponentTypeListParams) setQuery(q url.Values) {
+	if p == nil {
 		return
 	}
 
-	if f.Name != "" {
-		q.Set("name", f.Name)
+	if p.Name != "" {
+		q.Set("name", p.Name)
 	}
+
+	p.PaginationParams.setQuery(q)
 }

@@ -8,11 +8,11 @@ import (
 
 // ServerListParams allows you to filter the results
 type ServerListParams struct {
-	pagination
 	FacilityCode                 string `form:"facility-code"`
 	ComponentListParams          []ServerComponentListParams
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams
+	PaginationParams             *PaginationParams
 }
 
 func (p *ServerListParams) setQuery(q url.Values) {
@@ -27,6 +27,7 @@ func (p *ServerListParams) setQuery(q url.Values) {
 	encodeAttributesListParams(p.AttributeListParams, "attr", q)
 	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
 	encodeServerComponentListParams(p.ComponentListParams, q)
+	p.PaginationParams.setQuery(q)
 }
 
 func (p *ServerListParams) dbFilter() (*db.ServerFilter, error) {

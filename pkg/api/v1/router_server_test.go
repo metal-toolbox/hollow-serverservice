@@ -457,6 +457,52 @@ func TestIntegrationServerList(t *testing.T) {
 	}
 }
 
+func TestIntegrationServerListPagination(t *testing.T) {
+	s := serverTest(t)
+	s.Client.SetToken(validToken([]string{"read", "write"}))
+
+	p := &hollow.ServerListParams{PaginationParams: &hollow.PaginationParams{Limit: 2, Page: 1}}
+	r, resp, err := s.Client.Server.List(context.TODO(), p)
+
+	assert.NoError(t, err)
+	assert.Len(t, r, 2)
+	assert.Equal(t, db.FixtureServer[2].ID, r[0].UUID)
+	assert.Equal(t, db.FixtureServer[1].ID, r[1].UUID)
+
+	assert.EqualValues(t, 2, resp.PageCount)
+	assert.EqualValues(t, 2, resp.TotalPages)
+	assert.EqualValues(t, 3, resp.TotalRecordCount)
+	// Since we have a next page let's make sure all the links are set
+	assert.NotEmpty(t, resp.NextCursor)
+	assert.NotNil(t, resp.Links.NextCursor)
+	assert.NotNil(t, resp.Links.Next)
+	assert.Nil(t, resp.Links.Previous)
+	assert.True(t, resp.HasNextPage())
+
+	//
+	// Get the next page and verify the results
+	//
+	resp, err = s.Client.NextPage(context.TODO(), *resp, &r)
+
+	assert.NoError(t, err)
+	assert.Len(t, r, 1)
+	assert.Equal(t, db.FixtureServer[0].ID, r[0].UUID)
+
+	assert.EqualValues(t, 1, resp.PageCount)
+
+	// we should have followed the cursor so first/previous/next/last links shouldn't be set
+	// but there is another page so we should have a next cursor link. Total counts are not includes
+	// cursor pages
+	assert.EqualValues(t, 0, resp.TotalPages)
+	assert.EqualValues(t, 0, resp.TotalRecordCount)
+	assert.Nil(t, resp.Links.First)
+	assert.Nil(t, resp.Links.Previous)
+	assert.Nil(t, resp.Links.Next)
+	assert.Nil(t, resp.Links.Last)
+	assert.Nil(t, resp.Links.NextCursor)
+	assert.False(t, resp.HasNextPage())
+}
+
 func TestIntegrationServerCreate(t *testing.T) {
 	s := serverTest(t)
 

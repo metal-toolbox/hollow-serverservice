@@ -2,8 +2,14 @@ package hollow
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+)
+
+var (
+	// ErrNoNextPage is the error returned when there is not an additional page of resources
+	ErrNoNextPage = errors.New("no next page found")
 )
 
 // ClientError is returned when invalid arguments are provided to the client
