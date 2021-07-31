@@ -60,15 +60,17 @@ func notFoundResponse(c *gin.Context, err error) {
 }
 
 func createdResponse(c *gin.Context, slug string) {
+	uri := fmt.Sprintf("%s/%s", uriWithoutQueryParams(c), slug)
 	r := &ServerResponse{
 		Message: "resource created",
 		Slug:    slug,
 		Links: ServerResponseLinks{
-			Self: &Link{Href: fmt.Sprintf("%s/%s", uriWithoutQueryParams(c), slug)},
+			Self: &Link{Href: uri},
 		},
 	}
 
-	c.JSON(http.StatusOK, r)
+	c.Header("Location", uri)
+	c.JSON(http.StatusCreated, r)
 }
 
 func deletedResponse(c *gin.Context) {

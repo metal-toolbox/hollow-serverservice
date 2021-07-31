@@ -463,10 +463,13 @@ func TestIntegrationServerCreate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, _, err := s.Client.Server.Create(ctx, testServer)
+		id, resp, err := s.Client.Server.Create(ctx, testServer)
 		if !expectError {
-			assert.NotNil(t, res)
-			assert.Equal(t, testServer.UUID.String(), res.String())
+			require.NoError(t, err)
+			assert.NotNil(t, id)
+			assert.Equal(t, testServer.UUID.String(), id.String())
+			assert.NotNil(t, resp.Links.Self)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s", id), resp.Links.Self.Href)
 		}
 
 		return err
