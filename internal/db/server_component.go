@@ -33,7 +33,7 @@ type ServerComponentFilter struct {
 	Vendor                     string
 	Model                      string
 	Serial                     string
-	ServerComponentTypeID      *uuid.UUID
+	ServerComponentTypeID      uuid.UUID
 	AttributesFilters          []AttributesFilter
 	VersionedAttributesFilters []AttributesFilter
 }
@@ -57,25 +57,18 @@ func (c *ServerComponent) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (f *ServerComponentFilter) apply(d *gorm.DB) *gorm.DB {
-	if f.Name != "" {
-		d = d.Where("name = ?", f.Name)
+	whereConds := &ServerComponent{
+		Name:   f.Name,
+		Vendor: f.Vendor,
+		Model:  f.Model,
+		Serial: f.Serial,
 	}
 
-	if f.Vendor != "" {
-		d = d.Where("vendor = ?", f.Vendor)
+	if f.ServerComponentTypeID.String() != uuid.Nil.String() {
+		whereConds.ServerComponentTypeID = f.ServerComponentTypeID
 	}
 
-	if f.Model != "" {
-		d = d.Where("model = ?", f.Model)
-	}
-
-	if f.Serial != "" {
-		d = d.Where("serial = ?", f.Serial)
-	}
-
-	if f.ServerComponentTypeID != nil {
-		d = d.Where("server_component_type_id = ?", f.ServerComponentTypeID)
-	}
+	d = d.Where(whereConds)
 
 	if f.AttributesFilters != nil {
 		for i, af := range f.AttributesFilters {
@@ -114,7 +107,7 @@ func (f *ServerComponentFilter) nestedApply(d *gorm.DB, i int) *gorm.DB {
 		d = d.Where(joinName+".serial = ?", f.Serial)
 	}
 
-	if f.ServerComponentTypeID != nil {
+	if f.ServerComponentTypeID.String() != uuid.Nil.String() {
 		d = d.Where(joinName+".server_component_type_id = ?", f.ServerComponentTypeID)
 	}
 

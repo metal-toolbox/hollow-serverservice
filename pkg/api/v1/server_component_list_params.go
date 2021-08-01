@@ -59,7 +59,7 @@ func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]
 
 			fmt.Printf("Found Type By Slug, Setting ID to: %s\n\n", sct.ID)
 
-			dbF.ServerComponentTypeID = &sct.ID
+			dbF.ServerComponentTypeID = sct.ID
 		}
 
 		dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
