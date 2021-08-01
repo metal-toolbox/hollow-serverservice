@@ -30,7 +30,7 @@ func (p *ServerListParams) setQuery(q url.Values) {
 	p.PaginationParams.setQuery(q)
 }
 
-func (p *ServerListParams) dbFilter() (*db.ServerFilter, error) {
+func (p *ServerListParams) dbFilter(r *Router) (*db.ServerFilter, error) {
 	var err error
 
 	dbF := &db.ServerFilter{
@@ -47,7 +47,7 @@ func (p *ServerListParams) dbFilter() (*db.ServerFilter, error) {
 		return nil, err
 	}
 
-	dbF.ComponentFilters, err = convertToDBComponentFilter(p.ComponentListParams)
+	dbF.ComponentFilters, err = convertToDBComponentFilter(r, p.ComponentListParams)
 	if err != nil {
 		return nil, err
 	}

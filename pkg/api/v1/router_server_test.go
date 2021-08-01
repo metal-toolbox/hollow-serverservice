@@ -383,6 +383,19 @@ func TestIntegrationServerList(t *testing.T) {
 			"",
 		},
 		{
+			"search by a component slug",
+			&hollow.ServerListParams{
+				ComponentListParams: []hollow.ServerComponentListParams{
+					{
+						ServerComponentType: db.FixtureSCTFins.Slug,
+					},
+				},
+			},
+			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			false,
+			"",
+		},
+		{
 			"search for devices with a versioned attributes in a namespace with key that exists",
 			&hollow.ServerListParams{
 				VersionedAttributeListParams: []hollow.AttributeListParams{

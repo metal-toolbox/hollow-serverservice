@@ -36,6 +36,7 @@ clean: docker-clean
 
 vendor:
 	@go mod download
+	@go mod tidy
 
 docker-up:
 	@docker-compose up -d db

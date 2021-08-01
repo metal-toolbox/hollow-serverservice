@@ -33,7 +33,7 @@ type ServerComponentFilter struct {
 	Vendor                     string
 	Model                      string
 	Serial                     string
-	ServerComponentTypeID      uuid.UUID
+	ServerComponentTypeID      *uuid.UUID
 	AttributesFilters          []AttributesFilter
 	VersionedAttributesFilters []AttributesFilter
 }
@@ -73,8 +73,8 @@ func (f *ServerComponentFilter) apply(d *gorm.DB) *gorm.DB {
 		d = d.Where("serial = ?", f.Serial)
 	}
 
-	if f.ServerComponentTypeID.String() != uuid.Nil.String() {
-		d = d.Where("server_component_type_id = ?", f.Name)
+	if f.ServerComponentTypeID != nil {
+		d = d.Where("server_component_type_id = ?", f.ServerComponentTypeID)
 	}
 
 	if f.AttributesFilters != nil {
@@ -114,8 +114,8 @@ func (f *ServerComponentFilter) nestedApply(d *gorm.DB, i int) *gorm.DB {
 		d = d.Where(joinName+".serial = ?", f.Serial)
 	}
 
-	if f.ServerComponentTypeID.String() != uuid.Nil.String() {
-		d = d.Where(joinName+".server_component_type_id = ?", f.Name)
+	if f.ServerComponentTypeID != nil {
+		d = d.Where(joinName+".server_component_type_id = ?", f.ServerComponentTypeID)
 	}
 
 	if f.AttributesFilters != nil {

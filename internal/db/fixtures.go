@@ -13,7 +13,7 @@ var (
 	FixtureNamespaceOtherdata = "hollow.other_data"
 	FixtureNamespaceVersioned = "hollow.versioned"
 
-	FixtureSCTFins = ServerComponentType{ID: uuid.New(), Name: "Fins"}
+	FixtureSCTFins = ServerComponentType{ID: uuid.New(), Name: "Fins", Slug: "fins"}
 
 	FixtureAttributesNemoMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"age":6,"location":"Fishbowl"}`))}
 	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"age":12,"location":"East Austalian Current"}`))}

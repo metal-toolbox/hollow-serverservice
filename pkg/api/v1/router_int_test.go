@@ -27,8 +27,10 @@ func serverTest(t *testing.T) *integrationServer {
 
 	store := db.DatabaseTest(t)
 
+	l, _ := zap.NewDevelopment()
+
 	hs := hollowserver.Server{
-		Logger: zap.NewNop(),
+		Logger: l,
 		Store:  store,
 		AuthConfig: hollowserver.AuthConfig{
 			Audience: "hollow.test",

@@ -5,7 +5,6 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"go.metalkube.net/hollow/internal/db"
 )
@@ -16,7 +15,7 @@ type ServerComponentListParams struct {
 	Vendor                       string
 	Model                        string
 	Serial                       string
-	ServerComponentTypeUUID      uuid.UUID
+	ServerComponentType          string
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams
 	Pagination                   *PaginationParams
@@ -28,7 +27,7 @@ func (p *ServerComponentListParams) empty() bool {
 		p.Vendor != "",
 		p.Model != "",
 		p.Serial != "",
-		p.ServerComponentTypeUUID.String() != uuid.Nil.String(),
+		p.ServerComponentType != "",
 		len(p.AttributeListParams) != 0,
 		len(p.VersionedAttributeListParams) != 0:
 		return false
@@ -37,18 +36,30 @@ func (p *ServerComponentListParams) empty() bool {
 	}
 }
 
-func convertToDBComponentFilter(sclp []ServerComponentListParams) ([]db.ServerComponentFilter, error) {
+func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]db.ServerComponentFilter, error) {
 	var err error
 
 	dbFilters := []db.ServerComponentFilter{}
 
 	for _, p := range sclp {
 		dbF := db.ServerComponentFilter{
-			Name:                  p.Name,
-			Vendor:                p.Vendor,
-			Model:                 p.Model,
-			Serial:                p.Serial,
-			ServerComponentTypeID: p.ServerComponentTypeUUID,
+			Name:   p.Name,
+			Vendor: p.Vendor,
+			Model:  p.Model,
+			Serial: p.Serial,
+		}
+
+		if p.ServerComponentType != "" {
+			fmt.Printf("\n\n\nLooking Up Slug: %s\n\n", p.ServerComponentType)
+
+			sct, err := r.Store.FindServerComponentTypeBySlug(p.ServerComponentType)
+			if err != nil {
+				return nil, err
+			}
+
+			fmt.Printf("Found Type By Slug, Setting ID to: %s\n\n", sct.ID)
+
+			dbF.ServerComponentTypeID = &sct.ID
 		}
 
 		dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
@@ -69,67 +80,58 @@ func convertToDBComponentFilter(sclp []ServerComponentListParams) ([]db.ServerCo
 
 func encodeServerComponentListParams(sclp []ServerComponentListParams, q url.Values) {
 	for i, sp := range sclp {
-		keyPrefix := fmt.Sprintf("sc_%d_", i)
+		keyPrefix := fmt.Sprintf("sc_%d", i)
 
 		if sp.Name != "" {
-			q.Set(keyPrefix+"name", sp.Name)
+			q.Set(keyPrefix+"[name]", sp.Name)
 		}
 
 		if sp.Vendor != "" {
-			q.Set(keyPrefix+"vendor", sp.Vendor)
+			q.Set(keyPrefix+"[vendor]", sp.Vendor)
 		}
 
 		if sp.Model != "" {
-			q.Set(keyPrefix+"model", sp.Model)
+			q.Set(keyPrefix+"[model]", sp.Model)
 		}
 
 		if sp.Serial != "" {
-			q.Set(keyPrefix+"serial", sp.Serial)
+			q.Set(keyPrefix+"[serial]", sp.Serial)
 		}
 
-		if sp.ServerComponentTypeUUID.String() != uuid.Nil.String() {
-			q.Set(keyPrefix+"server_component_type_uuid", sp.Name)
+		if sp.ServerComponentType != "" {
+			q.Set(keyPrefix+"[type]", sp.ServerComponentType)
 		}
 
-		encodeAttributesListParams(sp.AttributeListParams, keyPrefix+"attr", q)
-		encodeAttributesListParams(sp.VersionedAttributeListParams, keyPrefix+"ver_attr", q)
+		encodeAttributesListParams(sp.AttributeListParams, keyPrefix+"_attr", q)
+		encodeAttributesListParams(sp.VersionedAttributeListParams, keyPrefix+"_ver_attr", q)
 	}
 }
 
 func parseQueryServerComponentsListParams(c *gin.Context) ([]ServerComponentListParams, error) {
-	var err error
-
 	sclp := []ServerComponentListParams{}
 	i := 0
 
 	for {
-		keyPrefix := fmt.Sprintf("sc_%d_", i)
+		keyPrefix := fmt.Sprintf("sc_%d", i)
 
-		var u uuid.UUID
-
-		if c.Query(keyPrefix+"server_component_type_uuid") != "" {
-			u, err = uuid.Parse(c.Query(keyPrefix + "server_component_type_uuid"))
-			if err != nil {
-				return nil, err
-			}
-		}
+		queryMap := c.QueryMap(keyPrefix)
 
 		p := ServerComponentListParams{
-			Name:                    c.Query(keyPrefix + "name"),
-			Vendor:                  c.Query(keyPrefix + "vendor"),
-			Model:                   c.Query(keyPrefix + "model"),
-			Serial:                  c.Query(keyPrefix + "serial"),
-			ServerComponentTypeUUID: u,
+			Name:                queryMap["name"],
+			Vendor:              queryMap["vendor"],
+			Model:               queryMap["model"],
+			Serial:              queryMap["serial"],
+			ServerComponentType: queryMap["type"],
 		}
 
-		alp, err := parseQueryAttributesListParams(c, keyPrefix+"attr")
+		alp, err := parseQueryAttributesListParams(c, keyPrefix+"_attr")
 		if err != nil {
 			return nil, err
 		}
 
 		p.AttributeListParams = alp
 
-		valp, err := parseQueryAttributesListParams(c, keyPrefix+"ver_attr")
+		valp, err := parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
 		if err != nil {
 			return nil, err
 		}

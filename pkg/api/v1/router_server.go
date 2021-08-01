@@ -42,7 +42,7 @@ func (r *Router) serverList(c *gin.Context) {
 
 	params.ComponentListParams = sclp
 
-	dbFilter, err := params.dbFilter()
+	dbFilter, err := params.dbFilter(r)
 	if err != nil {
 		badRequestResponse(c, "invalid list params", err)
 		return
