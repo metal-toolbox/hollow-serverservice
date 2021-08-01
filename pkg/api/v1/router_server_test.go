@@ -29,7 +29,7 @@ var testServer = hollow.Server{
 					Data:      json.RawMessage([]byte(`{"firmware":1}`)),
 				},
 			},
-			ComponentTypeUUID: db.FixtureSCTFins.ID,
+			ComponentTypeID: db.FixtureSCTFins.Slug,
 		},
 	},
 	Attributes: []hollow.Attributes{
@@ -630,7 +630,7 @@ func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 	assert.Equal(t, "Xeon 123", hc.Model)
 	assert.Equal(t, "Intel", hc.Vendor)
 	assert.Equal(t, "987654321", hc.Serial)
-	assert.Equal(t, db.FixtureSCTFins.ID, hc.ComponentTypeUUID)
+	assert.Equal(t, db.FixtureSCTFins.Slug, hc.ComponentTypeID)
 	assert.Equal(t, "Fins", hc.ComponentTypeName)
 
 	assert.Len(t, hc.Attributes, 1)

@@ -43,7 +43,7 @@ func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 1)
-			assert.Equal(t, db.FixtureSCTFins.Slug, r[0].Slug)
+			assert.Equal(t, db.FixtureSCTFins.Slug, r[0].ID)
 			assert.Equal(t, db.FixtureSCTFins.Name, r[0].Name)
 			assert.NotNil(t, resp)
 			assert.NotNil(t, resp.Links.Self)

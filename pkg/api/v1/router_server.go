@@ -105,7 +105,7 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
-	dbSRV, err := srv.toDBModel()
+	dbSRV, err := srv.toDBModel(r.Store)
 	if err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
@@ -145,7 +145,7 @@ func (r *Router) serverUpdate(c *gin.Context) {
 		return
 	}
 
-	dbSRV, err := srv.toDBModel()
+	dbSRV, err := srv.toDBModel(r.Store)
 	if err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
