@@ -132,8 +132,9 @@ func TestUpdateAttributesByServerUUIDAndNamespace(t *testing.T) {
 		expectedNotFound bool
 	}{
 		{"happy path", db.FixtureServerDory.ID, db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age":12,"location":"Fishbowl"}`)), false},
-		{"not found server uuid", uuid.New(), db.FixtureNamespaceMetadata, json.RawMessage{}, true},
-		{"not found namespace", db.FixtureServerDory.ID, "unknown", json.RawMessage{}, true},
+		{"happy path - not found server uuid", uuid.New(), db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age":12,"location":"Fishbowl"}`)), false},
+		{"happy path - not found namespace", db.FixtureServerDory.ID, "unknown", json.RawMessage([]byte(`{"age":12,"location":"Fishbowl"}`)), false},
+		{"no namespace provided", db.FixtureServerDory.ID, "", json.RawMessage{}, false},
 	}
 
 	for _, tt := range testCases {
