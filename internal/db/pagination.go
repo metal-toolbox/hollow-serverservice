@@ -22,9 +22,7 @@ type Pagination struct {
 
 func paginate(p Pagination) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		// Sorting is currently forced to created_at to ensure the cursor works. Eventually this will be updated to support
-		// additional fields
-		db = db.Order("created_at DESC").Limit(p.LimitUsed())
+		db = db.Limit(p.LimitUsed())
 
 		switch {
 		case p.Cursor != nil:

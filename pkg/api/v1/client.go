@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 var apiVersion = "v1"
@@ -66,6 +67,11 @@ func (c *Client) NextPage(ctx context.Context, resp ServerResponse, recs interfa
 		uri = resp.Links.NextCursor.Href
 	} else {
 		uri = resp.Links.Next.Href
+	}
+
+	// for some reason in production the links are only the path
+	if strings.HasPrefix(uri, "/api") {
+		uri = c.url + uri
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)

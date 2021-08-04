@@ -68,7 +68,16 @@ func (s *Store) GetServers(filter *ServerFilter, pager *Pagination) ([]Server, i
 		pager = &Pagination{}
 	}
 
-	if err := d.Scopes(paginate(*pager)).Select("distinct servers.*").Find(&srvs).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+	d = d.Order("servers.created_at DESC").Limit(pager.LimitUsed())
+
+	switch {
+	case pager.Cursor != nil:
+		d = d.Where("servers.created_at < ?", pager.Cursor)
+	case pager.Page != 0:
+		d = d.Offset(pager.Offset())
+	}
+
+	if err := d.Select("distinct servers.*").Find(&srvs).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
