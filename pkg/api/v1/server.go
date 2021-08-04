@@ -47,7 +47,7 @@ func (s *Server) fromDBModel(dbS db.Server) error {
 	return nil
 }
 
-func (s *Server) toDBModel() (*db.Server, error) {
+func (s *Server) toDBModel(store *db.Store) (*db.Server, error) {
 	dbS := &db.Server{
 		ID:           s.UUID,
 		Name:         s.Name,
@@ -55,7 +55,7 @@ func (s *Server) toDBModel() (*db.Server, error) {
 	}
 
 	for _, c := range s.Components {
-		dbC, err := c.toDBModel()
+		dbC, err := c.toDBModel(store)
 		if err != nil {
 			return nil, err
 		}

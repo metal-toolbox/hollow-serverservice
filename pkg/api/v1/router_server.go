@@ -42,7 +42,7 @@ func (r *Router) serverList(c *gin.Context) {
 
 	params.ComponentListParams = sclp
 
-	dbFilter, err := params.dbFilter()
+	dbFilter, err := params.dbFilter(r)
 	if err != nil {
 		badRequestResponse(c, "invalid list params", err)
 		return
@@ -50,7 +50,7 @@ func (r *Router) serverList(c *gin.Context) {
 
 	dbSRV, count, err := r.Store.GetServers(dbFilter, &pager)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -105,18 +105,18 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
-	dbSRV, err := srv.toDBModel()
+	dbSRV, err := srv.toDBModel(r.Store)
 	if err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
 	}
 
 	if err := r.Store.CreateServer(dbSRV); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
-	createdResponse(c, &dbSRV.ID)
+	createdResponse(c, dbSRV.ID.String())
 }
 
 func (r *Router) serverDelete(c *gin.Context) {
@@ -126,11 +126,37 @@ func (r *Router) serverDelete(c *gin.Context) {
 	}
 
 	if err = r.Store.DeleteServer(dbSRV); err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
 	deletedResponse(c)
+}
+
+func (r *Router) serverUpdate(c *gin.Context) {
+	u, err := r.parseUUID(c)
+	if err != nil {
+		return
+	}
+
+	var srv Server
+	if err := c.ShouldBindJSON(&srv); err != nil {
+		badRequestResponse(c, "invalid server", err)
+		return
+	}
+
+	dbSRV, err := srv.toDBModel(r.Store)
+	if err != nil {
+		badRequestResponse(c, "invalid server", err)
+		return
+	}
+
+	if err := r.Store.UpdateServer(u, *dbSRV); err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	updatedResponse(c, u.String())
 }
 
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
@@ -148,7 +174,7 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 
 	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, &pager)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -201,9 +227,9 @@ func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 
 	err = r.Store.CreateVersionedAttributes(srv, dbVA)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return
 	}
 
-	createdResponse(c, &dbVA.ID)
+	createdResponse(c, dbVA.ID.String())
 }

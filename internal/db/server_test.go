@@ -590,3 +590,50 @@ func TestGetServerPagination(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateServer(t *testing.T) {
+	s := db.DatabaseTest(t)
+
+	var testCases = []struct {
+		testName    string
+		srvUUID     uuid.UUID
+		newValues   db.Server
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			"happy path - existing server",
+			db.FixtureServerDory.ID,
+			db.Server{Name: "Not Dory", FacilityCode: "Somewhere"},
+			false,
+			"",
+		},
+		{
+			"no changes - existing server",
+			db.FixtureServerDory.ID,
+			db.Server{Name: db.FixtureServerDory.Name, FacilityCode: db.FixtureServerDory.FacilityCode},
+			false,
+			"",
+		},
+		{
+			"server not found",
+			uuid.New(),
+			db.Server{},
+			true,
+			"something not found",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.testName, func(t *testing.T) {
+			err := s.UpdateServer(tt.srvUUID, tt.newValues)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Errorf(t, err, tt.errorMsg)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

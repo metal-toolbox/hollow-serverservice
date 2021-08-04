@@ -4,8 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-
-	"github.com/google/uuid"
+	"strings"
 )
 
 var apiVersion = "v1"
@@ -56,36 +55,66 @@ func (c *Client) SetToken(token string) {
 	c.authToken = token
 }
 
+// NextPage will update the server response with the next page of results
+func (c *Client) NextPage(ctx context.Context, resp ServerResponse, recs interface{}) (*ServerResponse, error) {
+	if !resp.HasNextPage() {
+		return nil, ErrNoNextPage
+	}
+
+	var uri string
+	// prefer the cursor for going through pages as long as it is available
+	if resp.Links.NextCursor != nil {
+		uri = resp.Links.NextCursor.Href
+	} else {
+		uri = resp.Links.Next.Href
+	}
+
+	// for some reason in production the links are only the path
+	if strings.HasPrefix(uri, "/api") {
+		uri = c.url + uri
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := ServerResponse{Records: &recs}
+	err = c.do(req, &r)
+
+	return &r, err
+}
+
 // post provides a reusable method for a standard POST to a hollow server
-func (c *Client) post(ctx context.Context, path string, body interface{}) (*uuid.UUID, *ServerResponse, error) {
+func (c *Client) post(ctx context.Context, path string, body interface{}) (*ServerResponse, error) {
 	request, err := newPostRequest(ctx, c.url, path, body)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	r := ServerResponse{}
 
 	if err := c.do(request, &r); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return r.UUID, &r, nil
+	return &r, nil
 }
 
 // put provides a reusable method for a standard PUT to a hollow server
-func (c *Client) put(ctx context.Context, path string, body interface{}) (*uuid.UUID, *ServerResponse, error) {
+func (c *Client) put(ctx context.Context, path string, body interface{}) (*ServerResponse, error) {
 	request, err := newPutRequest(ctx, c.url, path, body)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	r := ServerResponse{}
 
 	if err := c.do(request, &r); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return r.UUID, &r, nil
+	return &r, nil
 }
 
 type queryParams interface {

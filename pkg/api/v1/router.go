@@ -1,8 +1,7 @@
 package hollow
 
 import (
-	"errors"
-	"net/http"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,33 +20,83 @@ type Router struct {
 func (r *Router) Routes(rg *gin.RouterGroup) {
 	amw := r.AuthMW
 
-	rg.GET("/servers", amw.AuthRequired([]string{"read"}), r.serverList)
-	rg.POST("/servers", amw.AuthRequired([]string{"create", "write"}), r.serverCreate)
-	rg.GET("/servers/:uuid", amw.AuthRequired([]string{"read"}), r.serverGet)
-	rg.DELETE("/servers/:uuid", amw.AuthRequired([]string{"write"}), r.serverDelete)
-	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired([]string{"read"}), r.serverVersionedAttributesList)
-	rg.PUT("/servers/:uuid/versioned-attributes", amw.AuthRequired([]string{"create", "create:versionedattributes", "write"}), r.serverVersionedAttributesCreate)
+	rg.GET("/servers", amw.AuthRequired(readScopes("server")), r.serverList)
+	rg.POST("/servers", amw.AuthRequired(createScopes("server")), r.serverCreate)
+	rg.GET("/servers/:uuid", amw.AuthRequired(readScopes("server")), r.serverGet)
+	rg.PUT("/servers/:uuid", amw.AuthRequired(updateScopes("server")), r.serverUpdate)
+	rg.DELETE("/servers/:uuid", amw.AuthRequired(deleteScopes("server")), r.serverDelete)
 
-	rg.GET("/server-component-types", amw.AuthRequired([]string{"read"}), r.serverComponentTypeList)
-	rg.POST("/server-component-types", amw.AuthRequired([]string{"create", "write"}), r.serverComponentTypeCreate)
+	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(readScopes("server", "server:attributes")), r.serverAttributesList)
+	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(createScopes("server", "server:attributes")), r.serverAttributesCreate)
+	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(readScopes("server", "server:attributes")), r.serverAttributesGet)
+	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
+	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
+
+	rg.GET("/servers/:uuid/components", amw.AuthRequired(readScopes("server", "server:component")), r.serverComponentList)
+	// rg.POST("/servers/:uuid/components", amw.AuthRequired(createScopes("server", "server:component")))
+	// rg.PUT("/servers/:uuid/components", amw.AuthRequired(updateScopes("server", "server:component")))
+
+	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
+	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
+
+	rg.GET("/server-component-types", amw.AuthRequired(readScopes("server-component-types")), r.serverComponentTypeList)
+	rg.POST("/server-component-types", amw.AuthRequired(updateScopes("server-component-types")), r.serverComponentTypeCreate)
+}
+
+func createScopes(items ...string) []string {
+	s := []string{"write", "create"}
+	for _, i := range items {
+		s = append(s, fmt.Sprintf("create:%s", i))
+	}
+
+	return s
+}
+
+func readScopes(items ...string) []string {
+	s := []string{"read"}
+	for _, i := range items {
+		s = append(s, fmt.Sprintf("read:%s", i))
+	}
+
+	return s
+}
+
+func updateScopes(items ...string) []string {
+	s := []string{"write", "update"}
+	for _, i := range items {
+		s = append(s, fmt.Sprintf("update:%s", i))
+	}
+
+	return s
+}
+
+func deleteScopes(items ...string) []string {
+	s := []string{"write", "delete"}
+	for _, i := range items {
+		s = append(s, fmt.Sprintf("delete:%s", i))
+	}
+
+	return s
+}
+
+func (r *Router) parseUUID(c *gin.Context) (uuid.UUID, error) {
+	u, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		badRequestResponse(c, "failed to parse uuid", err)
+	}
+
+	return u, err
 }
 
 func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
-	srvUUID, err := uuid.Parse(c.Param("uuid"))
+	srvUUID, err := r.parseUUID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server uuid", "error": err.Error()})
 		return nil, err
 	}
 
 	srv, err := r.Store.FindServerByUUID(srvUUID)
 	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			notFoundResponse(c, err)
-			return nil, err
-		}
-
-		dbFailureResponse(c, err)
-
+		dbErrorResponse(c, err)
 		return nil, err
 	}
 
@@ -55,15 +104,14 @@ func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
 }
 
 func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*db.Server, error) {
-	srvUUID, err := uuid.Parse(c.Param("uuid"))
+	srvUUID, err := r.parseUUID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid server uuid", "error": err.Error()})
 		return nil, err
 	}
 
 	srv, err := r.Store.FindOrCreateServerByUUID(srvUUID)
 	if err != nil {
-		dbFailureResponse(c, err)
+		dbErrorResponse(c, err)
 		return nil, err
 	}
 

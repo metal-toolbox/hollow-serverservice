@@ -38,6 +38,15 @@ type ServerComponentFilter struct {
 	VersionedAttributesFilters []AttributesFilter
 }
 
+func serverComponentPreload(db *gorm.DB) *gorm.DB {
+	d := db.Preload("VersionedAttributes",
+		"(created_at, namespace, server_component_id) IN (?)",
+		db.Table("versioned_attributes").Select("max(created_at), namespace, server_component_id").Group("namespace").Group("server_component_id"),
+	)
+
+	return d.Preload("Attributes").Preload("ServerComponentType")
+}
+
 // BeforeSave ensures that the server component type passes validation checks
 func (c *ServerComponent) BeforeSave(tx *gorm.DB) (err error) {
 	if c.ID.String() == uuid.Nil.String() {
@@ -47,7 +56,36 @@ func (c *ServerComponent) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (f *ServerComponentFilter) apply(d *gorm.DB, i int) *gorm.DB {
+func (f *ServerComponentFilter) apply(d *gorm.DB) *gorm.DB {
+	whereConds := &ServerComponent{
+		Name:   f.Name,
+		Vendor: f.Vendor,
+		Model:  f.Model,
+		Serial: f.Serial,
+	}
+
+	if f.ServerComponentTypeID.String() != uuid.Nil.String() {
+		whereConds.ServerComponentTypeID = f.ServerComponentTypeID
+	}
+
+	d = d.Where(whereConds)
+
+	if f.AttributesFilters != nil {
+		for i, af := range f.AttributesFilters {
+			d = af.applyServerComponent(d, "server_components", i)
+		}
+	}
+
+	if f.VersionedAttributesFilters != nil {
+		for i, af := range f.VersionedAttributesFilters {
+			d = af.applyVersionedServerComponent(d, "server_components", i)
+		}
+	}
+
+	return d
+}
+
+func (f *ServerComponentFilter) nestedApply(d *gorm.DB, i int) *gorm.DB {
 	joinName := fmt.Sprintf("sc_%d", i)
 	joinStr := fmt.Sprintf("JOIN server_components AS %s ON %s.server_id = servers.id", joinName, joinName)
 
@@ -70,7 +108,7 @@ func (f *ServerComponentFilter) apply(d *gorm.DB, i int) *gorm.DB {
 	}
 
 	if f.ServerComponentTypeID.String() != uuid.Nil.String() {
-		d = d.Where(joinName+".server_component_type_id = ?", f.Name)
+		d = d.Where(joinName+".server_component_type_id = ?", f.ServerComponentTypeID)
 	}
 
 	if f.AttributesFilters != nil {
@@ -86,4 +124,35 @@ func (f *ServerComponentFilter) apply(d *gorm.DB, i int) *gorm.DB {
 	}
 
 	return d
+}
+
+// GetComponentsByServerUUID will return all the server components for a given server UUID
+func (s *Store) GetComponentsByServerUUID(u uuid.UUID, filter *ServerComponentFilter, pager *Pagination) ([]ServerComponent, int64, error) {
+	// if server uuid is unknown return NotFound
+	if !s.ServerExists(u) {
+		return nil, 0, ErrNotFound
+	}
+
+	var (
+		comps []ServerComponent
+		count int64
+	)
+
+	d := serverComponentPreload(s.db)
+
+	if pager == nil {
+		pager = &Pagination{}
+	}
+
+	if filter != nil {
+		d = filter.apply(d)
+	}
+
+	d = d.Scopes(paginate(*pager))
+
+	if err := d.Where("server_id = ?", u).Find(&comps).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return comps, count, nil
 }

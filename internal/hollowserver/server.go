@@ -2,7 +2,6 @@ package hollowserver
 
 import (
 	"net/http"
-	"strings"
 	"time"
 
 	ginzap "github.com/gin-contrib/zap"
@@ -62,16 +61,7 @@ func (s *Server) setup() *gin.Engine {
 
 	// Remove any params from the URL string to keep the number of labels down
 	p.ReqCntURLLabelMappingFn = func(c *gin.Context) string {
-		url := c.Request.URL.Path
-
-		for _, p := range c.Params {
-			if p.Key == "uuid" {
-				url = strings.Replace(url, p.Value, ":uuid", 1)
-				break
-			}
-		}
-
-		return url
+		return c.FullPath()
 	}
 
 	p.Use(r)

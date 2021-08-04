@@ -1,9 +1,11 @@
 package db
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +15,7 @@ type ServerComponentType struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string
+	Slug      string
 }
 
 // ServerComponentTypeFilter provides the ability to filter the server components
@@ -29,6 +32,10 @@ func (t *ServerComponentType) BeforeSave(tx *gorm.DB) (err error) {
 
 	if t.Name == "" {
 		return requiredFieldMissing("server component type", "name")
+	}
+
+	if t.Slug == "" {
+		t.Slug = slug.Make(t.Name)
 	}
 
 	return nil
@@ -62,6 +69,22 @@ func (s *Store) GetServerComponentTypes(filter *ServerComponentTypeFilter, pager
 	}
 
 	return types, count, nil
+}
+
+// FindServerComponentTypeBySlug will return a server component type with the matching slug
+func (s *Store) FindServerComponentTypeBySlug(slug string) (*ServerComponentType, error) {
+	var sct ServerComponentType
+
+	err := s.db.First(&sct, ServerComponentType{Slug: slug}).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return &sct, nil
 }
 
 func (f *ServerComponentTypeFilter) apply(d *gorm.DB) *gorm.DB {

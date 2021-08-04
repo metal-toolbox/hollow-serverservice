@@ -8,11 +8,11 @@ import (
 
 // ServerListParams allows you to filter the results
 type ServerListParams struct {
-	pagination
 	FacilityCode                 string `form:"facility-code"`
 	ComponentListParams          []ServerComponentListParams
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams
+	PaginationParams             *PaginationParams
 }
 
 func (p *ServerListParams) setQuery(q url.Values) {
@@ -27,9 +27,10 @@ func (p *ServerListParams) setQuery(q url.Values) {
 	encodeAttributesListParams(p.AttributeListParams, "attr", q)
 	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
 	encodeServerComponentListParams(p.ComponentListParams, q)
+	p.PaginationParams.setQuery(q)
 }
 
-func (p *ServerListParams) dbFilter() (*db.ServerFilter, error) {
+func (p *ServerListParams) dbFilter(r *Router) (*db.ServerFilter, error) {
 	var err error
 
 	dbF := &db.ServerFilter{
@@ -46,7 +47,7 @@ func (p *ServerListParams) dbFilter() (*db.ServerFilter, error) {
 		return nil, err
 	}
 
-	dbF.ComponentFilters, err = convertToDBComponentFilter(p.ComponentListParams)
+	dbF.ComponentFilters, err = convertToDBComponentFilter(r, p.ComponentListParams)
 	if err != nil {
 		return nil, err
 	}

@@ -68,7 +68,16 @@ func (s *Store) GetServers(filter *ServerFilter, pager *Pagination) ([]Server, i
 		pager = &Pagination{}
 	}
 
-	if err := d.Scopes(paginate(*pager)).Find(&srvs).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+	d = d.Order("servers.created_at DESC").Limit(pager.LimitUsed())
+
+	switch {
+	case pager.Cursor != nil:
+		d = d.Where("servers.created_at < ?", pager.Cursor)
+	case pager.Page != 0:
+		d = d.Offset(pager.Offset())
+	}
+
+	if err := d.Select("distinct servers.*").Find(&srvs).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -92,6 +101,12 @@ func (s *Store) FindServerByUUID(srvUUID uuid.UUID) (*Server, error) {
 	return &srv, nil
 }
 
+// ServerExists will return if a server exists by the uuid in the datastore
+func (s *Store) ServerExists(srvUUID uuid.UUID) bool {
+	res := s.db.Select("id").First(&Server{}, srvUUID)
+	return res.RowsAffected == 1
+}
+
 // FindOrCreateServerByUUID will return an existing server if one already exists
 //  for the given UUID, if one doesn't exist a new one will be created
 func (s *Store) FindOrCreateServerByUUID(srvUUID uuid.UUID) (*Server, error) {
@@ -103,4 +118,24 @@ func (s *Store) FindOrCreateServerByUUID(srvUUID uuid.UUID) (*Server, error) {
 	}
 
 	return &srv, nil
+}
+
+// UpdateServer allows you to update the name and facility of a server
+func (s *Store) UpdateServer(srvUUID uuid.UUID, newS Server) error {
+	srv, err := s.FindServerByUUID(srvUUID)
+	if err != nil {
+		return err
+	}
+
+	values := map[string]interface{}{}
+
+	if newS.Name != "" && newS.Name != srv.Name {
+		values["name"] = newS.Name
+	}
+
+	if newS.FacilityCode != "" && newS.FacilityCode != srv.FacilityCode {
+		values["facility_code"] = newS.FacilityCode
+	}
+
+	return s.db.Model(&srv).Updates(values).Error
 }

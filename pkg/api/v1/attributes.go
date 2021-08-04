@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
@@ -19,6 +21,8 @@ import (
 type Attributes struct {
 	Namespace string          `json:"namespace"`
 	Data      json.RawMessage `json:"data"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
 }
 
 // AttributeListParams allow you to filter the results based on attributes
@@ -33,6 +37,8 @@ type AttributeListParams struct {
 func (a *Attributes) fromDBModel(dbA db.Attributes) error {
 	a.Namespace = dbA.Namespace
 	a.Data = json.RawMessage(dbA.Data)
+	a.CreatedAt = dbA.CreatedAt
+	a.UpdatedAt = dbA.UpdatedAt
 
 	return nil
 }
@@ -94,23 +100,23 @@ func convertToDBAttributesFilter(attrs []AttributeListParams) ([]db.AttributesFi
 }
 
 func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Values) {
-	for i, ap := range alp {
-		keyPrefix := fmt.Sprintf("%s_%d_", key, i)
+	for _, ap := range alp {
+		value := ap.Namespace
 
-		q.Set(keyPrefix+"namespace", ap.Namespace)
+		if len(ap.Keys) != 0 {
+			value = fmt.Sprintf("%s~%s", value, strings.Join(ap.Keys, "."))
 
-		for _, k := range ap.Keys {
-			q.Add(keyPrefix+"keys", k)
+			switch {
+			case ap.LessThanValue != 0:
+				value = fmt.Sprintf("%s~lt~%d", value, ap.LessThanValue)
+			case ap.GreaterThanValue != 0:
+				value = fmt.Sprintf("%s~gt~%d", value, ap.GreaterThanValue)
+			case ap.EqualValue != "":
+				value = fmt.Sprintf("%s~eq~%s", value, ap.EqualValue)
+			}
 		}
 
-		switch {
-		case ap.LessThanValue != 0:
-			q.Set(keyPrefix+"less-than", fmt.Sprint(ap.LessThanValue))
-		case ap.GreaterThanValue != 0:
-			q.Set(keyPrefix+"greater-than", fmt.Sprint(ap.GreaterThanValue))
-		case ap.EqualValue != "":
-			q.Set(keyPrefix+"equals", ap.EqualValue)
-		}
+		q.Add(key, value)
 	}
 }
 
@@ -118,44 +124,40 @@ func parseQueryAttributesListParams(c *gin.Context, key string) ([]AttributeList
 	var err error
 
 	alp := []AttributeListParams{}
-	i := 0
 
-	for {
-		keyPrefix := fmt.Sprintf("%s_%d_", key, i)
+	for _, p := range c.QueryArray(key) {
+		// format is "ns~keys.dot.seperated~operation~value"
+		parts := strings.Split(p, "~")
 
-		ns := c.Query(keyPrefix + "namespace")
-		if ns == "" {
-			break
+		param := AttributeListParams{
+			Namespace: parts[0],
 		}
 
-		a := AttributeListParams{
-			Namespace: ns,
-			Keys:      c.QueryArray(keyPrefix + "keys"),
+		if len(parts) == 1 {
+			alp = append(alp, param)
+			continue
 		}
 
-		equals := c.Query(keyPrefix + "equals")
-		if equals != "" {
-			a.EqualValue = equals
-		}
+		param.Keys = strings.Split(parts[1], ".")
 
-		lt := c.Query(keyPrefix + "less-than")
-		if lt != "" {
-			a.LessThanValue, err = strconv.Atoi(lt)
-			if err != nil {
-				return nil, err
+		if len(parts) == 4 { //nolint
+			switch op := parts[2]; op {
+			case "lt":
+				param.LessThanValue, err = strconv.Atoi(parts[3])
+				if err != nil {
+					return nil, err
+				}
+			case "gt":
+				param.GreaterThanValue, err = strconv.Atoi(parts[3])
+				if err != nil {
+					return nil, err
+				}
+			case "eq":
+				param.EqualValue = parts[3]
 			}
 		}
 
-		gt := c.Query(keyPrefix + "greater-than")
-		if gt != "" {
-			a.GreaterThanValue, err = strconv.Atoi(gt)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		alp = append(alp, a)
-		i++
+		alp = append(alp, param)
 	}
 
 	return alp, nil

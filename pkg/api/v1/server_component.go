@@ -18,7 +18,7 @@ type ServerComponent struct {
 	Model             string       `json:"model"`
 	Serial            string       `json:"serial"`
 	Attributes        []Attributes `json:"attributes"`
-	ComponentTypeUUID uuid.UUID    `json:"component_type_uuid"`
+	ComponentTypeID   string       `json:"component_type_id"`
 	ComponentTypeName string       `json:"component_type_name"`
 	CreatedAt         time.Time    `json:"created_at"`
 	UpdatedAt         time.Time    `json:"updated_at"`
@@ -46,7 +46,7 @@ func (c *ServerComponent) fromDBModel(dbC db.ServerComponent) error {
 	c.Vendor = dbC.Vendor
 	c.Model = dbC.Model
 	c.Serial = dbC.Serial
-	c.ComponentTypeUUID = dbC.ServerComponentType.ID
+	c.ComponentTypeID = dbC.ServerComponentType.Slug
 	c.ComponentTypeName = dbC.ServerComponentType.Name
 	c.CreatedAt = dbC.CreatedAt
 	c.UpdatedAt = dbC.UpdatedAt
@@ -61,16 +61,22 @@ func (c *ServerComponent) fromDBModel(dbC db.ServerComponent) error {
 	return nil
 }
 
-func (c *ServerComponent) toDBModel() (*db.ServerComponent, error) {
+func (c *ServerComponent) toDBModel(s *db.Store) (*db.ServerComponent, error) {
 	dbC := &db.ServerComponent{
-		ID:                    c.UUID,
-		ServerID:              c.ServerUUID,
-		Name:                  c.Name,
-		Vendor:                c.Vendor,
-		Model:                 c.Model,
-		Serial:                c.Serial,
-		ServerComponentTypeID: c.ComponentTypeUUID,
+		ID:       c.UUID,
+		ServerID: c.ServerUUID,
+		Name:     c.Name,
+		Vendor:   c.Vendor,
+		Model:    c.Model,
+		Serial:   c.Serial,
 	}
+
+	sct, err := s.FindServerComponentTypeBySlug(c.ComponentTypeID)
+	if err != nil {
+		return nil, err
+	}
+
+	dbC.ServerComponentTypeID = sct.ID
 
 	attrs, err := convertToDBAttributes(c.Attributes)
 	if err != nil {

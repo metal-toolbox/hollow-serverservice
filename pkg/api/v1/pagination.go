@@ -2,6 +2,7 @@ package hollow
 
 import (
 	"encoding/base64"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -10,7 +11,8 @@ import (
 	"go.metalkube.net/hollow/internal/db"
 )
 
-type pagination struct {
+// PaginationParams allow you to paginate the results
+type PaginationParams struct {
 	Limit  int    `json:"limit,omitempty"`
 	Page   int    `json:"page,omitempty"`
 	Cursor string `json:"cursor,omitempty"`
@@ -74,4 +76,22 @@ func parsePagination(c *gin.Context) (db.Pagination, error) {
 		Page:   page,
 		Cursor: cursor,
 	}, nil
+}
+
+func (p *PaginationParams) setQuery(q url.Values) {
+	if p == nil {
+		return
+	}
+
+	if p.Cursor != "" {
+		q.Set("cursor", p.Cursor)
+	}
+
+	if p.Page != 0 {
+		q.Set("page", strconv.Itoa(p.Page))
+	}
+
+	if p.Limit != 0 {
+		q.Set("limit", strconv.Itoa(p.Limit))
+	}
 }

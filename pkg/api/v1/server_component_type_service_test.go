@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -15,12 +14,12 @@ import (
 func TestServerComponentTypeServiceCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		hct := hollow.ServerComponentType{Name: "unit-test"}
-		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "uuid":"00000000-0000-0000-0000-000000001234"}`))
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"slug-1"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.ServerComponentType.Create(ctx, hct)
+		resp, err := c.ServerComponentType.Create(ctx, hct)
 		if !expectError {
-			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
+			assert.Equal(t, "slug-1", resp.Slug)
 		}
 
 		return err
@@ -29,7 +28,7 @@ func TestServerComponentTypeServiceCreate(t *testing.T) {
 
 func TestServerComponentTypeServiceList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		hct := []hollow.ServerComponentType{{UUID: uuid.New(), Name: "unit-test-1"}, {UUID: uuid.New(), Name: "unit-test-2"}}
+		hct := []hollow.ServerComponentType{{ID: "slug-1", Name: "unit-test-1"}, {ID: "slug-2", Name: "unit-test-2"}}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: hct})
 		require.Nil(t, err)
 

@@ -1,6 +1,7 @@
 package hollow
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -8,7 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+
+	"go.metalkube.net/hollow/internal/db"
 )
 
 // ServerResponse represents the data that the server will return on any given call
@@ -22,7 +24,7 @@ type ServerResponse struct {
 	Links            ServerResponseLinks `json:"_links,omitempty"`
 	Message          string              `json:"message,omitempty"`
 	Error            string              `json:"error,omitempty"`
-	UUID             *uuid.UUID          `json:"uuid,omitempty"`
+	Slug             string              `json:"slug,omitempty"`
 	Record           interface{}         `json:"record,omitempty"`
 	Records          interface{}         `json:"records,omitempty"`
 }
@@ -42,43 +44,55 @@ type Link struct {
 	Href string `json:"href,omitempty"`
 }
 
-func newErrorResponse(m string, err error) *ServerResponse {
-	return &ServerResponse{
-		Message: m,
-		Error:   err.Error(),
-	}
+// HasNextPage will return if there are additional resources to load on additional pages
+func (r *ServerResponse) HasNextPage() bool {
+	return r.Records != nil && (r.Links.NextCursor != nil || r.Links.Next != nil)
 }
 
 func badRequestResponse(c *gin.Context, message string, err error) {
-	c.JSON(http.StatusBadRequest, newErrorResponse(message, err))
+	c.JSON(http.StatusBadRequest, &ServerResponse{Message: message, Error: err.Error()})
 }
 
-func notFoundResponse(c *gin.Context, err error) {
-	c.JSON(http.StatusNotFound, newErrorResponse("resource not found", err))
-}
-
-func createdResponse(c *gin.Context, u *uuid.UUID) {
+func createdResponse(c *gin.Context, slug string) {
+	uri := fmt.Sprintf("%s/%s", uriWithoutQueryParams(c), slug)
 	r := &ServerResponse{
 		Message: "resource created",
-		UUID:    u,
+		Slug:    slug,
 		Links: ServerResponseLinks{
-			Self: &Link{Href: fmt.Sprintf("%s/%s", c.FullPath(), u)},
+			Self: &Link{Href: uri},
 		},
 	}
 
-	c.JSON(http.StatusOK, r)
+	c.Header("Location", uri)
+	c.JSON(http.StatusCreated, r)
 }
 
 func deletedResponse(c *gin.Context) {
 	c.JSON(http.StatusOK, &ServerResponse{Message: "resource deleted"})
 }
 
-func dbFailureResponse(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, newErrorResponse("datastore error", err))
+func updatedResponse(c *gin.Context, slug string) {
+	r := &ServerResponse{
+		Message: "resource updated",
+		Slug:    slug,
+		Links: ServerResponseLinks{
+			Self: &Link{Href: uriWithoutQueryParams(c)},
+		},
+	}
+
+	c.JSON(http.StatusOK, r)
+}
+
+func dbErrorResponse(c *gin.Context, err error) {
+	if errors.Is(err, db.ErrNotFound) {
+		c.JSON(http.StatusNotFound, &ServerResponse{Message: "resource not found", Error: err.Error()})
+	} else {
+		c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "datastore error", Error: err.Error()})
+	}
 }
 
 func failedConvertingToVersioned(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, newErrorResponse("failed parsing the datastore results", err))
+	c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "failed parsing the datastore results", Error: err.Error()})
 }
 
 func listResponse(c *gin.Context, i interface{}, p paginationData) {
@@ -114,7 +128,7 @@ func listResponse(c *gin.Context, i interface{}, p paginationData) {
 
 	if p.nextCursor != "" && p.pageCount == p.pager.LimitUsed() {
 		r.NextCursor = p.nextCursor
-		r.Links.NextCursor = &Link{Href: getURIWithQuerySet(*uri, "cursor", p.nextCursor)}
+		r.Links.NextCursor = &Link{Href: getURIWithCursor(*uri, p.nextCursor)}
 	}
 
 	c.JSON(http.StatusOK, r)
@@ -135,6 +149,23 @@ func getURIWithQuerySet(uri url.URL, key, value string) string {
 	q.Del(key)
 	q.Add(key, value)
 	uri.RawQuery = q.Encode()
+
+	return uri.String()
+}
+
+func getURIWithCursor(uri url.URL, value string) string {
+	q := uri.Query()
+	q.Del("cursor")
+	q.Del("page")
+	q.Add("cursor", value)
+	uri.RawQuery = q.Encode()
+
+	return uri.String()
+}
+
+func uriWithoutQueryParams(c *gin.Context) string {
+	uri := c.Request.URL
+	uri.RawQuery = ""
 
 	return uri.String()
 }

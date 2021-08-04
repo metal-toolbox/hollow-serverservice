@@ -1,11 +1,14 @@
 package db
 
 import (
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Attributes provide the ability to store namespaced values attached to an entity.
@@ -42,4 +45,79 @@ func (a *Attributes) BeforeSave(tx *gorm.DB) (err error) {
 // CreateAttributes will persist attributes into the backend datastore
 func (s *Store) CreateAttributes(a *Attributes) error {
 	return s.db.Create(a).Error
+}
+
+// DeleteAttributes will persist attributes into the backend datastore
+func (s *Store) DeleteAttributes(a *Attributes) error {
+	return s.db.Delete(a).Error
+}
+
+// GetAttributesByServerUUID will return all the attributes for a given server UUID
+func (s *Store) GetAttributesByServerUUID(u uuid.UUID, pager *Pagination) ([]Attributes, int64, error) {
+	// if server uuid is unknown return NotFound
+	if !s.ServerExists(u) {
+		return nil, 0, ErrNotFound
+	}
+
+	var (
+		attrs []Attributes
+		count int64
+	)
+
+	if pager == nil {
+		pager = &Pagination{}
+	}
+
+	d := s.db.Preload(clause.Associations).Scopes(paginate(*pager))
+
+	if err := d.Where("server_id = ?", u).Find(&attrs).Offset(-1).Limit(-1).Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return attrs, count, nil
+}
+
+// GetAttributesByServerUUIDAndNamespace will return attributes for a given server UUID and namespace
+func (s *Store) GetAttributesByServerUUIDAndNamespace(u uuid.UUID, ns string) (*Attributes, error) {
+	var attr Attributes
+
+	d := s.db.Preload(clause.Associations)
+
+	if err := d.Where("server_id = ?", u).Where("namespace = ?", ns).First(&attr).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return &attr, nil
+}
+
+// FindOrInitAttributesByServerUUIDAndNamespace will return attributes for a given server UUID and namespace. If one
+// doesn't exist an empty one will be returned which can be saved
+func (s *Store) FindOrInitAttributesByServerUUIDAndNamespace(u uuid.UUID, ns string) (*Attributes, error) {
+	var attr Attributes
+
+	d := s.db.Preload(clause.Associations)
+
+	if err := d.FirstOrInit(&attr, Attributes{ServerID: &u, Namespace: ns}).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return &attr, nil
+}
+
+// UpdateAttributesByServerUUIDAndNamespace allow you to update the data stored in a given namespace for a server
+func (s *Store) UpdateAttributesByServerUUIDAndNamespace(u uuid.UUID, ns string, data json.RawMessage) error {
+	attr, err := s.FindOrInitAttributesByServerUUIDAndNamespace(u, ns)
+	if err != nil {
+		return err
+	}
+
+	return s.db.Model(&attr).Updates(Attributes{Data: datatypes.JSON(data)}).Error
 }

@@ -13,11 +13,11 @@ var (
 	FixtureNamespaceOtherdata = "hollow.other_data"
 	FixtureNamespaceVersioned = "hollow.versioned"
 
-	FixtureSCTFins = ServerComponentType{ID: uuid.New(), Name: "Fins"}
+	FixtureSCTFins = ServerComponentType{ID: uuid.New(), Name: "Fins", Slug: "fins"}
 
-	FixtureAttributesNemoMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"location": "Fishbowl", "age": 6}`))}
-	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 12}`))}
-	FixtureAttributesMarlinMetadata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"location": "East Austalian Current", "age": 10}`))}
+	FixtureAttributesNemoMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"age":6,"location":"Fishbowl"}`))}
+	FixtureAttributesDoryMetadata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"age":12,"location":"East Austalian Current"}`))}
+	FixtureAttributesMarlinMetadata = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceMetadata, Data: datatypes.JSON([]byte(`{"age":10,"location":"East Austalian Current"}`))}
 
 	FixtureAttributesNemoOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": true, "type": "clown", "lastUpdated": 1624960800, "nested": {"tag": "finding-nemo", "number": 1}}`))}
 	FixtureAttributesDoryOtherdata   = Attributes{ID: uuid.New(), Namespace: FixtureNamespaceOtherdata, Data: datatypes.JSON([]byte(`{"enabled": true, "type": "blue-tang", "lastUpdated": 1624960400, "nested": {"tag": "finding-nemo", "number": 2}}`))}

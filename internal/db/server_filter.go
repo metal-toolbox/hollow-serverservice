@@ -30,7 +30,7 @@ func (f *ServerFilter) apply(d *gorm.DB) *gorm.DB {
 
 	if f.ComponentFilters != nil {
 		for i, cf := range f.ComponentFilters {
-			d = cf.apply(d, i)
+			d = cf.nestedApply(d, i)
 		}
 	}
 

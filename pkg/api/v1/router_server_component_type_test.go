@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -21,13 +20,13 @@ func TestIntegrationServerComponentTypeServiceCreate(t *testing.T) {
 
 		hct := hollow.ServerComponentType{Name: "integration-test"}
 
-		r, resp, err := s.Client.ServerComponentType.Create(ctx, hct)
+		resp, err := s.Client.ServerComponentType.Create(ctx, hct)
 		if !expectError {
 			require.NoError(t, err)
-			assert.NotEqual(t, uuid.Nil.String(), r.String())
+			assert.Equal(t, "integration-test", resp.Slug)
 			assert.NotNil(t, resp)
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, fmt.Sprintf("/api/v1/server-component-types/%s", r.String()), resp.Links.Self.Href)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/server-component-types/%s", resp.Slug), resp.Links.Self.Href)
 		}
 
 		return err
@@ -44,7 +43,7 @@ func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 1)
-			assert.Equal(t, db.FixtureSCTFins.ID, r[0].UUID)
+			assert.Equal(t, db.FixtureSCTFins.Slug, r[0].ID)
 			assert.Equal(t, db.FixtureSCTFins.Name, r[0].Name)
 			assert.NotNil(t, resp)
 			assert.NotNil(t, resp.Links.Self)
