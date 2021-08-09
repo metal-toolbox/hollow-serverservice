@@ -38,6 +38,7 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 
 	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
 	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
+	rg.GET("/servers/:uuid/versioned-attributes/:namespace", amw.AuthRequired(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesGet)
 
 	rg.GET("/server-component-types", amw.AuthRequired(readScopes("server-component-types")), r.serverComponentTypeList)
 	rg.POST("/server-component-types", amw.AuthRequired(updateScopes("server-component-types")), r.serverComponentTypeCreate)
