@@ -20,14 +20,7 @@ type Server struct {
 	Listen     string
 	Debug      bool
 	Store      *db.Store
-	AuthConfig AuthConfig
-}
-
-// AuthConfig provides the configuration for the authentication service
-type AuthConfig struct {
-	Audience string
-	Issuer   string
-	JWKSURI  string
+	AuthConfig ginjwt.AuthConfig
 }
 
 var (
@@ -41,7 +34,7 @@ func (s *Server) setup() *gin.Engine {
 		err    error
 	)
 
-	authMW, err = ginjwt.NewAuthMiddleware(s.AuthConfig.Audience, s.AuthConfig.Issuer, s.AuthConfig.JWKSURI)
+	authMW, err = ginjwt.NewAuthMiddleware(s.AuthConfig)
 	if err != nil {
 		s.Logger.Sugar().Fatal("failed to initialize auth middleware", "error", err)
 	}
@@ -70,7 +63,7 @@ func (s *Server) setup() *gin.Engine {
 		ginzap.WithUTC(true),
 		ginzap.WithCustomFields(
 			func(c *gin.Context) zap.Field { return zap.String("jwt_subject", ginjwt.GetSubject(c)) },
-			func(c *gin.Context) zap.Field { return zap.String("jwt_email", ginjwt.GetEmail(c)) },
+			func(c *gin.Context) zap.Field { return zap.String("jwt_user", ginjwt.GetUser(c)) },
 		),
 	))
 	r.Use(ginzap.RecoveryWithZap(s.Logger, true))

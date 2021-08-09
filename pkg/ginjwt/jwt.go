@@ -13,33 +13,43 @@ import (
 
 const (
 	contextKeySubject       = "jwt.subject"
-	contextKeyEmail         = "jwt.email"
+	contextKeyUser          = "jwt.user"
 	expectedAuthHeaderParts = 2
 )
 
 // Middleware provides a gin compatible middleware that will authenticate JWT requests
 type Middleware struct {
-	audience   string
-	issuer     string
-	jwksURI    string
+	config     AuthConfig
 	cachedJWKS jose.JSONWebKeySet
 }
 
-type customClaims struct {
-	Scope string `json:"scope"`
-	Email string `json:"https://equinixmetal.com/email"`
-}
-
-func (c *customClaims) Scopes() []string {
-	return strings.Split(c.Scope, " ")
+// AuthConfig provides the configuration for the authentication service
+type AuthConfig struct {
+	Enabled       bool
+	Audience      string
+	Issuer        string
+	JWKSURI       string
+	LogFields     []string
+	RolesClaim    string
+	UsernameClaim string
 }
 
 // NewAuthMiddleware will return an auth middleware configured with the jwt parameters passed in
-func NewAuthMiddleware(aud, iss, jwksURI string) (*Middleware, error) {
+func NewAuthMiddleware(cfg AuthConfig) (*Middleware, error) {
+	if cfg.RolesClaim == "" {
+		cfg.RolesClaim = "scope"
+	}
+
+	if cfg.UsernameClaim == "" {
+		cfg.UsernameClaim = "sub"
+	}
+
 	mw := &Middleware{
-		audience: aud,
-		issuer:   iss,
-		jwksURI:  jwksURI,
+		config: cfg,
+	}
+
+	if !cfg.Enabled {
+		return mw, nil
 	}
 
 	if err := mw.refreshJWKS(); err != nil {
@@ -52,6 +62,10 @@ func NewAuthMiddleware(aud, iss, jwksURI string) (*Middleware, error) {
 // AuthRequired provides a middleware that ensures a request has authentication
 func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !m.config.Enabled {
+			return
+		}
+
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" {
@@ -86,7 +100,7 @@ func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 		}
 
 		cl := jwt.Claims{}
-		sc := customClaims{}
+		sc := map[string]interface{}{}
 
 		if err := tok.Claims(key, &cl, &sc); err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "unable to validate auth token"})
@@ -94,8 +108,8 @@ func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 		}
 
 		err = cl.Validate(jwt.Expected{
-			Issuer:   m.issuer,
-			Audience: jwt.Audience{m.audience},
+			Issuer:   m.config.Issuer,
+			Audience: jwt.Audience{m.config.Audience},
 			Time:     time.Now(),
 		})
 		if err != nil {
@@ -103,18 +117,31 @@ func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 			return
 		}
 
-		if !hasScope(sc.Scopes(), scopes) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "not authorized, missing required scope"})
+		var roles []string
+		switch r := sc[m.config.RolesClaim].(type) {
+		case string:
+			roles = strings.Split(r, " ")
+		case []interface{}:
+			for _, i := range r {
+				roles = append(roles, i.(string))
+			}
+		}
+
+		if !hasScope(roles, scopes) {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"message": "not authorized, missing required scope"})
 			return
 		}
 
+		u := sc[m.config.UsernameClaim]
+		user := u.(string)
+
 		c.Set(contextKeySubject, cl.Subject)
-		c.Set(contextKeyEmail, sc.Email)
+		c.Set(contextKeyUser, user)
 	}
 }
 
 func (m *Middleware) refreshJWKS() error {
-	resp, err := http.Get(m.jwksURI) //nolint:noctx
+	resp, err := http.Get(m.config.JWKSURI) //nolint:noctx
 	if err != nil {
 		return err
 	}
@@ -163,8 +190,8 @@ func GetSubject(c *gin.Context) string {
 	return c.GetString(contextKeySubject)
 }
 
-// GetEmail will return the JWT email that is saved in the request. This requires that authentication of the request
-// has already occurred. If authentication failed or there isn't an email an empty string is returned.
-func GetEmail(c *gin.Context) string {
-	return c.GetString(contextKeyEmail)
+// GetUser will return the JWT user that is saved in the request. This requires that authentication of the request
+// has already occurred. If authentication failed or there isn't a user an empty string is returned.
+func GetUser(c *gin.Context) string {
+	return c.GetString(contextKeyUser)
 }

@@ -77,7 +77,9 @@ func TestHelperJWKSProvider() string {
 
 // TestHelperGetToken will return a signed token
 func TestHelperGetToken(signer jose.Signer, cl jwt.Claims, scopes []string) string {
-	sc := customClaims{Scope: strings.Join(scopes, " ")}
+	sc := map[string]interface{}{}
+
+	sc["scope"] = strings.Join(scopes, " ")
 
 	raw, err := jwt.Signed(signer).Claims(cl).Claims(sc).CompactSerialize()
 	if err != nil {

@@ -32,7 +32,8 @@ func serverTest(t *testing.T) *integrationServer {
 	hs := hollowserver.Server{
 		Logger: l,
 		Store:  store,
-		AuthConfig: hollowserver.AuthConfig{
+		AuthConfig: ginjwt.AuthConfig{
+			Enabled:  true,
 			Audience: "hollow.test",
 			Issuer:   "hollow.test.issuer",
 			JWKSURI:  jwksURI,

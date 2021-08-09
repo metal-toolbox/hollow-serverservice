@@ -112,7 +112,7 @@ func TestMiddlewareValidatesTokens(t *testing.T) {
 				Audience:  jwt.Audience{"ginjwt.test", "another.test.service"},
 			},
 			[]string{"testScope", "anotherScope", "more-scopes"},
-			http.StatusUnauthorized,
+			http.StatusForbidden,
 			"missing required scope",
 		},
 		{
@@ -172,7 +172,9 @@ func TestMiddlewareValidatesTokens(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			jwksURI := ginjwt.TestHelperJWKSProvider()
-			authMW, err := ginjwt.NewAuthMiddleware(tt.middlewareAud, tt.middlewareIss, jwksURI)
+
+			cfg := ginjwt.AuthConfig{Enabled: true, Audience: tt.middlewareAud, Issuer: tt.middlewareIss, JWKSURI: jwksURI}
+			authMW, err := ginjwt.NewAuthMiddleware(cfg)
 			require.NoError(t, err)
 
 			r := gin.New()
@@ -232,7 +234,8 @@ func TestInvalidAuthHeader(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			jwksURI := ginjwt.TestHelperJWKSProvider()
-			authMW, err := ginjwt.NewAuthMiddleware("aud", "iss", jwksURI)
+			cfg := ginjwt.AuthConfig{Enabled: true, Audience: "aud", Issuer: "iss", JWKSURI: jwksURI}
+			authMW, err := ginjwt.NewAuthMiddleware(cfg)
 			require.NoError(t, err)
 
 			r := gin.New()
