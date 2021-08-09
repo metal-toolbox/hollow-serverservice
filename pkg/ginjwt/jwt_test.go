@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -187,7 +188,7 @@ func TestMiddlewareValidatesTokens(t *testing.T) {
 			req := httptest.NewRequest("GET", "http://test/", nil)
 
 			signer := ginjwt.TestHelperMustMakeSigner(jose.RS256, tt.signingKeyID, tt.signingKey)
-			rawToken := ginjwt.TestHelperGetToken(signer, tt.claims, tt.claimScopes)
+			rawToken := ginjwt.TestHelperGetToken(signer, tt.claims, "scope", strings.Join(tt.claimScopes, " "))
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s", rawToken))
 
 			r.ServeHTTP(w, req)
