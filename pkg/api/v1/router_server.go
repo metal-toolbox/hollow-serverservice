@@ -159,6 +159,56 @@ func (r *Router) serverUpdate(c *gin.Context) {
 	updatedResponse(c, u.String())
 }
 
+func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
+	pager, err := parsePagination(c)
+	if err != nil {
+		badRequestResponse(c, "invalid pagination", err)
+		return
+	}
+
+	srvUUID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		badRequestResponse(c, "invalid server uuid", err)
+		return
+	}
+
+	ns := c.Param("namespace")
+
+	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, ns, &pager)
+	if err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	va := []VersionedAttributes{}
+
+	for _, dbA := range dbVA {
+		a := VersionedAttributes{}
+		if err := a.fromDBModel(dbA); err != nil {
+			failedConvertingToVersioned(c, err)
+			return
+		}
+
+		va = append(va, a)
+	}
+
+	nextCursor := ""
+
+	sz := len(va)
+	if sz != 0 {
+		nextCursor = encodeCursor(va[sz-1].CreatedAt)
+	}
+
+	pd := paginationData{
+		pageCount:  len(va),
+		totalCount: count,
+		nextCursor: nextCursor,
+		pager:      pager,
+	}
+
+	listResponse(c, va, pd)
+}
+
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 	pager, err := parsePagination(c)
 	if err != nil {
@@ -172,7 +222,7 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 		return
 	}
 
-	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, &pager)
+	dbVA, count, err := r.Store.ListVersionedAttributes(srvUUID, &pager)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -231,5 +281,5 @@ func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	createdResponse(c, dbVA.ID.String())
+	createdResponse(c, dbVA.Namespace)
 }

@@ -50,14 +50,10 @@ func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]
 		}
 
 		if p.ServerComponentType != "" {
-			fmt.Printf("\n\n\nLooking Up Slug: %s\n\n", p.ServerComponentType)
-
 			sct, err := r.Store.FindServerComponentTypeBySlug(p.ServerComponentType)
 			if err != nil {
 				return nil, err
 			}
-
-			fmt.Printf("Found Type By Slug, Setting ID to: %s\n\n", sct.ID)
 
 			dbF.ServerComponentTypeID = sct.ID
 		}

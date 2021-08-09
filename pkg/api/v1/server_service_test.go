@@ -167,12 +167,28 @@ func TestServerServiceListComponents(t *testing.T) {
 func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		va := hollow.VersionedAttributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
-		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"00000000-0000-0000-0000-000000001234"}`))
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"the-namespace"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
+		resp, err := c.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
-			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
+			assert.Equal(t, "the-namespace", resp.Slug)
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceGetVersionedAttributess(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		va := []hollow.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: va})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, _, err := c.Server.GetVersionedAttributes(ctx, uuid.New(), "namespace")
+		if !expectError {
+			assert.ElementsMatch(t, va, res)
 		}
 
 		return err
@@ -186,7 +202,7 @@ func TestServerServiceListVersionedAttributess(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.GetVersionedAttributes(ctx, uuid.New())
+		res, _, err := c.Server.ListVersionedAttributes(ctx, uuid.New())
 		if !expectError {
 			assert.ElementsMatch(t, va, res)
 		}

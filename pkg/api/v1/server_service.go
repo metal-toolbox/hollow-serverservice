@@ -28,8 +28,9 @@ type ServerService interface {
 	ListAttributes(context.Context, uuid.UUID, *PaginationParams) ([]Attributes, *ServerResponse, error)
 	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error)
 	ListComponents(context.Context, uuid.UUID, *PaginationParams) ([]ServerComponent, *ServerResponse, error)
-	GetVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
-	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*uuid.UUID, *ServerResponse, error)
+	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*ServerResponse, error)
+	GetVersionedAttributes(context.Context, uuid.UUID, string) ([]VersionedAttributes, *ServerResponse, error)
+	ListVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
 }
 
 // ServerServiceClient implements ServerService
@@ -132,19 +133,6 @@ func (c *ServerServiceClient) UpdateAttributes(ctx context.Context, srvUUID uuid
 	return c.client.put(ctx, path, Attributes{Data: data})
 }
 
-// GetVersionedAttributes will return all the versioned attributes for a given server
-func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUID uuid.UUID) ([]VersionedAttributes, *ServerResponse, error) {
-	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
-	val := &[]VersionedAttributes{}
-	r := ServerResponse{Records: val}
-
-	if err := c.client.list(ctx, path, nil, &r); err != nil {
-		return nil, nil, err
-	}
-
-	return *val, &r, nil
-}
-
 // ListComponents will get all the components for a given server
 func (c *ServerServiceClient) ListComponents(ctx context.Context, srvUUID uuid.UUID, params *PaginationParams) ([]ServerComponent, *ServerResponse, error) {
 	sc := &[]ServerComponent{}
@@ -159,18 +147,34 @@ func (c *ServerServiceClient) ListComponents(ctx context.Context, srvUUID uuid.U
 }
 
 // CreateVersionedAttributes will create a new versioned attribute for a given server
-func (c *ServerServiceClient) CreateVersionedAttributes(ctx context.Context, srvUUID uuid.UUID, va VersionedAttributes) (*uuid.UUID, *ServerResponse, error) {
+func (c *ServerServiceClient) CreateVersionedAttributes(ctx context.Context, srvUUID uuid.UUID, va VersionedAttributes) (*ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
 
-	resp, err := c.client.post(ctx, path, va)
-	if err != nil {
+	return c.client.post(ctx, path, va)
+}
+
+// GetVersionedAttributes will return all the versioned attributes for a given server
+func (c *ServerServiceClient) GetVersionedAttributes(ctx context.Context, srvUUID uuid.UUID, ns string) ([]VersionedAttributes, *ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint, ns)
+	val := &[]VersionedAttributes{}
+	r := ServerResponse{Records: val}
+
+	if err := c.client.list(ctx, path, nil, &r); err != nil {
 		return nil, nil, err
 	}
 
-	u, err := uuid.Parse(resp.Slug)
-	if err != nil {
-		return nil, resp, nil
+	return *val, &r, nil
+}
+
+// ListVersionedAttributes will return all the versioned attributes for a given server
+func (c *ServerServiceClient) ListVersionedAttributes(ctx context.Context, srvUUID uuid.UUID) ([]VersionedAttributes, *ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverVersionedAttributesEndpoint)
+	val := &[]VersionedAttributes{}
+	r := ServerResponse{Records: val}
+
+	if err := c.client.list(ctx, path, nil, &r); err != nil {
+		return nil, nil, err
 	}
 
-	return &u, resp, nil
+	return *val, &r, nil
 }

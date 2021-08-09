@@ -654,22 +654,62 @@ func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
 
 		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
 
-		res, _, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
+		resp, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
-			assert.NotNil(t, res)
+			assert.Equal(t, va.Namespace, resp.Slug)
 		}
 
 		return err
 	})
 }
 
-func TestIntegrationServerServiceGetVersionedAttributes(t *testing.T) {
+func TestIntegrationServerServiceCreateVersionedAttributesIncrementCounter(t *testing.T) {
+	s := serverTest(t)
+	s.Client.SetToken(validToken([]string{"read", "write"}))
+
+	u := uuid.New()
+	ctx := context.TODO()
+
+	va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
+	newVA := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration", "something":"else"}`))}
+
+	_, err := s.Client.Server.CreateVersionedAttributes(ctx, u, va)
+	require.NoError(t, err)
+
+	// Ensure we only have one versioned attribute now
+	r, _, err := s.Client.Server.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
+	require.NoError(t, err)
+	assert.Len(t, r, 1)
+
+	// Create with the same data again. This should just increase the counter, not create a new one.
+	_, err = s.Client.Server.CreateVersionedAttributes(ctx, u, va)
+	require.NoError(t, err)
+
+	// Ensure we still have only one versioned attribute and that the counter increased
+	r, _, err = s.Client.Server.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
+	require.NoError(t, err)
+	assert.Len(t, r, 1)
+	assert.Equal(t, 1, r[0].Tally)
+
+	// Create with different data and ensure a new one is created
+	_, err = s.Client.Server.CreateVersionedAttributes(ctx, u, newVA)
+	require.NoError(t, err)
+
+	// Ensure we still have only one versioned attribute and that the counter increased
+	r, _, err = s.Client.Server.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
+	require.NoError(t, err)
+	assert.Len(t, r, 2)
+	assert.Equal(t, 0, r[0].Tally)
+	assert.Equal(t, 1, r[1].Tally)
+}
+
+func TestIntegrationServerServiceListVersionedAttributes(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, _, err := s.Client.Server.GetVersionedAttributes(ctx, db.FixtureServerNemo.ID)
+		res, _, err := s.Client.Server.ListVersionedAttributes(ctx, db.FixtureServerNemo.ID)
 		if !expectError {
 			require.Len(t, res, 2)
 			assert.Equal(t, db.FixtureNamespaceVersioned, res[0].Namespace)
