@@ -56,6 +56,19 @@ func TestCreateVersionedAttributes(t *testing.T) {
 	}
 }
 
+func TestCreateVersionedAttributesTallyIncreases(t *testing.T) {
+	s := db.DatabaseTest(t)
+
+	va := &db.VersionedAttributes{Namespace: db.FixtureNamespaceVersioned, Data: db.FixtureVersionedAttributesNew.Data}
+	err := s.CreateVersionedAttributes(&db.FixtureServerNemo, va)
+	assert.NoError(t, err)
+
+	lva, _, err := s.GetVersionedAttributes(db.FixtureServerNemo.ID, db.FixtureNamespaceVersioned, nil)
+	assert.NoError(t, err)
+	assert.Len(t, lva, 2)
+	assert.Equal(t, lva[0].Tally, 1)
+}
+
 func TestGetVersionedAttributes(t *testing.T) {
 	s := db.DatabaseTest(t)
 

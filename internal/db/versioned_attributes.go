@@ -111,14 +111,6 @@ func areEqualJSON(s1, s2 json.RawMessage) bool {
 		o2 interface{}
 	)
 
-	if []byte(s1) == nil && []byte(s2) == nil {
-		return true
-	}
-
-	if []byte(s1) == nil || []byte(s2) == nil {
-		return false
-	}
-
 	if err := json.Unmarshal([]byte(s1), &o1); err != nil {
 		return false
 	}
