@@ -6,6 +6,7 @@ import (
 
 	"go.metalkube.net/hollow/internal/db"
 	"go.metalkube.net/hollow/internal/hollowserver"
+	"go.metalkube.net/hollow/pkg/ginjwt"
 )
 
 // serveCmd represents the serve command
@@ -25,12 +26,18 @@ func init() {
 	serveCmd.Flags().String("db-uri", "postgresql://root@db:26257/hollow_dev?sslmode=disable", "URI for database connection")
 	viperBindFlag("db.uri", serveCmd.Flags().Lookup("db-uri"))
 
-	serveCmd.Flags().String("jwt-aud", "", "expected audience on JWT tokens")
-	viperBindFlag("jwt.audience", serveCmd.Flags().Lookup("jwt-aud"))
-	serveCmd.Flags().String("jwt-issuer", "https://equinixmetal.us.auth0.com/", "expected issuer of JWT tokens")
-	viperBindFlag("jwt.issuer", serveCmd.Flags().Lookup("jwt-issuer"))
-	serveCmd.Flags().String("jwt-jwksuri", "https://equinixmetal.us.auth0.com/.well-known/jwks.json", "URI for JWKS listing for JWTs")
-	viperBindFlag("jwt.jwksuri", serveCmd.Flags().Lookup("jwt-jwksuri"))
+	serveCmd.Flags().Bool("oidc", true, "use oidc auth")
+	viperBindFlag("oidc.enabled", serveCmd.Flags().Lookup("oidc"))
+	serveCmd.Flags().String("oidc-aud", "", "expected audience on OIDC JWT")
+	viperBindFlag("oidc.audience", serveCmd.Flags().Lookup("oidc-aud"))
+	serveCmd.Flags().String("oidc-issuer", "", "expected issuer of OIDC JWT")
+	viperBindFlag("oidc.issuer", serveCmd.Flags().Lookup("oidc-issuer"))
+	serveCmd.Flags().String("oidc-jwksuri", "", "URI for JWKS listing for JWTs")
+	viperBindFlag("oidc.jwksuri", serveCmd.Flags().Lookup("oidc-jwksuri"))
+	serveCmd.Flags().String("oidc-roles-claim", "claim", "field containing the permissions of an OIDC JWT")
+	viperBindFlag("oidc.claims.roles", serveCmd.Flags().Lookup("oidc-roles-claim"))
+	serveCmd.Flags().String("oidc-username-claim", "", "additional fields to output in logs from the JWT token, ex (email)")
+	viperBindFlag("oidc.claims.username", serveCmd.Flags().Lookup("oidc-username-claim"))
 }
 
 func serve() {
@@ -48,10 +55,14 @@ func serve() {
 		Listen: viper.GetString("listen"),
 		Debug:  viper.GetBool("logging.debug"),
 		Store:  store,
-		AuthConfig: hollowserver.AuthConfig{
-			Audience: viper.GetString("jwt.audience"),
-			Issuer:   viper.GetString("jwt.issuer"),
-			JWKSURI:  viper.GetString("jwt.jwksuri"),
+		AuthConfig: ginjwt.AuthConfig{
+			Enabled:       viper.GetBool("oidc.enabled"),
+			Audience:      viper.GetString("oidc.audience"),
+			Issuer:        viper.GetString("oidc.issuer"),
+			JWKSURI:       viper.GetString("oidc.jwksuri"),
+			LogFields:     viper.GetStringSlice("oidc.log"),
+			RolesClaim:    viper.GetString("oidc.claims.roles"),
+			UsernameClaim: viper.GetString("oidc.claims.username"),
 		},
 	}
 

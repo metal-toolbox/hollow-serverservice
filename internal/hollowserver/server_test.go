@@ -11,13 +11,11 @@ import (
 
 	"go.metalkube.net/hollow/internal/db"
 	"go.metalkube.net/hollow/internal/hollowserver"
+	"go.metalkube.net/hollow/pkg/ginjwt"
 )
 
-// use a public keys listing so tests pass
-var serverAuthConfig = hollowserver.AuthConfig{
-	Audience: "",
-	Issuer:   "",
-	JWKSURI:  "https://www.googleapis.com/oauth2/v3/certs",
+var serverAuthConfig = ginjwt.AuthConfig{
+	Enabled: false,
 }
 
 func TestUnknownRoute(t *testing.T) {

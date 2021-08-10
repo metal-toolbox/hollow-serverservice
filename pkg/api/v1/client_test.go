@@ -141,9 +141,9 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 			"auth token with no scopes",
 			ctx,
 			validToken([]string{}),
-			http.StatusUnauthorized,
+			http.StatusForbidden,
 			true,
-			"server error - response code: 401, message:",
+			"server error - response code: 403, message:",
 		},
 		{
 			"fake timeout",

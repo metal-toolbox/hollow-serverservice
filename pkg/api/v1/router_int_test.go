@@ -32,10 +32,12 @@ func serverTest(t *testing.T) *integrationServer {
 	hs := hollowserver.Server{
 		Logger: l,
 		Store:  store,
-		AuthConfig: hollowserver.AuthConfig{
-			Audience: "hollow.test",
-			Issuer:   "hollow.test.issuer",
-			JWKSURI:  jwksURI,
+		AuthConfig: ginjwt.AuthConfig{
+			Enabled:    true,
+			Audience:   "hollow.test",
+			Issuer:     "hollow.test.issuer",
+			JWKSURI:    jwksURI,
+			RolesClaim: "userPerms",
 		},
 	}
 	s := hs.NewServer()
@@ -75,5 +77,5 @@ func validToken(scopes []string) string {
 	}
 	signer := ginjwt.TestHelperMustMakeSigner(jose.RS256, ginjwt.TestPrivRSAKey1ID, ginjwt.TestPrivRSAKey1)
 
-	return ginjwt.TestHelperGetToken(signer, claims, scopes)
+	return ginjwt.TestHelperGetToken(signer, claims, "userPerms", scopes)
 }

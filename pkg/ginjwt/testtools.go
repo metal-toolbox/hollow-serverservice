@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/square/go-jose.v2"
@@ -76,8 +75,10 @@ func TestHelperJWKSProvider() string {
 }
 
 // TestHelperGetToken will return a signed token
-func TestHelperGetToken(signer jose.Signer, cl jwt.Claims, scopes []string) string {
-	sc := customClaims{Scope: strings.Join(scopes, " ")}
+func TestHelperGetToken(signer jose.Signer, cl jwt.Claims, key string, value interface{}) string {
+	sc := map[string]interface{}{}
+
+	sc[key] = value
 
 	raw, err := jwt.Signed(signer).Claims(cl).Claims(sc).CompactSerialize()
 	if err != nil {
