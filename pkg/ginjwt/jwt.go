@@ -132,8 +132,13 @@ func (m *Middleware) AuthRequired(scopes []string) gin.HandlerFunc {
 			return
 		}
 
-		u := sc[m.config.UsernameClaim]
-		user := u.(string)
+		var user string
+		switch u := sc[m.config.UsernameClaim].(type) {
+		case string:
+			user = u
+		default:
+			user = cl.Subject
+		}
 
 		c.Set(contextKeySubject, cl.Subject)
 		c.Set(contextKeyUser, user)
