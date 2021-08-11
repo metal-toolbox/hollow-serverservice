@@ -27,6 +27,7 @@ type Server struct {
 var (
 	readTimeout  = 10 * time.Second
 	writeTimeout = 20 * time.Second
+	corsMaxAge   = 12 * time.Hour
 )
 
 func (s *Server) setup() *gin.Engine {
@@ -48,7 +49,7 @@ func (s *Server) setup() *gin.Engine {
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowAllOrigins:  true,
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		MaxAge:           corsMaxAge,
 	}))
 
 	// Health endpoints
