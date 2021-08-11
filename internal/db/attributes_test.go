@@ -131,10 +131,10 @@ func TestUpdateAttributesByServerUUIDAndNamespace(t *testing.T) {
 		data             json.RawMessage
 		expectedNotFound bool
 	}{
-		{"happy path", db.FixtureServerDory.ID, db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age":12,"location":"Fishbowl"}`)), false},
-		{"happy path - not found server uuid", uuid.New(), db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age":12,"location":"Fishbowl"}`)), false},
-		{"happy path - not found namespace", db.FixtureServerDory.ID, "unknown", json.RawMessage([]byte(`{"age":12,"location":"Fishbowl"}`)), false},
-		{"no namespace provided", db.FixtureServerDory.ID, "", json.RawMessage{}, false},
+		{"happy path", db.FixtureServerDory.ID, db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), false},
+		{"not found server uuid", uuid.New(), db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), true},
+		{"happy path - new namespace should upsert", db.FixtureServerDory.ID, "unknown", json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), false},
+		{"no namespace provided", db.FixtureServerDory.ID, "", json.RawMessage{}, true},
 	}
 
 	for _, tt := range testCases {
@@ -146,6 +146,9 @@ func TestUpdateAttributesByServerUUIDAndNamespace(t *testing.T) {
 				assert.ErrorIs(t, err, db.ErrNotFound)
 			} else {
 				assert.NoError(t, err)
+				attr, err := s.GetAttributesByServerUUIDAndNamespace(tt.u, tt.ns)
+				assert.NoError(t, err)
+				assert.Equal(t, datatypes.JSON(tt.data), attr.Data)
 			}
 		})
 	}

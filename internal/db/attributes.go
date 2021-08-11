@@ -97,15 +97,15 @@ func (s *Store) GetAttributesByServerUUIDAndNamespace(u uuid.UUID, ns string) (*
 // FindOrInitAttributesByServerUUIDAndNamespace will return attributes for a given server UUID and namespace. If one
 // doesn't exist an empty one will be returned which can be saved
 func (s *Store) FindOrInitAttributesByServerUUIDAndNamespace(u uuid.UUID, ns string) (*Attributes, error) {
+	if !s.ServerExists(u) || ns == "" {
+		return nil, ErrNotFound
+	}
+
 	var attr Attributes
 
 	d := s.db.Preload(clause.Associations)
 
 	if err := d.FirstOrInit(&attr, Attributes{ServerID: &u, Namespace: ns}).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrNotFound
-		}
-
 		return nil, err
 	}
 
@@ -119,5 +119,7 @@ func (s *Store) UpdateAttributesByServerUUIDAndNamespace(u uuid.UUID, ns string,
 		return err
 	}
 
-	return s.db.Model(&attr).Updates(Attributes{Data: datatypes.JSON(data)}).Error
+	attr.Data = datatypes.JSON(data)
+
+	return s.db.Save(&attr).Error
 }
