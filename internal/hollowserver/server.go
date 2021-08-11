@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
@@ -26,6 +27,7 @@ type Server struct {
 var (
 	readTimeout  = 10 * time.Second
 	writeTimeout = 20 * time.Second
+	corsMaxAge   = 12 * time.Hour
 )
 
 func (s *Server) setup() *gin.Engine {
@@ -41,6 +43,14 @@ func (s *Server) setup() *gin.Engine {
 
 	// Setup default gin router
 	r := gin.New()
+
+	r.Use(cors.New(cors.Config{
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+		MaxAge:           corsMaxAge,
+	}))
 
 	// Health endpoints
 	// These are defined before zap so that they are not logged
