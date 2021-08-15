@@ -38,7 +38,7 @@ vendor:
 	@go mod tidy
 
 docker-up:
-	@docker-compose up -d db
+	# @docker-compose up -d db
 
 docker-down:
 	@docker-compose down
@@ -47,11 +47,12 @@ docker-clean:
 	@docker-compose down --volumes
 
 dev-database:
-	@docker exec hollow_db_1 cockroach sql --insecure -e "drop database if exists hollow_dev"
-	@docker exec hollow_db_1 cockroach sql --insecure -e "create database hollow_dev"
+	@cockroach sql --insecure -e "drop database if exists hollow_dev"
+	@cockroach sql --insecure -e "create database hollow_dev"
 	@GOOSE_DRIVER=postgres GOOSE_DBSTRING="${DEV_DB}" goose -dir=db/migrations up
 
 test-database:
-	@docker exec hollow_db_1 cockroach sql --insecure -e "drop database if exists hollow_test"
-	@docker exec hollow_db_1 cockroach sql --insecure -e "create database hollow_test"
+	@cockroach sql --insecure -e "drop database if exists hollow_test"
+	@cockroach sql --insecure -e "create database hollow_test"
 	@GOOSE_DRIVER=postgres GOOSE_DBSTRING="${TEST_DB}" goose -dir=db/migrations up
+	@cockroach sql --insecure -e "use hollow_test; ALTER TABLE attributes DROP CONSTRAINT check_server_id_server_component_id; ALTER TABLE versioned_attributes DROP CONSTRAINT check_server_id_server_component_id;"
