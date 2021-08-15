@@ -38,7 +38,7 @@ vendor:
 	@go mod tidy
 
 docker-up:
-	# @docker-compose up -d db
+	@docker-compose up -d db
 
 docker-down:
 	@docker-compose down
