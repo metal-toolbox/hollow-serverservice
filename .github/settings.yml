@@ -1,7 +1,7 @@
 repository:
   # See https://developer.github.com/v3/repos/#edit for all available settings.
   name: hollow
-  description: Hollow is the combination of a golang-based API built on top of cockroachdb primarily responsible for the handling of physical asset information (e.g. metadata about our physical assets)
+  description: The API service which leverages CockroachDB as a backend to inventory firmware, bios, and other hardware information required for cohesive fleet management
   homepage: https://tinkerbell.org/
   # private: false
   visibility: internal
