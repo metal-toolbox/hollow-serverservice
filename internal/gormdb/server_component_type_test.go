@@ -1,4 +1,4 @@
-package db_test
+package gormdb_test
 
 import (
 	"testing"
@@ -6,20 +6,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func TestCreateServerComponentType(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
-		ct          *db.ServerComponentType
+		ct          *gormdb.ServerComponentType
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing name", &db.ServerComponentType{}, true, "validation failed: name is a required server component type attribute"},
-		{"happy path", &db.ServerComponentType{Name: "Test-Type"}, false, ""},
+		{"missing name", &gormdb.ServerComponentType{}, true, "validation failed: name is a required server component type attribute"},
+		{"happy path", &gormdb.ServerComponentType{Name: "Test-Type"}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -35,16 +35,16 @@ func TestCreateServerComponentType(t *testing.T) {
 }
 
 func TestGetServerComponentType(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
-		filter        *db.ServerComponentTypeFilter
+		filter        *gormdb.ServerComponentTypeFilter
 		expectedUUIDs []uuid.UUID
 	}{
-		{"happy path - filter doesn't match", &db.ServerComponentTypeFilter{Name: "DoesntExist"}, []uuid.UUID{}},
-		{"happy path - filter match", &db.ServerComponentTypeFilter{Name: db.FixtureSCTFins.Name}, []uuid.UUID{db.FixtureSCTFins.ID}},
-		{"happy path - no filter", nil, []uuid.UUID{db.FixtureSCTFins.ID}},
+		{"happy path - filter doesn't match", &gormdb.ServerComponentTypeFilter{Name: "DoesntExist"}, []uuid.UUID{}},
+		{"happy path - filter match", &gormdb.ServerComponentTypeFilter{Name: gormdb.FixtureSCTFins.Name}, []uuid.UUID{gormdb.FixtureSCTFins.ID}},
+		{"happy path - no filter", nil, []uuid.UUID{gormdb.FixtureSCTFins.ID}},
 	}
 
 	for _, tt := range testCases {

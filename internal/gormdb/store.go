@@ -1,6 +1,8 @@
-package db
+package gormdb
 
 import (
+	"database/sql"
+
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -36,6 +38,11 @@ func NewPostgresStore(uri string, lg *zap.Logger) (*Store, error) {
 	return &Store{
 		db: db,
 	}, nil
+}
+
+// DB returns a sql.DB connection just to make this testing of models easier
+func (s *Store) DB() (*sql.DB, error) {
+	return s.db.DB()
 }
 
 // Ping checks to ensure that the database is available and processing queries

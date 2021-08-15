@@ -1,4 +1,4 @@
-package db_test
+package gormdb_test
 
 import (
 	"testing"
@@ -6,42 +6,42 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func TestGetComponentsByServerUUID(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName       string
 		srvUUID        uuid.UUID
-		filter         *db.ServerComponentFilter
+		filter         *gormdb.ServerComponentFilter
 		expectedUUIDs  []uuid.UUID
 		expectNotFound bool
 	}{
 		{
 			"happy path - no filter",
-			db.FixtureServerNemo.ID,
+			gormdb.FixtureServerNemo.ID,
 			nil,
 			[]uuid.UUID{
-				db.FixtureSCNemoLeftFin.ID,
-				db.FixtureSCNemoRightFin.ID,
+				gormdb.FixtureSCNemoLeftFin.ID,
+				gormdb.FixtureSCNemoRightFin.ID,
 			},
 			false,
 		},
 		{
 			"happy path - filter match",
-			db.FixtureServerNemo.ID,
-			&db.ServerComponentFilter{Serial: "Left"},
+			gormdb.FixtureServerNemo.ID,
+			&gormdb.ServerComponentFilter{Serial: "Left"},
 			[]uuid.UUID{
-				db.FixtureSCNemoLeftFin.ID,
+				gormdb.FixtureSCNemoLeftFin.ID,
 			},
 			false,
 		},
 		{
 			"happy path - filter excludes everything",
-			db.FixtureServerNemo.ID,
-			&db.ServerComponentFilter{Serial: "Doesnt Exist"},
+			gormdb.FixtureServerNemo.ID,
+			&gormdb.ServerComponentFilter{Serial: "Doesnt Exist"},
 			[]uuid.UUID{},
 			false,
 		},
@@ -59,7 +59,7 @@ func TestGetComponentsByServerUUID(t *testing.T) {
 			r, count, err := s.GetComponentsByServerUUID(tt.srvUUID, tt.filter, nil)
 			if tt.expectNotFound {
 				assert.Error(t, err)
-				assert.ErrorIs(t, err, db.ErrNotFound)
+				assert.ErrorIs(t, err, gormdb.ErrNotFound)
 			} else {
 				assert.NoError(t, err)
 				assert.EqualValues(t, len(tt.expectedUUIDs), count)

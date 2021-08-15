@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // Attributes provide the ability to apply namespaced settings to an entity.
@@ -34,7 +34,7 @@ type AttributeListParams struct {
 	GreaterThanValue int      `form:"greater-than" query:"greater-than"`
 }
 
-func (a *Attributes) fromDBModel(dbA db.Attributes) error {
+func (a *Attributes) fromDBModel(dbA gormdb.Attributes) error {
 	a.Namespace = dbA.Namespace
 	a.Data = json.RawMessage(dbA.Data)
 	a.CreatedAt = dbA.CreatedAt
@@ -43,8 +43,8 @@ func (a *Attributes) fromDBModel(dbA db.Attributes) error {
 	return nil
 }
 
-func (a *Attributes) toDBModel() (db.Attributes, error) {
-	dbA := db.Attributes{
+func (a *Attributes) toDBModel() (gormdb.Attributes, error) {
+	dbA := gormdb.Attributes{
 		Namespace: a.Namespace,
 		Data:      datatypes.JSON(a.Data),
 	}
@@ -52,7 +52,7 @@ func (a *Attributes) toDBModel() (db.Attributes, error) {
 	return dbA, nil
 }
 
-func convertFromDBAttributes(dbAttrs []db.Attributes) ([]Attributes, error) {
+func convertFromDBAttributes(dbAttrs []gormdb.Attributes) ([]Attributes, error) {
 	attrs := []Attributes{}
 
 	for _, dbA := range dbAttrs {
@@ -67,8 +67,8 @@ func convertFromDBAttributes(dbAttrs []db.Attributes) ([]Attributes, error) {
 	return attrs, nil
 }
 
-func convertToDBAttributes(attrs []Attributes) ([]db.Attributes, error) {
-	dbAttrs := []db.Attributes{}
+func convertToDBAttributes(attrs []Attributes) ([]gormdb.Attributes, error) {
+	dbAttrs := []gormdb.Attributes{}
 
 	for _, a := range attrs {
 		dbA, err := a.toDBModel()
@@ -82,11 +82,11 @@ func convertToDBAttributes(attrs []Attributes) ([]db.Attributes, error) {
 	return dbAttrs, nil
 }
 
-func convertToDBAttributesFilter(attrs []AttributeListParams) ([]db.AttributesFilter, error) {
-	dbFilter := []db.AttributesFilter{}
+func convertToDBAttributesFilter(attrs []AttributeListParams) ([]gormdb.AttributesFilter, error) {
+	dbFilter := []gormdb.AttributesFilter{}
 
 	for _, aF := range attrs {
-		f := db.AttributesFilter{
+		f := gormdb.AttributesFilter{
 			Namespace:        aF.Namespace,
 			Keys:             aF.Keys,
 			EqualValue:       aF.EqualValue,

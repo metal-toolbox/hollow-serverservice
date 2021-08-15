@@ -1,6 +1,7 @@
 package hollowserver
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.uber.org/zap"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 	v1api "go.metalkube.net/hollow/pkg/api/v1"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
@@ -20,7 +21,8 @@ type Server struct {
 	Logger     *zap.Logger
 	Listen     string
 	Debug      bool
-	Store      *db.Store
+	Store      *gormdb.Store
+	DB         *sql.DB
 	AuthConfig ginjwt.AuthConfig
 }
 
@@ -60,7 +62,7 @@ func (s *Server) setup() *gin.Engine {
 
 	p := ginprometheus.NewPrometheus("gin")
 
-	v1Rtr := v1api.Router{Store: s.Store, AuthMW: authMW}
+	v1Rtr := v1api.Router{Store: s.Store, DB: s.DB, AuthMW: authMW}
 
 	// Remove any params from the URL string to keep the number of labels down
 	p.ReqCntURLLabelMappingFn = func(c *gin.Context) string {

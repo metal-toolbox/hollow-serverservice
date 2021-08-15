@@ -1,4 +1,4 @@
-package db_test
+package gormdb_test
 
 import (
 	"encoding/json"
@@ -8,20 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/datatypes"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func TestCreateAttributes(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
-		a           *db.Attributes
+		a           *gormdb.Attributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing namespace", &db.Attributes{}, true, "validation failed: namespace is a required attributes attribute"},
-		{"happy path", &db.Attributes{ServerID: &db.FixtureServerDory.ID, Namespace: "hollow.test", Data: datatypes.JSON([]byte(`{"value": "set"}`))}, false, ""},
+		{"missing namespace", &gormdb.Attributes{}, true, "validation failed: namespace is a required attributes attribute"},
+		{"happy path", &gormdb.Attributes{ServerID: &gormdb.FixtureServerDory.ID, Namespace: "hollow.test", Data: datatypes.JSON([]byte(`{"value": "set"}`))}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -37,14 +37,14 @@ func TestCreateAttributes(t *testing.T) {
 }
 
 func TestDeleteAttributes(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
-	err := s.DeleteAttributes(&db.FixtureAttributesDoryMetadata)
+	err := s.DeleteAttributes(&gormdb.FixtureAttributesDoryMetadata)
 	assert.NoError(t, err)
 }
 
 func TestGetAttributesByServerUUID(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName         string
@@ -54,10 +54,10 @@ func TestGetAttributesByServerUUID(t *testing.T) {
 	}{
 		{
 			"happy path",
-			db.FixtureServerDory.ID,
+			gormdb.FixtureServerDory.ID,
 			[]uuid.UUID{
-				db.FixtureAttributesDoryMetadata.ID,
-				db.FixtureAttributesDoryOtherdata.ID,
+				gormdb.FixtureAttributesDoryMetadata.ID,
+				gormdb.FixtureAttributesDoryOtherdata.ID,
 			},
 			false,
 		},
@@ -74,7 +74,7 @@ func TestGetAttributesByServerUUID(t *testing.T) {
 			attrs, count, err := s.GetAttributesByServerUUID(tt.u, nil)
 			if tt.expectedNotFound {
 				assert.Error(t, err)
-				assert.ErrorIs(t, err, db.ErrNotFound)
+				assert.ErrorIs(t, err, gormdb.ErrNotFound)
 			} else {
 				assert.NoError(t, err)
 				assert.Len(t, attrs, int(count))
@@ -91,7 +91,7 @@ func TestGetAttributesByServerUUID(t *testing.T) {
 }
 
 func TestGetAttributesByServerUUIDAndNamespace(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName         string
@@ -100,9 +100,9 @@ func TestGetAttributesByServerUUIDAndNamespace(t *testing.T) {
 		expectedID       uuid.UUID
 		expectedNotFound bool
 	}{
-		{"happy path", db.FixtureServerDory.ID, db.FixtureNamespaceMetadata, db.FixtureAttributesDoryMetadata.ID, false},
-		{"not found server uuid", uuid.New(), db.FixtureNamespaceMetadata, uuid.Nil, true},
-		{"not found namespace", db.FixtureServerDory.ID, "unknown", uuid.Nil, true},
+		{"happy path", gormdb.FixtureServerDory.ID, gormdb.FixtureNamespaceMetadata, gormdb.FixtureAttributesDoryMetadata.ID, false},
+		{"not found server uuid", uuid.New(), gormdb.FixtureNamespaceMetadata, uuid.Nil, true},
+		{"not found namespace", gormdb.FixtureServerDory.ID, "unknown", uuid.Nil, true},
 	}
 
 	for _, tt := range testCases {
@@ -111,7 +111,7 @@ func TestGetAttributesByServerUUIDAndNamespace(t *testing.T) {
 
 			if tt.expectedNotFound {
 				assert.Error(t, err)
-				assert.ErrorIs(t, err, db.ErrNotFound)
+				assert.ErrorIs(t, err, gormdb.ErrNotFound)
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, attr)
@@ -122,7 +122,7 @@ func TestGetAttributesByServerUUIDAndNamespace(t *testing.T) {
 }
 
 func TestUpdateAttributesByServerUUIDAndNamespace(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName         string
@@ -131,10 +131,10 @@ func TestUpdateAttributesByServerUUIDAndNamespace(t *testing.T) {
 		data             json.RawMessage
 		expectedNotFound bool
 	}{
-		{"happy path", db.FixtureServerDory.ID, db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), false},
-		{"not found server uuid", uuid.New(), db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), true},
-		{"happy path - new namespace should upsert", db.FixtureServerDory.ID, "unknown", json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), false},
-		{"no namespace provided", db.FixtureServerDory.ID, "", json.RawMessage{}, true},
+		{"happy path", gormdb.FixtureServerDory.ID, gormdb.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), false},
+		{"not found server uuid", uuid.New(), gormdb.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), true},
+		{"happy path - new namespace should upsert", gormdb.FixtureServerDory.ID, "unknown", json.RawMessage([]byte(`{"age": 12, "location": "Fishbowl"}`)), false},
+		{"no namespace provided", gormdb.FixtureServerDory.ID, "", json.RawMessage{}, true},
 	}
 
 	for _, tt := range testCases {
@@ -143,7 +143,7 @@ func TestUpdateAttributesByServerUUIDAndNamespace(t *testing.T) {
 
 			if tt.expectedNotFound {
 				assert.Error(t, err)
-				assert.ErrorIs(t, err, db.ErrNotFound)
+				assert.ErrorIs(t, err, gormdb.ErrNotFound)
 			} else {
 				assert.NoError(t, err)
 				attr, err := s.GetAttributesByServerUUIDAndNamespace(tt.u, tt.ns)

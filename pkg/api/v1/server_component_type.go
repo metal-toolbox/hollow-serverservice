@@ -1,8 +1,6 @@
 package hollow
 
-import (
-	"go.metalkube.net/hollow/internal/db"
-)
+import "go.metalkube.net/hollow/internal/gormdb"
 
 // ServerComponentType provides a way to group server components by the type
 type ServerComponentType struct {
@@ -10,15 +8,15 @@ type ServerComponentType struct {
 	Name string `json:"name"`
 }
 
-func (t *ServerComponentType) fromDBModel(dbT db.ServerComponentType) error {
+func (t *ServerComponentType) fromDBModel(dbT gormdb.ServerComponentType) error {
 	t.Name = dbT.Name
 	t.ID = dbT.Slug
 
 	return nil
 }
 
-func (t *ServerComponentType) toDBModel() (*db.ServerComponentType, error) {
-	dbT := &db.ServerComponentType{
+func (t *ServerComponentType) toDBModel() (*gormdb.ServerComponentType, error) {
+	dbT := &gormdb.ServerComponentType{
 		Name: t.Name,
 		Slug: t.ID,
 	}

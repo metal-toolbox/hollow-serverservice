@@ -3,7 +3,7 @@ package hollow
 import (
 	"net/url"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // ServerListParams allows you to filter the results
@@ -30,10 +30,10 @@ func (p *ServerListParams) setQuery(q url.Values) {
 	p.PaginationParams.setQuery(q)
 }
 
-func (p *ServerListParams) dbFilter(r *Router) (*db.ServerFilter, error) {
+func (p *ServerListParams) dbFilter(r *Router) (*gormdb.ServerFilter, error) {
 	var err error
 
-	dbF := &db.ServerFilter{
+	dbF := &gormdb.ServerFilter{
 		FacilityCode: p.FacilityCode,
 	}
 

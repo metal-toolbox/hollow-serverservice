@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // PaginationParams allow you to paginate the results
@@ -22,7 +22,7 @@ type paginationData struct {
 	pageCount  int
 	totalCount int64
 	nextCursor string
-	pager      db.Pagination
+	pager      gormdb.Pagination
 }
 
 func encodeCursor(t time.Time) string {
@@ -46,10 +46,10 @@ func decodeCursor(encodedCursor string) (res *time.Time, err error) {
 	return
 }
 
-func parsePagination(c *gin.Context) (db.Pagination, error) {
+func parsePagination(c *gin.Context) (gormdb.Pagination, error) {
 	var err error
 	// Initializing default
-	limit := db.DefaultPaginationSize
+	limit := gormdb.DefaultPaginationSize
 	page := 1
 	query := c.Request.URL.Query()
 
@@ -66,12 +66,12 @@ func parsePagination(c *gin.Context) (db.Pagination, error) {
 		case "cursor":
 			cursor, err = decodeCursor(queryValue)
 			if err != nil {
-				return db.Pagination{}, err
+				return gormdb.Pagination{}, err
 			}
 		}
 	}
 
-	return db.Pagination{
+	return gormdb.Pagination{
 		Limit:  limit,
 		Page:   page,
 		Cursor: cursor,

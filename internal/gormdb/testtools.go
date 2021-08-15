@@ -1,6 +1,6 @@
 //+build testtools
 
-package db
+package gormdb
 
 import (
 	"os"
@@ -68,4 +68,17 @@ func cleanDB() {
 	d.Delete(&ServerComponent{})
 	d.Delete(&ServerComponentType{})
 	d.Unscoped().Delete(&Server{})
+}
+
+// DatabaseTestErr provides a test database
+func DatabaseTestErr() (*Store, error) {
+	if testing.Short() {
+		return nil, nil
+	}
+
+	if err := testDatastore(); err != nil {
+		return nil, err
+	}
+
+	return testStore, nil
 }

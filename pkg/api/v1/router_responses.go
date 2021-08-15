@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // ServerResponse represents the data that the server will return on any given call
@@ -84,7 +84,7 @@ func updatedResponse(c *gin.Context, slug string) {
 }
 
 func dbErrorResponse(c *gin.Context, err error) {
-	if errors.Is(err, db.ErrNotFound) {
+	if errors.Is(err, gormdb.ErrNotFound) {
 		c.JSON(http.StatusNotFound, &ServerResponse{Message: "resource not found", Error: err.Error()})
 	} else {
 		c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "datastore error", Error: err.Error()})

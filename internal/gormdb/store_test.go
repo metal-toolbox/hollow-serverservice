@@ -1,4 +1,4 @@
-package db_test
+package gormdb_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func TestNewPostgresStore(t *testing.T) {
@@ -15,13 +15,13 @@ func TestNewPostgresStore(t *testing.T) {
 		t.Skip("skipping database test in short mode")
 	}
 
-	s, err := db.NewPostgresStore(db.TestDBURI, zap.NewNop())
+	s, err := gormdb.NewPostgresStore(gormdb.TestDBURI, zap.NewNop())
 	assert.NoError(t, err)
 	assert.NotNil(t, s)
 }
 
 func TestNewPostgresStoreFailure(t *testing.T) {
-	s, err := db.NewPostgresStore("invalid-uri", zap.NewNop())
+	s, err := gormdb.NewPostgresStore("invalid-uri", zap.NewNop())
 	assert.Error(t, err)
 	assert.Nil(t, s)
 }
@@ -35,7 +35,7 @@ func TestPingNoDB(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		s := &db.Store{}
+		s := &gormdb.Store{}
 		res := s.Ping()
 		assert.Equal(t, tt.expectedResult, res, tt.testName)
 	}
@@ -51,11 +51,11 @@ func TestPing(t *testing.T) {
 		dbURI          string
 		expectedResult bool
 	}{
-		{"happy path", db.TestDBURI, true},
+		{"happy path", gormdb.TestDBURI, true},
 	}
 
 	for _, tt := range testCases {
-		s, err := db.NewPostgresStore(tt.dbURI, zap.NewNop())
+		s, err := gormdb.NewPostgresStore(tt.dbURI, zap.NewNop())
 		require.NoError(t, err)
 		require.NotNil(t, s)
 

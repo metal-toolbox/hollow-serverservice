@@ -1,19 +1,21 @@
 package hollow
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
 
 // Router provides a router for the v1 API
 type Router struct {
-	Store  *db.Store
+	Store  *gormdb.Store
 	AuthMW *ginjwt.Middleware
+	DB     *sql.DB
 }
 
 // Routes will add the routes for this API version to a router group
@@ -89,7 +91,7 @@ func (r *Router) parseUUID(c *gin.Context) (uuid.UUID, error) {
 	return u, err
 }
 
-func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
+func (r *Router) loadServerFromParams(c *gin.Context) (*gormdb.Server, error) {
 	srvUUID, err := r.parseUUID(c)
 	if err != nil {
 		return nil, err
@@ -104,7 +106,7 @@ func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
 	return srv, nil
 }
 
-func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*db.Server, error) {
+func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*gormdb.Server, error) {
 	srvUUID, err := r.parseUUID(c)
 	if err != nil {
 		return nil, err

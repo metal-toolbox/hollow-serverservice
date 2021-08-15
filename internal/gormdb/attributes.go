@@ -1,4 +1,4 @@
-package db
+package gormdb
 
 import (
 	"encoding/json"
@@ -19,9 +19,9 @@ type Attributes struct {
 	ID                uuid.UUID
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
-	ServerID          *uuid.UUID
+	ServerID          *uuid.UUID `gorm:"<-:create;"`
 	Server            *Server
-	ServerComponentID *uuid.UUID
+	ServerComponentID *uuid.UUID `gorm:"<-:create;"`
 	ServerComponent   *ServerComponent
 	Namespace         string `gorm:"<-:create;"`
 	Data              datatypes.JSON

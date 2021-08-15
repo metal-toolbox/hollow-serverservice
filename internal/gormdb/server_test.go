@@ -1,4 +1,4 @@
-package db_test
+package gormdb_test
 
 import (
 	"testing"
@@ -6,19 +6,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func TestCreateServer(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
-		srv         db.Server
+		srv         gormdb.Server
 		expectError bool
 		errorMsg    string
 	}{
-		{"happy path", db.Server{FacilityCode: "TEST1"}, false, ""},
+		{"happy path", gormdb.Server{FacilityCode: "TEST1"}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -34,14 +34,14 @@ func TestCreateServer(t *testing.T) {
 }
 
 func TestDeleteServer(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
-	err := s.DeleteServer(&db.FixtureServerNemo)
+	err := s.DeleteServer(&gormdb.FixtureServerNemo)
 	assert.NoError(t, err)
 }
 
 func TestFindServerByUUID(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName   string
@@ -52,7 +52,7 @@ func TestFindServerByUUID(t *testing.T) {
 	}{
 		{
 			"happy path - existing server",
-			db.FixtureServerDory.ID,
+			gormdb.FixtureServerDory.ID,
 			false,
 			"",
 		},
@@ -80,7 +80,7 @@ func TestFindServerByUUID(t *testing.T) {
 }
 
 func TestFindOrCreateServerByUUID(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName   string
@@ -91,7 +91,7 @@ func TestFindOrCreateServerByUUID(t *testing.T) {
 	}{
 		{
 			"happy path - existing server",
-			db.FixtureServerDory.ID,
+			gormdb.FixtureServerDory.ID,
 			false,
 			"",
 		},
@@ -119,115 +119,115 @@ func TestFindOrCreateServerByUUID(t *testing.T) {
 }
 
 func TestGetServer(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
-		filter        *db.ServerFilter
+		filter        *gormdb.ServerFilter
 		expectedUUIDs []uuid.UUID
 		expectError   bool
 		errorMsg      string
 	}{
 		{
 			"search by age less than 7",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:     db.FixtureNamespaceMetadata,
+						Namespace:     gormdb.FixtureNamespaceMetadata,
 						Keys:          []string{"age"},
 						LessThanValue: 7,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by age greater than 11 and facility code",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:        db.FixtureNamespaceMetadata,
+						Namespace:        gormdb.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
 						GreaterThanValue: 11,
 					},
 				},
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"search by facility",
-			&db.ServerFilter{
+			&gormdb.ServerFilter{
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search by type and location from different attributes",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "blue-tang",
 					},
 					{
-						Namespace:  db.FixtureNamespaceMetadata,
+						Namespace:  gormdb.FixtureNamespaceMetadata,
 						Keys:       []string{"location"},
 						EqualValue: "East Austalian Current",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"search by nested tag",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"nested", "tag"},
 						EqualValue: "finding-nemo",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerNemo.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID, gormdb.FixtureServerNemo.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search by nested number greater than 1",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:        db.FixtureNamespaceOtherdata,
+						Namespace:        gormdb.FixtureNamespaceOtherdata,
 						Keys:             []string{"nested", "number"},
 						GreaterThanValue: 1,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"empty search filter",
 			nil,
-			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID, gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"facility filter that doesn't match",
-			&db.ServerFilter{
+			&gormdb.ServerFilter{
 				FacilityCode: "Neverland",
 			},
 			[]uuid.UUID{},
@@ -236,39 +236,39 @@ func TestGetServer(t *testing.T) {
 		},
 		{
 			"search by type from attributes and name from versioned attributes",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "clown",
 					},
 				},
-				VersionedAttributesFilters: []db.AttributesFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by type from attributes and name from versioned attributes, using the not current value, so nothing should return",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "clown",
 					},
 				},
-				VersionedAttributesFilters: []db.AttributesFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "old",
 					},
@@ -280,8 +280,8 @@ func TestGetServer(t *testing.T) {
 		},
 		{
 			"search by multiple components of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Model:  "A Lucky Fin",
 						Serial: "Right",
@@ -292,14 +292,14 @@ func TestGetServer(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"ensure both components have to match when searching by multiple components of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Name:   "My Lucky Fin",
 						Vendor: "Barracuda",
@@ -318,55 +318,55 @@ func TestGetServer(t *testing.T) {
 		},
 		{
 			"search by a single component and versioned attributes of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Model:  "A Lucky Fin",
 						Serial: "Right",
 					},
 				},
-				VersionedAttributesFilters: []db.AttributesFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by a single component and versioned attributes of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Model:  "A Lucky Fin",
 						Serial: "Right",
 					},
 				},
-				VersionedAttributesFilters: []db.AttributesFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by a single component and it's versioned attributes of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Model: "A Lucky Fin",
-						VersionedAttributesFilters: []db.AttributesFilter{
+						VersionedAttributesFilters: []gormdb.AttributesFilter{
 							{
-								Namespace:  db.FixtureNamespaceVersioned,
+								Namespace:  gormdb.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
 								EqualValue: "cool",
 							},
@@ -374,55 +374,55 @@ func TestGetServer(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by a component and server versioned attributes of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Model: "A Lucky Fin",
-						VersionedAttributesFilters: []db.AttributesFilter{
+						VersionedAttributesFilters: []gormdb.AttributesFilter{
 							{
-								Namespace:  db.FixtureNamespaceVersioned,
+								Namespace:  gormdb.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
 								EqualValue: "cool",
 							},
 						},
 					},
 				},
-				VersionedAttributesFilters: []db.AttributesFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search by a component and server versioned attributes of the server",
-			&db.ServerFilter{
-				ComponentFilters: []db.ServerComponentFilter{
+			&gormdb.ServerFilter{
+				ComponentFilters: []gormdb.ServerComponentFilter{
 					{
 						Model: "A Lucky Fin",
-						VersionedAttributesFilters: []db.AttributesFilter{
+						VersionedAttributesFilters: []gormdb.AttributesFilter{
 							{
-								Namespace:  db.FixtureNamespaceVersioned,
+								Namespace:  gormdb.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
 								EqualValue: "cool",
 							},
 						},
 					},
 				},
-				VersionedAttributesFilters: []db.AttributesFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "old",
 					},
@@ -434,24 +434,24 @@ func TestGetServer(t *testing.T) {
 		},
 		{
 			"search for devices with a versioned attributes in a namespace with key that exists",
-			&db.ServerFilter{
-				VersionedAttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace: db.FixtureNamespaceVersioned,
+						Namespace: gormdb.FixtureNamespaceVersioned,
 						Keys:      []string{"name"},
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search for devices with a versioned attributes in a namespace with key that doesn't exists",
-			&db.ServerFilter{
-				VersionedAttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace: db.FixtureNamespaceVersioned,
+						Namespace: gormdb.FixtureNamespaceVersioned,
 						Keys:      []string{"doesntExist"},
 					},
 				},
@@ -462,27 +462,27 @@ func TestGetServer(t *testing.T) {
 		},
 		{
 			"search for devices that have versioned attributes in a namespace - no filters",
-			&db.ServerFilter{
-				VersionedAttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				VersionedAttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace: db.FixtureNamespaceVersioned,
+						Namespace: gormdb.FixtureNamespaceVersioned,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"search for devices that have attributes in a namespace - no filters",
-			&db.ServerFilter{
-				AttributesFilters: []db.AttributesFilter{
+			&gormdb.ServerFilter{
+				AttributesFilters: []gormdb.AttributesFilter{
 					{
-						Namespace: db.FixtureNamespaceMetadata,
+						Namespace: gormdb.FixtureNamespaceMetadata,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID, gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -506,7 +506,7 @@ func TestGetServer(t *testing.T) {
 					assert.Len(t, h.ServerComponents, 2, tt.testName)
 					assert.Len(t, h.Attributes, 2, tt.testName)
 					// Nemo has two versioned attributes but only the most recent in a namespace should preload
-					if h.ID == db.FixtureServerNemo.ID {
+					if h.ID == gormdb.FixtureServerNemo.ID {
 						assert.Len(t, h.VersionedAttributes, 1, tt.testName)
 					}
 				}
@@ -518,48 +518,48 @@ func TestGetServer(t *testing.T) {
 }
 
 func TestGetServerPagination(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName      string
-		pager         db.Pagination
+		pager         gormdb.Pagination
 		expectedUUIDs []uuid.UUID
 		expectError   bool
 		errorMsg      string
 	}{
 		{
 			"limit 1 page 1",
-			db.Pagination{
+			gormdb.Pagination{
 				Limit: 1,
 				Page:  1,
 			},
-			[]uuid.UUID{db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"limit 1 page 2",
-			db.Pagination{
+			gormdb.Pagination{
 				Limit: 1,
 				Page:  2,
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID},
 			false,
 			"",
 		},
 		{
 			"limit 1 page 3",
-			db.Pagination{
+			gormdb.Pagination{
 				Limit: 1,
 				Page:  3,
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
 		{
 			"limit 1 page 4",
-			db.Pagination{
+			gormdb.Pagination{
 				Limit: 1,
 				Page:  4,
 			},
@@ -592,33 +592,33 @@ func TestGetServerPagination(t *testing.T) {
 }
 
 func TestUpdateServer(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
 		srvUUID     uuid.UUID
-		newValues   db.Server
+		newValues   gormdb.Server
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			"happy path - existing server",
-			db.FixtureServerDory.ID,
-			db.Server{Name: "Not Dory", FacilityCode: "Somewhere"},
+			gormdb.FixtureServerDory.ID,
+			gormdb.Server{Name: "Not Dory", FacilityCode: "Somewhere"},
 			false,
 			"",
 		},
 		{
 			"no changes - existing server",
-			db.FixtureServerDory.ID,
-			db.Server{Name: db.FixtureServerDory.Name, FacilityCode: db.FixtureServerDory.FacilityCode},
+			gormdb.FixtureServerDory.ID,
+			gormdb.Server{Name: gormdb.FixtureServerDory.Name, FacilityCode: gormdb.FixtureServerDory.FacilityCode},
 			false,
 			"",
 		},
 		{
 			"server not found",
 			uuid.New(),
-			db.Server{},
+			gormdb.Server{},
 			true,
 			"something not found",
 		},

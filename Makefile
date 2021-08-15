@@ -5,12 +5,11 @@ DB_STRING=host=localhost port=26257 user=root sslmode=disable
 DEV_DB=${DB_STRING} dbname=hollow_dev
 TEST_DB=${DB_STRING} dbname=hollow_test
 
-
 test: | unit-test integration-test
 
 integration-test: docker-up test-database
 	@echo Running integration tests...
-	@HOLLOW_TEST_DB="${TEST_DB}" go test -cover -tags testtools,integration ./... -p 1
+	@HOLLOW_TEST_DB="${TEST_DB}" go test -cover -tags testtools,integration -p 1 ./...
 
 unit-test: | lint
 	@echo Running unit tests...

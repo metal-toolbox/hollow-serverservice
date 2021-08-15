@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // ServerComponentListParams allows you to filter the results by server components
@@ -36,13 +36,13 @@ func (p *ServerComponentListParams) empty() bool {
 	}
 }
 
-func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]db.ServerComponentFilter, error) {
+func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]gormdb.ServerComponentFilter, error) {
 	var err error
 
-	dbFilters := []db.ServerComponentFilter{}
+	dbFilters := []gormdb.ServerComponentFilter{}
 
 	for _, p := range sclp {
-		dbF := db.ServerComponentFilter{
+		dbF := gormdb.ServerComponentFilter{
 			Name:   p.Name,
 			Vendor: p.Vendor,
 			Model:  p.Model,

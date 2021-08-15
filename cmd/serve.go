@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 	"go.metalkube.net/hollow/internal/hollowserver"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
@@ -41,7 +41,7 @@ func init() {
 }
 
 func serve() {
-	store, err := db.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar())
+	store, err := gormdb.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar())
 	if err != nil {
 		logger.Fatalw("failed to init data store", "error", err)
 	}

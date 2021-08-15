@@ -3,7 +3,7 @@ package hollow
 import (
 	"github.com/gin-gonic/gin"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func (r *Router) serverComponentTypeCreate(c *gin.Context) {
@@ -34,7 +34,7 @@ func (r *Router) serverComponentTypeList(c *gin.Context) {
 		return
 	}
 
-	dbFilter := &db.ServerComponentTypeFilter{
+	dbFilter := &gormdb.ServerComponentTypeFilter{
 		Name: c.Query("name"),
 	}
 

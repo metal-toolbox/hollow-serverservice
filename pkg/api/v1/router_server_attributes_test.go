@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
@@ -25,11 +25,11 @@ func TestIntegrationServerCreateAttributes(t *testing.T) {
 			Data:      json.RawMessage([]byte(`{"setting":"enabled"}`)),
 		}
 
-		resp, err := s.Client.Server.CreateAttributes(ctx, db.FixtureServerNemo.ID, attrs)
+		resp, err := s.Client.Server.CreateAttributes(ctx, gormdb.FixtureServerNemo.ID, attrs)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/attributes/integration.tests", db.FixtureServerNemo.ID), resp.Links.Self.Href)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/attributes/integration.tests", gormdb.FixtureServerNemo.ID), resp.Links.Self.Href)
 			assert.Equal(t, "integration.tests", resp.Slug)
 		}
 
@@ -43,12 +43,12 @@ func TestIntegrationServerListAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs, resp, err := s.Client.Server.ListAttributes(ctx, db.FixtureServerNemo.ID, nil)
+		attrs, resp, err := s.Client.Server.ListAttributes(ctx, gormdb.FixtureServerNemo.ID, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
 			assert.Len(t, attrs, 2)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/attributes", db.FixtureServerNemo.ID), resp.Links.Self.Href)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/attributes", gormdb.FixtureServerNemo.ID), resp.Links.Self.Href)
 		}
 
 		return err
@@ -81,12 +81,12 @@ func TestIntegrationServerGetAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attr, resp, err := s.Client.Server.GetAttributes(ctx, db.FixtureServerNemo.ID, db.FixtureNamespaceMetadata)
+		attr, resp, err := s.Client.Server.GetAttributes(ctx, gormdb.FixtureServerNemo.ID, gormdb.FixtureNamespaceMetadata)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
-			assert.ElementsMatch(t, attr.Data, db.FixtureAttributesNemoMetadata.Data)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/attributes/%s", db.FixtureServerNemo.ID, db.FixtureNamespaceMetadata), resp.Links.Self.Href)
+			assert.ElementsMatch(t, attr.Data, gormdb.FixtureAttributesNemoMetadata.Data)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/attributes/%s", gormdb.FixtureServerNemo.ID, gormdb.FixtureNamespaceMetadata), resp.Links.Self.Href)
 		}
 
 		return err
@@ -99,12 +99,12 @@ func TestIntegrationServerDeleteAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.Server.DeleteAttributes(ctx, db.FixtureServerNemo.ID, db.FixtureNamespaceMetadata)
+		_, err := s.Client.Server.DeleteAttributes(ctx, gormdb.FixtureServerNemo.ID, gormdb.FixtureNamespaceMetadata)
 		if !expectError {
 			require.NoError(t, err)
 
 			// ensure the attributes are gone
-			_, _, err2 := s.Client.Server.GetAttributes(ctx, db.FixtureServerNemo.ID, db.FixtureNamespaceMetadata)
+			_, _, err2 := s.Client.Server.GetAttributes(ctx, gormdb.FixtureServerNemo.ID, gormdb.FixtureNamespaceMetadata)
 			require.Error(t, err2)
 			assert.Contains(t, err2.Error(), "response code: 404, message: resource not found")
 		}
@@ -119,7 +119,7 @@ func TestIntegrationServerUpdateAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.Server.UpdateAttributes(ctx, db.FixtureServerDory.ID, db.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"setting":"enabled"}`)))
+		_, err := s.Client.Server.UpdateAttributes(ctx, gormdb.FixtureServerDory.ID, gormdb.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"setting":"enabled"}`)))
 		if !expectError {
 			// assert.Nil(t, resp.Links.Self)
 			require.NoError(t, err)

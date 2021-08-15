@@ -1,6 +1,6 @@
 //+build testtools
 
-package db
+package gormdb
 
 import (
 	"github.com/google/uuid"

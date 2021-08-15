@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // Server represents a server in a facility
@@ -20,7 +20,7 @@ type Server struct {
 	UpdatedAt           time.Time             `json:"updated_at"`
 }
 
-func (s *Server) fromDBModel(dbS db.Server) error {
+func (s *Server) fromDBModel(dbS gormdb.Server) error {
 	var err error
 
 	s.UUID = dbS.ID
@@ -47,8 +47,8 @@ func (s *Server) fromDBModel(dbS db.Server) error {
 	return nil
 }
 
-func (s *Server) toDBModel(store *db.Store) (*db.Server, error) {
-	dbS := &db.Server{
+func (s *Server) toDBModel(store *gormdb.Store) (*gormdb.Server, error) {
+	dbS := &gormdb.Server{
 		ID:           s.UUID,
 		Name:         s.Name,
 		FacilityCode: s.FacilityCode,

@@ -1,4 +1,4 @@
-package db_test
+package gormdb_test
 
 import (
 	"testing"
@@ -9,21 +9,21 @@ import (
 	"github.com/stretchr/testify/require"
 	"gorm.io/datatypes"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 func TestCreateVersionedAttributes(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
-		srv         *db.Server
-		a           db.VersionedAttributes
+		srv         *gormdb.Server
+		a           gormdb.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"missing namespace", &db.FixtureServerDory, db.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttributes attribute"},
-		{"happy path", &db.FixtureServerDory, db.VersionedAttributes{Namespace: "integration.test.createva", Data: datatypes.JSON([]byte(`{"test":"integration"}`))}, false, ""},
+		{"missing namespace", &gormdb.FixtureServerDory, gormdb.VersionedAttributes{}, true, "validation failed: namespace is a required VersionedAttributes attribute"},
+		{"happy path", &gormdb.FixtureServerDory, gormdb.VersionedAttributes{Namespace: "integration.test.createva", Data: datatypes.JSON([]byte(`{"test":"integration"}`))}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -57,32 +57,32 @@ func TestCreateVersionedAttributes(t *testing.T) {
 }
 
 func TestCreateVersionedAttributesTallyIncreases(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
-	va := &db.VersionedAttributes{Namespace: db.FixtureNamespaceVersioned, Data: db.FixtureVersionedAttributesNew.Data}
-	err := s.CreateVersionedAttributes(&db.FixtureServerNemo, va)
+	va := &gormdb.VersionedAttributes{Namespace: gormdb.FixtureNamespaceVersioned, Data: gormdb.FixtureVersionedAttributesNew.Data}
+	err := s.CreateVersionedAttributes(&gormdb.FixtureServerNemo, va)
 	assert.NoError(t, err)
 
-	lva, _, err := s.GetVersionedAttributes(db.FixtureServerNemo.ID, db.FixtureNamespaceVersioned, nil)
+	lva, _, err := s.GetVersionedAttributes(gormdb.FixtureServerNemo.ID, gormdb.FixtureNamespaceVersioned, nil)
 	assert.NoError(t, err)
 	assert.Len(t, lva, 2)
 	assert.Equal(t, lva[0].Tally, 1)
 }
 
 func TestGetVersionedAttributes(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
 		searchUUID  uuid.UUID
 		searchNS    string
-		expectList  []db.VersionedAttributes
+		expectList  []gormdb.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"no results, bad uuid", uuid.New(), "namespace", []db.VersionedAttributes{}, false, ""},
-		{"no results, bad namespace", db.FixtureServerNemo.ID, "namespace", []db.VersionedAttributes{}, false, ""},
-		{"happy path", db.FixtureServerNemo.ID, db.FixtureNamespaceVersioned, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
+		{"no results, bad uuid", uuid.New(), "namespace", []gormdb.VersionedAttributes{}, false, ""},
+		{"no results, bad namespace", gormdb.FixtureServerNemo.ID, "namespace", []gormdb.VersionedAttributes{}, false, ""},
+		{"happy path", gormdb.FixtureServerNemo.ID, gormdb.FixtureNamespaceVersioned, []gormdb.VersionedAttributes{gormdb.FixtureVersionedAttributesNew, gormdb.FixtureVersionedAttributesOld}, false, ""},
 	}
 
 	for _, tt := range testCases {
@@ -105,17 +105,17 @@ func TestGetVersionedAttributes(t *testing.T) {
 }
 
 func TestListVersionedAttributes(t *testing.T) {
-	s := db.DatabaseTest(t)
+	s := gormdb.DatabaseTest(t)
 
 	var testCases = []struct {
 		testName    string
 		searchUUID  uuid.UUID
-		expectList  []db.VersionedAttributes
+		expectList  []gormdb.VersionedAttributes
 		expectError bool
 		errorMsg    string
 	}{
-		{"no results, bad uuid", uuid.New(), []db.VersionedAttributes{}, false, ""},
-		{"happy path", db.FixtureServerNemo.ID, []db.VersionedAttributes{db.FixtureVersionedAttributesNew, db.FixtureVersionedAttributesOld}, false, ""},
+		{"no results, bad uuid", uuid.New(), []gormdb.VersionedAttributes{}, false, ""},
+		{"happy path", gormdb.FixtureServerNemo.ID, []gormdb.VersionedAttributes{gormdb.FixtureVersionedAttributesNew, gormdb.FixtureVersionedAttributesOld}, false, ""},
 	}
 
 	for _, tt := range testCases {

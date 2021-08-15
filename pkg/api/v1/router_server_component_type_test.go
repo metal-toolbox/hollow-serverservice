@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
@@ -43,8 +43,8 @@ func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 1)
-			assert.Equal(t, db.FixtureSCTFins.Slug, r[0].ID)
-			assert.Equal(t, db.FixtureSCTFins.Name, r[0].Name)
+			assert.Equal(t, gormdb.FixtureSCTFins.Slug, r[0].ID)
+			assert.Equal(t, gormdb.FixtureSCTFins.Name, r[0].Name)
 			assert.NotNil(t, resp)
 			assert.NotNil(t, resp.Links.Self)
 		}

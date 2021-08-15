@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
@@ -29,7 +29,7 @@ var testServer = hollow.Server{
 					Data:      json.RawMessage([]byte(`{"firmware":1}`)),
 				},
 			},
-			ComponentTypeID: db.FixtureSCTFins.Slug,
+			ComponentTypeID: gormdb.FixtureSCTFins.Slug,
 		},
 	},
 	Attributes: []hollow.Attributes{
@@ -83,13 +83,13 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:     db.FixtureNamespaceMetadata,
+						Namespace:     gormdb.FixtureNamespaceMetadata,
 						Keys:          []string{"age"},
 						LessThanValue: 7,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -98,14 +98,14 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:        db.FixtureNamespaceMetadata,
+						Namespace:        gormdb.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
 						GreaterThanValue: 11,
 					},
 				},
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID},
 			false,
 			"",
 		},
@@ -114,7 +114,7 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				FacilityCode: "Ocean",
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -123,18 +123,18 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "blue-tang",
 					},
 					{
-						Namespace:  db.FixtureNamespaceMetadata,
+						Namespace:  gormdb.FixtureNamespaceMetadata,
 						Keys:       []string{"location"},
 						EqualValue: "East Austalian Current",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID},
 			false,
 			"",
 		},
@@ -143,13 +143,13 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"nested", "tag"},
 						EqualValue: "finding-nemo",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerNemo.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID, gormdb.FixtureServerNemo.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -158,20 +158,20 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:        db.FixtureNamespaceOtherdata,
+						Namespace:        gormdb.FixtureNamespaceOtherdata,
 						Keys:             []string{"nested", "number"},
 						GreaterThanValue: 1,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"empty search filter",
 			nil,
-			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID, gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -189,20 +189,20 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "clown",
 					},
 				},
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -211,14 +211,14 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceOtherdata,
+						Namespace:  gormdb.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "clown",
 					},
 				},
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "old",
 					},
@@ -242,7 +242,7 @@ func TestIntegrationServerList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -277,13 +277,13 @@ func TestIntegrationServerList(t *testing.T) {
 				},
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -298,13 +298,13 @@ func TestIntegrationServerList(t *testing.T) {
 				},
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -316,7 +316,7 @@ func TestIntegrationServerList(t *testing.T) {
 						Model: "A Lucky Fin",
 						VersionedAttributeListParams: []hollow.AttributeListParams{
 							{
-								Namespace:  db.FixtureNamespaceVersioned,
+								Namespace:  gormdb.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
 								EqualValue: "cool",
 							},
@@ -324,7 +324,7 @@ func TestIntegrationServerList(t *testing.T) {
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -336,7 +336,7 @@ func TestIntegrationServerList(t *testing.T) {
 						Model: "A Lucky Fin",
 						VersionedAttributeListParams: []hollow.AttributeListParams{
 							{
-								Namespace:  db.FixtureNamespaceVersioned,
+								Namespace:  gormdb.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
 								EqualValue: "cool",
 							},
@@ -345,13 +345,13 @@ func TestIntegrationServerList(t *testing.T) {
 				},
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "new",
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -363,7 +363,7 @@ func TestIntegrationServerList(t *testing.T) {
 						Model: "A Lucky Fin",
 						VersionedAttributeListParams: []hollow.AttributeListParams{
 							{
-								Namespace:  db.FixtureNamespaceVersioned,
+								Namespace:  gormdb.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
 								EqualValue: "cool",
 							},
@@ -372,7 +372,7 @@ func TestIntegrationServerList(t *testing.T) {
 				},
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  db.FixtureNamespaceVersioned,
+						Namespace:  gormdb.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
 						EqualValue: "old",
 					},
@@ -387,11 +387,11 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				ComponentListParams: []hollow.ServerComponentListParams{
 					{
-						ServerComponentType: db.FixtureSCTFins.Slug,
+						ServerComponentType: gormdb.FixtureSCTFins.Slug,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID, gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -400,12 +400,12 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace: db.FixtureNamespaceVersioned,
+						Namespace: gormdb.FixtureNamespaceVersioned,
 						Keys:      []string{"name"},
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -414,7 +414,7 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace: db.FixtureNamespaceVersioned,
+						Namespace: gormdb.FixtureNamespaceVersioned,
 						Keys:      []string{"doesntExist"},
 					},
 				},
@@ -428,11 +428,11 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				VersionedAttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace: db.FixtureNamespaceVersioned,
+						Namespace: gormdb.FixtureNamespaceVersioned,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID},
 			false,
 			"",
 		},
@@ -441,11 +441,11 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace: db.FixtureNamespaceMetadata,
+						Namespace: gormdb.FixtureNamespaceMetadata,
 					},
 				},
 			},
-			[]uuid.UUID{db.FixtureServerNemo.ID, db.FixtureServerDory.ID, db.FixtureServerMarlin.ID},
+			[]uuid.UUID{gormdb.FixtureServerNemo.ID, gormdb.FixtureServerDory.ID, gormdb.FixtureServerMarlin.ID},
 			false,
 			"",
 		},
@@ -479,8 +479,8 @@ func TestIntegrationServerListPagination(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r, 2)
-	assert.Equal(t, db.FixtureServer[2].ID, r[0].UUID)
-	assert.Equal(t, db.FixtureServer[1].ID, r[1].UUID)
+	assert.Equal(t, gormdb.FixtureServer[2].ID, r[0].UUID)
+	assert.Equal(t, gormdb.FixtureServer[1].ID, r[1].UUID)
 
 	assert.EqualValues(t, 2, resp.PageCount)
 	assert.EqualValues(t, 2, resp.TotalPages)
@@ -499,7 +499,7 @@ func TestIntegrationServerListPagination(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r, 1)
-	assert.Equal(t, db.FixtureServer[0].ID, r[0].UUID)
+	assert.Equal(t, gormdb.FixtureServer[0].ID, r[0].UUID)
 
 	assert.EqualValues(t, 1, resp.PageCount)
 
@@ -542,7 +542,7 @@ func TestIntegrationServerCreate(t *testing.T) {
 		{
 			"fails on a duplicate uuid",
 			&hollow.Server{
-				UUID:         db.FixtureServerNemo.ID,
+				UUID:         gormdb.FixtureServerNemo.ID,
 				FacilityCode: "int-test",
 			},
 			"duplicate key",
@@ -563,7 +563,7 @@ func TestIntegrationServerDelete(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		_, err := s.Client.Server.Delete(ctx, hollow.Server{UUID: db.FixtureServerNemo.ID})
+		_, err := s.Client.Server.Delete(ctx, hollow.Server{UUID: gormdb.FixtureServerNemo.ID})
 
 		return err
 	})
@@ -595,11 +595,11 @@ func TestIntegrationServerUpdate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		resp, err := s.Client.Server.Update(ctx, db.FixtureServerDory.ID, hollow.Server{Name: "The New Dory"})
+		resp, err := s.Client.Server.Update(ctx, gormdb.FixtureServerDory.ID, hollow.Server{Name: "The New Dory"})
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s", db.FixtureServerDory.ID), resp.Links.Self.Href)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s", gormdb.FixtureServerDory.ID), resp.Links.Self.Href)
 		}
 
 		return err
@@ -630,7 +630,7 @@ func TestIntegrationServerCreateAndFetchWithAllAttributes(t *testing.T) {
 	assert.Equal(t, "Xeon 123", hc.Model)
 	assert.Equal(t, "Intel", hc.Vendor)
 	assert.Equal(t, "987654321", hc.Serial)
-	assert.Equal(t, db.FixtureSCTFins.Slug, hc.ComponentTypeID)
+	assert.Equal(t, gormdb.FixtureSCTFins.Slug, hc.ComponentTypeID)
 	assert.Equal(t, "Fins", hc.ComponentTypeName)
 
 	assert.Len(t, hc.Attributes, 1)
@@ -709,12 +709,12 @@ func TestIntegrationServerServiceListVersionedAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, _, err := s.Client.Server.ListVersionedAttributes(ctx, db.FixtureServerNemo.ID)
+		res, _, err := s.Client.Server.ListVersionedAttributes(ctx, gormdb.FixtureServerNemo.ID)
 		if !expectError {
 			require.Len(t, res, 2)
-			assert.Equal(t, db.FixtureNamespaceVersioned, res[0].Namespace)
+			assert.Equal(t, gormdb.FixtureNamespaceVersioned, res[0].Namespace)
 			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Data)
-			assert.Equal(t, db.FixtureNamespaceVersioned, res[1].Namespace)
+			assert.Equal(t, gormdb.FixtureNamespaceVersioned, res[1].Namespace)
 			assert.Equal(t, json.RawMessage([]byte(`{"name":"old"}`)), res[1].Data)
 		}
 

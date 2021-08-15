@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/gormdb"
 )
 
 // ServerComponent represents a component of a server. These can be things like
@@ -24,7 +24,7 @@ type ServerComponent struct {
 	UpdatedAt         time.Time    `json:"updated_at"`
 }
 
-func convertDBServerComponents(dbComponents []db.ServerComponent) ([]ServerComponent, error) {
+func convertDBServerComponents(dbComponents []gormdb.ServerComponent) ([]ServerComponent, error) {
 	components := []ServerComponent{}
 
 	for _, dbC := range dbComponents {
@@ -39,7 +39,7 @@ func convertDBServerComponents(dbComponents []db.ServerComponent) ([]ServerCompo
 	return components, nil
 }
 
-func (c *ServerComponent) fromDBModel(dbC db.ServerComponent) error {
+func (c *ServerComponent) fromDBModel(dbC gormdb.ServerComponent) error {
 	c.UUID = dbC.ID
 	c.ServerUUID = dbC.ServerID
 	c.Name = dbC.Name
@@ -61,8 +61,8 @@ func (c *ServerComponent) fromDBModel(dbC db.ServerComponent) error {
 	return nil
 }
 
-func (c *ServerComponent) toDBModel(s *db.Store) (*db.ServerComponent, error) {
-	dbC := &db.ServerComponent{
+func (c *ServerComponent) toDBModel(s *gormdb.Store) (*gormdb.ServerComponent, error) {
+	dbC := &gormdb.ServerComponent{
 		ID:       c.UUID,
 		ServerID: c.ServerUUID,
 		Name:     c.Name,
