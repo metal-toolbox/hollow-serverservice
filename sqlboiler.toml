@@ -1,4 +1,6 @@
 wipe = true
+pkgname = "db"
+output = "internal/db"
 
 [crdb]
 dbname = "hollow_test"
