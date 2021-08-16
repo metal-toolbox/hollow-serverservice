@@ -33,6 +33,8 @@ func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
 		return nil, newClientError("failed to initialize: no hollow api url provided")
 	}
 
+	url = strings.TrimSuffix(url, "/")
+
 	c := &Client{
 		url:       url,
 		authToken: authToken,
