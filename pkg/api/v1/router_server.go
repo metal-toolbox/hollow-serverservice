@@ -119,7 +119,7 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
-	createdResponse(c, dbSRV.ID.String())
+	createdResponse(c, srv.UUID.String())
 }
 
 func (r *Router) serverDelete(c *gin.Context) {
