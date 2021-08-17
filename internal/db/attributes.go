@@ -19,6 +19,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
@@ -28,7 +29,7 @@ type Attribute struct {
 	ServerID          null.String `boil:"server_id" json:"server_id,omitempty" toml:"server_id" yaml:"server_id,omitempty"`
 	ServerComponentID null.String `boil:"server_component_id" json:"server_component_id,omitempty" toml:"server_component_id" yaml:"server_component_id,omitempty"`
 	Namespace         string      `boil:"namespace" json:"namespace" toml:"namespace" yaml:"namespace"`
-	Data              null.JSON   `boil:"data" json:"data,omitempty" toml:"data" yaml:"data,omitempty"`
+	Data              types.JSON  `boil:"data" json:"data" toml:"data" yaml:"data"`
 	CreatedAt         null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt         null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
@@ -120,26 +121,24 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpernull_JSON struct{ field string }
+type whereHelpertypes_JSON struct{ field string }
 
-func (w whereHelpernull_JSON) EQ(x null.JSON) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelpertypes_JSON) EQ(x types.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
-func (w whereHelpernull_JSON) NEQ(x null.JSON) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
+func (w whereHelpertypes_JSON) NEQ(x types.JSON) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_JSON) LT(x null.JSON) qm.QueryMod {
+func (w whereHelpertypes_JSON) LT(x types.JSON) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_JSON) LTE(x null.JSON) qm.QueryMod {
+func (w whereHelpertypes_JSON) LTE(x types.JSON) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_JSON) GT(x null.JSON) qm.QueryMod {
+func (w whereHelpertypes_JSON) GT(x types.JSON) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_JSON) GTE(x null.JSON) qm.QueryMod {
+func (w whereHelpertypes_JSON) GTE(x types.JSON) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -171,7 +170,7 @@ var AttributeWhere = struct {
 	ServerID          whereHelpernull_String
 	ServerComponentID whereHelpernull_String
 	Namespace         whereHelperstring
-	Data              whereHelpernull_JSON
+	Data              whereHelpertypes_JSON
 	CreatedAt         whereHelpernull_Time
 	UpdatedAt         whereHelpernull_Time
 }{
@@ -179,7 +178,7 @@ var AttributeWhere = struct {
 	ServerID:          whereHelpernull_String{field: "\"attributes\".\"server_id\""},
 	ServerComponentID: whereHelpernull_String{field: "\"attributes\".\"server_component_id\""},
 	Namespace:         whereHelperstring{field: "\"attributes\".\"namespace\""},
-	Data:              whereHelpernull_JSON{field: "\"attributes\".\"data\""},
+	Data:              whereHelpertypes_JSON{field: "\"attributes\".\"data\""},
 	CreatedAt:         whereHelpernull_Time{field: "\"attributes\".\"created_at\""},
 	UpdatedAt:         whereHelpernull_Time{field: "\"attributes\".\"updated_at\""},
 }
@@ -209,8 +208,8 @@ type attributeL struct{}
 
 var (
 	attributeAllColumns            = []string{"id", "server_id", "server_component_id", "namespace", "data", "created_at", "updated_at"}
-	attributeColumnsWithoutDefault = []string{"namespace"}
-	attributeColumnsWithDefault    = []string{"id", "server_id", "server_component_id", "data", "created_at", "updated_at"}
+	attributeColumnsWithoutDefault = []string{"namespace", "data"}
+	attributeColumnsWithDefault    = []string{"id", "server_id", "server_component_id", "created_at", "updated_at"}
 	attributePrimaryKeyColumns     = []string{"id"}
 )
 

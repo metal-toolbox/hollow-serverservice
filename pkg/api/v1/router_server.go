@@ -2,10 +2,10 @@ package hollow
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	// "github.com/volatiletech/null/v8"
-	// "github.com/volatiletech/sqlboiler/v4/boil"
-	// "go.metalkube.net/hollow/models"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"go.metalkube.net/hollow/internal/db"
 )
 
 func (r *Router) serverList(c *gin.Context) {
@@ -45,17 +45,24 @@ func (r *Router) serverList(c *gin.Context) {
 
 	params.ComponentListParams = sclp
 
-	dbFilter, err := params.dbFilter(r)
+	_, err = params.dbFilter(r)
 	if err != nil {
 		badRequestResponse(c, "invalid list params", err)
 		return
 	}
 
-	dbSRV, count, err := r.Store.GetServers(dbFilter, &pager)
+	dbSRV, err := db.Servers(
+		qm.Load("Attributes"),
+		qm.Load("VersionedAttributes"),
+		qm.Load("ServerComponents.Attributes"),
+		qm.Load("ServerComponents.ServerComponentType"),
+	).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
+
+	count := int64(1)
 
 	srvs := []Server{}
 
@@ -93,7 +100,7 @@ func (r *Router) serverGet(c *gin.Context) {
 	}
 
 	var srv Server
-	if err = srv.fromDBModel(*dbSRV); err != nil {
+	if err = srv.fromDBModel(dbSRV); err != nil {
 		failedConvertingToVersioned(c, err)
 		return
 	}
@@ -108,18 +115,18 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
-	dbSRV, err := srv.toDBModel(r.Store)
+	dbSRV, err := srv.toDBModel()
 	if err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
 	}
 
-	if err := r.Store.CreateServer(dbSRV); err != nil {
+	if err := dbSRV.Insert(c.Request.Context(), r.DB, boil.Infer()); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	createdResponse(c, srv.UUID.String())
+	createdResponse(c, dbSRV.ID)
 }
 
 func (r *Router) serverDelete(c *gin.Context) {
@@ -128,7 +135,7 @@ func (r *Router) serverDelete(c *gin.Context) {
 		return
 	}
 
-	if err = r.Store.DeleteServer(dbSRV); err != nil {
+	if _, err = dbSRV.Delete(c.Request.Context(), r.DB); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
@@ -148,13 +155,15 @@ func (r *Router) serverUpdate(c *gin.Context) {
 		return
 	}
 
-	dbSRV, err := srv.toDBModel(r.Store)
+	dbSRV, err := srv.toDBModel()
 	if err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
 	}
 
-	if err := r.Store.UpdateServer(u, *dbSRV); err != nil {
+	cols := boil.Whitelist(db.ServerTableColumns.Name, db.ServerTableColumns.FacilityCode)
+
+	if _, err := dbSRV.Update(c.Request.Context(), r.DB, cols); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
@@ -163,21 +172,26 @@ func (r *Router) serverUpdate(c *gin.Context) {
 }
 
 func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
+	srv, err := r.loadServerFromParams(c)
+	if err != nil {
+		return
+	}
+
 	pager, err := parsePagination(c)
 	if err != nil {
 		badRequestResponse(c, "invalid pagination", err)
 		return
 	}
 
-	srvUUID, err := uuid.Parse(c.Param("uuid"))
+	ns := c.Param("namespace")
+
+	dbVA, err := srv.VersionedAttributes(db.VersionedAttributeWhere.Namespace.EQ(ns)).All(c.Request.Context(), r.DB)
 	if err != nil {
-		badRequestResponse(c, "invalid server uuid", err)
+		dbErrorResponse(c, err)
 		return
 	}
 
-	ns := c.Param("namespace")
-
-	dbVA, count, err := r.Store.GetVersionedAttributes(srvUUID, ns, &pager)
+	count, err := srv.VersionedAttributes(db.VersionedAttributeWhere.Namespace.EQ(ns)).Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -213,23 +227,24 @@ func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
 }
 
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
+	srv, err := r.loadServerFromParams(c)
+	if err != nil {
+		return
+	}
+
 	pager, err := parsePagination(c)
 	if err != nil {
 		badRequestResponse(c, "invalid pagination", err)
 		return
 	}
 
-	srvUUID, err := uuid.Parse(c.Param("uuid"))
-	if err != nil {
-		badRequestResponse(c, "invalid server uuid", err)
-		return
-	}
-
-	dbVA, count, err := r.Store.ListVersionedAttributes(srvUUID, &pager)
+	dbVA, err := srv.VersionedAttributes().All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
+
+	count := int64(1)
 
 	va := []VersionedAttributes{}
 

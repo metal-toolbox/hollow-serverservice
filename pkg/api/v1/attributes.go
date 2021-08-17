@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"go.metalkube.net/hollow/internal/db"
 	"go.metalkube.net/hollow/internal/gormdb"
@@ -35,26 +35,29 @@ type AttributeListParams struct {
 	GreaterThanValue int      `form:"greater-than" query:"greater-than"`
 }
 
-func (a *Attributes) fromDBModel(dbA db.Attribute) error {
+func (a *Attributes) fromDBModel(dbA *db.Attribute) error {
 	a.Namespace = dbA.Namespace
-	a.Data = json.RawMessage(dbA.Data.JSON)
+	a.Data = json.RawMessage(dbA.Data)
 	a.CreatedAt = dbA.CreatedAt.Time
 	a.UpdatedAt = dbA.UpdatedAt.Time
 
 	return nil
 }
 
-func (a *Attributes) toDBModel() (db.Attribute, error) {
-	dbA := db.Attribute{
+func (a *Attributes) toDBModel() (*db.Attribute, error) {
+	dbA := &db.Attribute{
 		Namespace: a.Namespace,
-		Data:      null.JSONFrom(a.Data),
+		Data:      types.JSON(a.Data),
 	}
 
 	return dbA, nil
 }
 
-func convertFromDBAttributes(dbAttrs []db.Attribute) ([]Attributes, error) {
+func convertFromDBAttributes(dbAttrs db.AttributeSlice) ([]Attributes, error) {
 	attrs := []Attributes{}
+	if dbAttrs == nil {
+		return attrs, nil
+	}
 
 	for _, dbA := range dbAttrs {
 		a := Attributes{}
@@ -68,20 +71,20 @@ func convertFromDBAttributes(dbAttrs []db.Attribute) ([]Attributes, error) {
 	return attrs, nil
 }
 
-func convertToDBAttributes(attrs []Attributes) ([]db.Attribute, error) {
-	dbAttrs := []db.Attribute{}
+// func convertToDBAttributes(attrs []Attributes) (db.AttributeSlice, error) {
+// 	dbAttrs := db.AttributeSlice{}
 
-	for _, a := range attrs {
-		dbA, err := a.toDBModel()
-		if err != nil {
-			return nil, err
-		}
+// 	for _, a := range attrs {
+// 		dbA, err := a.toDBModel()
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		dbAttrs = append(dbAttrs, dbA)
-	}
+// 		dbAttrs = append(dbAttrs, dbA)
+// 	}
 
-	return dbAttrs, nil
-}
+// 	return dbAttrs, nil
+// }
 
 func convertToDBAttributesFilter(attrs []AttributeListParams) ([]gormdb.AttributesFilter, error) {
 	dbFilter := []gormdb.AttributesFilter{}

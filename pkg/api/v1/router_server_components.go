@@ -5,7 +5,7 @@ import (
 )
 
 func (r *Router) serverComponentList(c *gin.Context) {
-	u, err := r.parseUUID(c)
+	srv, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
@@ -16,11 +16,13 @@ func (r *Router) serverComponentList(c *gin.Context) {
 		return
 	}
 
-	dbComps, count, err := r.Store.GetComponentsByServerUUID(u, nil, &pager)
+	dbComps, err := srv.ServerComponents().All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
+
+	count := int64(0)
 
 	comps, err := convertDBServerComponents(dbComps)
 	if err != nil {

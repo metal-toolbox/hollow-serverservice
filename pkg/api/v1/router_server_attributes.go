@@ -2,10 +2,12 @@ package hollow
 
 import (
 	"github.com/gin-gonic/gin"
+
+	"go.metalkube.net/hollow/internal/db"
 )
 
 func (r *Router) serverAttributesList(c *gin.Context) {
-	u, err := r.parseUUID(c)
+	srv, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
@@ -16,11 +18,13 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 		return
 	}
 
-	dbAttrs, count, err := r.Store.GetAttributesByServerUUID(u, &pager)
+	dbAttrs, err := srv.Attributes().All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
+
+	count := int64(0)
 
 	attrs, err := convertFromDBAttributes(dbAttrs)
 	if err != nil {
@@ -46,21 +50,21 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 }
 
 func (r *Router) serverAttributesGet(c *gin.Context) {
-	u, err := r.parseUUID(c)
+	srv, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
 
 	ns := c.Param("namespace")
 
-	dbAttr, err := r.Store.GetAttributesByServerUUIDAndNamespace(u, ns)
+	dbAttr, err := srv.Attributes(db.AttributeWhere.Namespace.EQ(ns)).One(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
 	attr := Attributes{}
-	if err := attr.fromDBModel(*dbAttr); err != nil {
+	if err := attr.fromDBModel(dbAttr); err != nil {
 		failedConvertingToVersioned(c, err)
 		return
 	}
@@ -69,7 +73,7 @@ func (r *Router) serverAttributesGet(c *gin.Context) {
 }
 
 func (r *Router) serverAttributesCreate(c *gin.Context) {
-	u, err := r.parseUUID(c)
+	srv, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
@@ -86,9 +90,7 @@ func (r *Router) serverAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	dbAttr.ServerID = &u
-
-	if err := r.Store.CreateAttributes(&dbAttr); err != nil {
+	if err := srv.AddAttributes(c.Request.Context(), r.DB, true, dbAttr); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}

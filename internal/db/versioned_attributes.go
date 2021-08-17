@@ -19,6 +19,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
@@ -27,11 +28,11 @@ type VersionedAttribute struct {
 	ID                string      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ServerID          null.String `boil:"server_id" json:"server_id,omitempty" toml:"server_id" yaml:"server_id,omitempty"`
 	Namespace         string      `boil:"namespace" json:"namespace" toml:"namespace" yaml:"namespace"`
-	Data              null.JSON   `boil:"data" json:"data,omitempty" toml:"data" yaml:"data,omitempty"`
+	Data              types.JSON  `boil:"data" json:"data" toml:"data" yaml:"data"`
 	CreatedAt         null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt         null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 	ServerComponentID null.String `boil:"server_component_id" json:"server_component_id,omitempty" toml:"server_component_id" yaml:"server_component_id,omitempty"`
-	Tally             null.Int64  `boil:"tally" json:"tally,omitempty" toml:"tally" yaml:"tally,omitempty"`
+	Tally             int64       `boil:"tally" json:"tally" toml:"tally" yaml:"tally"`
 
 	R *versionedAttributeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L versionedAttributeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -79,47 +80,47 @@ var VersionedAttributeTableColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int64 struct{ field string }
+type whereHelperint64 struct{ field string }
 
-func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
 var VersionedAttributeWhere = struct {
 	ID                whereHelperstring
 	ServerID          whereHelpernull_String
 	Namespace         whereHelperstring
-	Data              whereHelpernull_JSON
+	Data              whereHelpertypes_JSON
 	CreatedAt         whereHelpernull_Time
 	UpdatedAt         whereHelpernull_Time
 	ServerComponentID whereHelpernull_String
-	Tally             whereHelpernull_Int64
+	Tally             whereHelperint64
 }{
 	ID:                whereHelperstring{field: "\"versioned_attributes\".\"id\""},
 	ServerID:          whereHelpernull_String{field: "\"versioned_attributes\".\"server_id\""},
 	Namespace:         whereHelperstring{field: "\"versioned_attributes\".\"namespace\""},
-	Data:              whereHelpernull_JSON{field: "\"versioned_attributes\".\"data\""},
+	Data:              whereHelpertypes_JSON{field: "\"versioned_attributes\".\"data\""},
 	CreatedAt:         whereHelpernull_Time{field: "\"versioned_attributes\".\"created_at\""},
 	UpdatedAt:         whereHelpernull_Time{field: "\"versioned_attributes\".\"updated_at\""},
 	ServerComponentID: whereHelpernull_String{field: "\"versioned_attributes\".\"server_component_id\""},
-	Tally:             whereHelpernull_Int64{field: "\"versioned_attributes\".\"tally\""},
+	Tally:             whereHelperint64{field: "\"versioned_attributes\".\"tally\""},
 }
 
 // VersionedAttributeRels is where relationship names are stored.
@@ -147,8 +148,8 @@ type versionedAttributeL struct{}
 
 var (
 	versionedAttributeAllColumns            = []string{"id", "server_id", "namespace", "data", "created_at", "updated_at", "server_component_id", "tally"}
-	versionedAttributeColumnsWithoutDefault = []string{"namespace"}
-	versionedAttributeColumnsWithDefault    = []string{"id", "server_id", "data", "created_at", "updated_at", "server_component_id", "tally"}
+	versionedAttributeColumnsWithoutDefault = []string{"namespace", "data"}
+	versionedAttributeColumnsWithDefault    = []string{"id", "server_id", "created_at", "updated_at", "server_component_id", "tally"}
 	versionedAttributePrimaryKeyColumns     = []string{"id"}
 )
 

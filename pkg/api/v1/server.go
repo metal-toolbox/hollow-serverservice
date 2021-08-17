@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/null/v8"
 
 	"go.metalkube.net/hollow/internal/db"
 )
@@ -20,26 +21,30 @@ type Server struct {
 	UpdatedAt           time.Time             `json:"updated_at"`
 }
 
-func (s *Server) fromDBModel(dbS db.Server) error {
+func (s *Server) fromDBModel(dbS *db.Server) error {
 	var err error
 
-	s.UUID = dbS.ID
-	s.Name = dbS.Name
-	s.FacilityCode = dbS.FacilityCode
-	s.CreatedAt = dbS.CreatedAt
-	s.UpdatedAt = dbS.UpdatedAt
-
-	s.Attributes, err = convertFromDBAttributes(dbS.Attributes)
+	s.UUID, err = uuid.Parse(dbS.ID)
 	if err != nil {
 		return err
 	}
 
-	s.Components, err = convertDBServerComponents(dbS.ServerComponents)
+	s.Name = dbS.Name.String
+	s.FacilityCode = dbS.FacilityCode.String
+	s.CreatedAt = dbS.CreatedAt.Time
+	s.UpdatedAt = dbS.UpdatedAt.Time
+
+	s.Attributes, err = convertFromDBAttributes(dbS.R.Attributes)
 	if err != nil {
 		return err
 	}
 
-	s.VersionedAttributes, err = convertFromDBVersionedAttributes(dbS.VersionedAttributes)
+	s.Components, err = convertDBServerComponents(dbS.R.ServerComponents)
+	if err != nil {
+		return err
+	}
+
+	s.VersionedAttributes, err = convertFromDBVersionedAttributes(dbS.R.VersionedAttributes)
 	if err != nil {
 		return err
 	}
@@ -47,35 +52,38 @@ func (s *Server) fromDBModel(dbS db.Server) error {
 	return nil
 }
 
-func (s *Server) toDBModel(store *db.Store) (*db.Server, error) {
+func (s *Server) toDBModel() (*db.Server, error) {
 	dbS := &db.Server{
-		ID:           s.UUID,
-		Name:         s.Name,
-		FacilityCode: s.FacilityCode,
+		Name:         null.StringFrom(s.Name),
+		FacilityCode: null.StringFrom(s.FacilityCode),
 	}
 
-	for _, c := range s.Components {
-		dbC, err := c.toDBModel(store)
-		if err != nil {
-			return nil, err
-		}
-
-		dbS.ServerComponents = append(dbS.ServerComponents, *dbC)
+	if s.UUID.String() != uuid.Nil.String() {
+		dbS.ID = s.UUID.String()
 	}
 
-	attrs, err := convertToDBAttributes(s.Attributes)
-	if err != nil {
-		return nil, err
-	}
+	// for _, c := range s.Components {
+	// 	dbC, err := c.toDBModel(store)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-	dbS.Attributes = attrs
+	// 	dbS.ServerComponents = append(dbS.ServerComponents, *dbC)
+	// }
 
-	verAttrs, err := convertToDBVersionedAttributes(s.VersionedAttributes)
-	if err != nil {
-		return nil, err
-	}
+	// attrs, err := convertToDBAttributes(s.Attributes)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	dbS.VersionedAttributes = verAttrs
+	// dbS.Attributes = attrs
+
+	// verAttrs, err := convertToDBVersionedAttributes(s.VersionedAttributes)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// dbS.VersionedAttributes = verAttrs
 
 	return dbS, nil
 }

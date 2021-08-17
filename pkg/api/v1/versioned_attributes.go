@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/datatypes"
 
+	"go.metalkube.net/hollow/internal/db"
 	"go.metalkube.net/hollow/internal/gormdb"
 )
 
@@ -27,32 +28,32 @@ func (a *VersionedAttributes) toDBModel() (*gormdb.VersionedAttributes, error) {
 	return dbc, nil
 }
 
-func (a *VersionedAttributes) fromDBModel(dba gormdb.VersionedAttributes) error {
-	a.CreatedAt = dba.CreatedAt
-	a.LastReportedAt = dba.UpdatedAt
-	a.Tally = dba.Tally
+func (a *VersionedAttributes) fromDBModel(dba *db.VersionedAttribute) error {
+	a.CreatedAt = dba.CreatedAt.Time
+	a.LastReportedAt = dba.UpdatedAt.Time
+	a.Tally = int(dba.Tally)
 	a.Namespace = dba.Namespace
 	a.Data = json.RawMessage(dba.Data)
 
 	return nil
 }
 
-func convertToDBVersionedAttributes(attrs []VersionedAttributes) ([]gormdb.VersionedAttributes, error) {
-	dbVerAttrs := []gormdb.VersionedAttributes{}
+// func convertToDBVersionedAttributes(attrs []VersionedAttributes) ([]gormdb.VersionedAttributes, error) {
+// 	dbVerAttrs := []gormdb.VersionedAttributes{}
 
-	for _, a := range attrs {
-		dbVA, err := a.toDBModel()
-		if err != nil {
-			return nil, err
-		}
+// 	for _, a := range attrs {
+// 		dbVA, err := a.toDBModel()
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		dbVerAttrs = append(dbVerAttrs, *dbVA)
-	}
+// 		dbVerAttrs = append(dbVerAttrs, *dbVA)
+// 	}
 
-	return dbVerAttrs, nil
-}
+// 	return dbVerAttrs, nil
+// }
 
-func convertFromDBVersionedAttributes(dbAttrs []gormdb.VersionedAttributes) ([]VersionedAttributes, error) {
+func convertFromDBVersionedAttributes(dbAttrs db.VersionedAttributeSlice) ([]VersionedAttributes, error) {
 	attrs := []VersionedAttributes{}
 
 	for _, dbA := range dbAttrs {

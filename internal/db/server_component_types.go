@@ -24,11 +24,11 @@ import (
 
 // ServerComponentType is an object representing the database table.
 type ServerComponentType struct {
-	ID        string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name      string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	CreatedAt null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	Slug      null.String `boil:"slug" json:"slug,omitempty" toml:"slug" yaml:"slug,omitempty"`
+	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	Slug      string    `boil:"slug" json:"slug" toml:"slug" yaml:"slug"`
 
 	R *serverComponentTypeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L serverComponentTypeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -69,13 +69,13 @@ var ServerComponentTypeWhere = struct {
 	Name      whereHelperstring
 	CreatedAt whereHelpernull_Time
 	UpdatedAt whereHelpernull_Time
-	Slug      whereHelpernull_String
+	Slug      whereHelperstring
 }{
 	ID:        whereHelperstring{field: "\"server_component_types\".\"id\""},
 	Name:      whereHelperstring{field: "\"server_component_types\".\"name\""},
 	CreatedAt: whereHelpernull_Time{field: "\"server_component_types\".\"created_at\""},
 	UpdatedAt: whereHelpernull_Time{field: "\"server_component_types\".\"updated_at\""},
-	Slug:      whereHelpernull_String{field: "\"server_component_types\".\"slug\""},
+	Slug:      whereHelperstring{field: "\"server_component_types\".\"slug\""},
 }
 
 // ServerComponentTypeRels is where relationship names are stored.
@@ -100,8 +100,8 @@ type serverComponentTypeL struct{}
 
 var (
 	serverComponentTypeAllColumns            = []string{"id", "name", "created_at", "updated_at", "slug"}
-	serverComponentTypeColumnsWithoutDefault = []string{"name"}
-	serverComponentTypeColumnsWithDefault    = []string{"id", "created_at", "updated_at", "slug"}
+	serverComponentTypeColumnsWithoutDefault = []string{"name", "slug"}
+	serverComponentTypeColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	serverComponentTypePrimaryKeyColumns     = []string{"id"}
 )
 

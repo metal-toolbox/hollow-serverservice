@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	"go.metalkube.net/hollow/internal/db"
 	"go.metalkube.net/hollow/internal/gormdb"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
@@ -91,13 +92,13 @@ func (r *Router) parseUUID(c *gin.Context) (uuid.UUID, error) {
 	return u, err
 }
 
-func (r *Router) loadServerFromParams(c *gin.Context) (*gormdb.Server, error) {
-	srvUUID, err := r.parseUUID(c)
+func (r *Router) loadServerFromParams(c *gin.Context) (*db.Server, error) {
+	u, err := r.parseUUID(c)
 	if err != nil {
 		return nil, err
 	}
 
-	srv, err := r.Store.FindServerByUUID(srvUUID)
+	srv, err := db.FindServer(c.Request.Context(), r.DB, u.String())
 	if err != nil {
 		dbErrorResponse(c, err)
 		return nil, err
