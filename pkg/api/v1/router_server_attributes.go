@@ -1,9 +1,13 @@
 package hollow
 
 import (
-	"github.com/gin-gonic/gin"
+	"database/sql"
+	"time"
 
-	"go.metalkube.net/hollow/internal/db"
+	"github.com/gin-gonic/gin"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"go.metalkube.net/hollow/internal/models"
 )
 
 func (r *Router) serverAttributesList(c *gin.Context) {
@@ -12,11 +16,7 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 		return
 	}
 
-	pager, err := parsePagination(c)
-	if err != nil {
-		badRequestResponse(c, "invalid pagination", err)
-		return
-	}
+	pager := parsePagination(c)
 
 	dbAttrs, err := srv.Attributes().All(c.Request.Context(), r.DB)
 	if err != nil {
@@ -24,7 +24,11 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 		return
 	}
 
-	count := int64(0)
+	count, err := srv.Attributes().Count(c.Request.Context(), r.DB)
+	if err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
 
 	attrs, err := convertFromDBAttributes(dbAttrs)
 	if err != nil {
@@ -32,17 +36,9 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 		return
 	}
 
-	nextCursor := ""
-
-	sz := len(attrs)
-	if sz != 0 {
-		nextCursor = encodeCursor(attrs[sz-1].CreatedAt)
-	}
-
 	pd := paginationData{
 		pageCount:  len(attrs),
 		totalCount: count,
-		nextCursor: nextCursor,
 		pager:      pager,
 	}
 
@@ -57,7 +53,7 @@ func (r *Router) serverAttributesGet(c *gin.Context) {
 
 	ns := c.Param("namespace")
 
-	dbAttr, err := srv.Attributes(db.AttributeWhere.Namespace.EQ(ns)).One(c.Request.Context(), r.DB)
+	dbAttr, err := srv.Attributes(models.AttributeWhere.Namespace.EQ(ns)).One(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -112,9 +108,48 @@ func (r *Router) serverAttributesUpdate(c *gin.Context) {
 		return
 	}
 
-	err = r.Store.UpdateAttributesByServerUUIDAndNamespace(u, ns, attr.Data)
+	ctx := c.Request.Context()
+
+	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
 		dbErrorResponse(c, err)
+		return
+	}
+
+	rows, err := models.Attributes(qm.Where("namespace = ?", ns), qm.Where("server_id = ?", u)).UpdateAll(ctx, tx, models.M{"data": attr.Data})
+	if err != nil {
+		tx.Rollback() //nolint errcheck
+		dbErrorResponse(c, err)
+
+		return
+	}
+
+	if rows == 0 {
+		tx.Rollback() //nolint errcheck
+		dbErrorResponse(c, sql.ErrNoRows)
+
+		return
+	}
+
+	rows, err = models.Servers(qm.Where("id = ?", u)).UpdateAll(ctx, tx, models.M{"updated_at": time.Now()})
+	if err != nil {
+		tx.Rollback() //nolint errcheck
+		dbErrorResponse(c, err)
+
+		return
+	}
+
+	if rows == 0 {
+		tx.Rollback() //nolint errcheck
+		dbErrorResponse(c, sql.ErrNoRows)
+
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		tx.Rollback() //nolint errcheck
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -122,20 +157,15 @@ func (r *Router) serverAttributesUpdate(c *gin.Context) {
 }
 
 func (r *Router) serverAttributesDelete(c *gin.Context) {
-	u, err := r.parseUUID(c)
-	if err != nil {
-		return
-	}
-
+	u := c.Param("uuid")
 	ns := c.Param("namespace")
 
-	dbAttr, err := r.Store.GetAttributesByServerUUIDAndNamespace(u, ns)
-	if err != nil {
-		dbErrorResponse(c, err)
-		return
+	rows, err := models.Attributes(qm.Where("namespace = ?", ns), qm.Where("server_id = ?", u)).DeleteAll(c.Request.Context(), r.DB)
+	if rows == 0 && err == nil {
+		err = sql.ErrNoRows
 	}
 
-	if err = r.Store.DeleteAttributes(dbAttr); err != nil {
+	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}

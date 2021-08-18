@@ -11,7 +11,6 @@ import (
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.uber.org/zap"
 
-	"go.metalkube.net/hollow/internal/gormdb"
 	v1api "go.metalkube.net/hollow/pkg/api/v1"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
@@ -21,7 +20,6 @@ type Server struct {
 	Logger     *zap.Logger
 	Listen     string
 	Debug      bool
-	Store      *gormdb.Store
 	DB         *sql.DB
 	AuthConfig ginjwt.AuthConfig
 }
@@ -62,7 +60,7 @@ func (s *Server) setup() *gin.Engine {
 
 	p := ginprometheus.NewPrometheus("gin")
 
-	v1Rtr := v1api.Router{Store: s.Store, DB: s.DB, AuthMW: authMW}
+	v1Rtr := v1api.Router{DB: s.DB, AuthMW: authMW}
 
 	// Remove any params from the URL string to keep the number of labels down
 	p.ReqCntURLLabelMappingFn = func(c *gin.Context) string {
@@ -126,13 +124,15 @@ func (s *Server) livenessCheck(c *gin.Context) {
 // requests. Currently our only dependency is the DB so we just ensure that is
 // responding.
 func (s *Server) readinessCheck(c *gin.Context) {
-	if s.Store.Ping() {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "UP",
-		})
-	} else {
+	if s.DB == nil || s.DB.PingContext(c.Request.Context()) != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status": "DOWN",
 		})
+
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "UP",
+	})
 }

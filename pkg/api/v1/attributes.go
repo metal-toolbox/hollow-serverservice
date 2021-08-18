@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.metalkube.net/hollow/internal/db"
-	"go.metalkube.net/hollow/internal/gormdb"
+	"go.metalkube.net/hollow/internal/models"
 )
 
 // Attributes provide the ability to apply namespaced settings to an entity.
@@ -35,7 +35,7 @@ type AttributeListParams struct {
 	GreaterThanValue int      `form:"greater-than" query:"greater-than"`
 }
 
-func (a *Attributes) fromDBModel(dbA *db.Attribute) error {
+func (a *Attributes) fromDBModel(dbA *models.Attribute) error {
 	a.Namespace = dbA.Namespace
 	a.Data = json.RawMessage(dbA.Data)
 	a.CreatedAt = dbA.CreatedAt.Time
@@ -44,8 +44,8 @@ func (a *Attributes) fromDBModel(dbA *db.Attribute) error {
 	return nil
 }
 
-func (a *Attributes) toDBModel() (*db.Attribute, error) {
-	dbA := &db.Attribute{
+func (a *Attributes) toDBModel() (*models.Attribute, error) {
+	dbA := &models.Attribute{
 		Namespace: a.Namespace,
 		Data:      types.JSON(a.Data),
 	}
@@ -53,7 +53,7 @@ func (a *Attributes) toDBModel() (*db.Attribute, error) {
 	return dbA, nil
 }
 
-func convertFromDBAttributes(dbAttrs db.AttributeSlice) ([]Attributes, error) {
+func convertFromDBAttributes(dbAttrs models.AttributeSlice) ([]Attributes, error) {
 	attrs := []Attributes{}
 	if dbAttrs == nil {
 		return attrs, nil
@@ -69,38 +69,6 @@ func convertFromDBAttributes(dbAttrs db.AttributeSlice) ([]Attributes, error) {
 	}
 
 	return attrs, nil
-}
-
-// func convertToDBAttributes(attrs []Attributes) (db.AttributeSlice, error) {
-// 	dbAttrs := db.AttributeSlice{}
-
-// 	for _, a := range attrs {
-// 		dbA, err := a.toDBModel()
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		dbAttrs = append(dbAttrs, dbA)
-// 	}
-
-// 	return dbAttrs, nil
-// }
-
-func convertToDBAttributesFilter(attrs []AttributeListParams) ([]gormdb.AttributesFilter, error) {
-	dbFilter := []gormdb.AttributesFilter{}
-
-	for _, aF := range attrs {
-		f := gormdb.AttributesFilter{
-			Namespace:        aF.Namespace,
-			Keys:             aF.Keys,
-			EqualValue:       aF.EqualValue,
-			LessThanValue:    aF.LessThanValue,
-			GreaterThanValue: aF.GreaterThanValue,
-		}
-		dbFilter = append(dbFilter, f)
-	}
-
-	return dbFilter, nil
 }
 
 func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Values) {
@@ -165,4 +133,58 @@ func parseQueryAttributesListParams(c *gin.Context, key string) ([]AttributeList
 	}
 
 	return alp, nil
+}
+
+func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
+	nsMod := qm.Where(fmt.Sprintf("%s.namespace = ?", tblName), p.Namespace)
+
+	sqlValues := []interface{}{}
+	jsonPath := ""
+
+	// If we only have a namespace and no keys we are limiting by namespace only
+	if len(p.Keys) == 0 {
+		return nsMod
+	}
+
+	for i, k := range p.Keys {
+		if i > 0 {
+			jsonPath += " , "
+		}
+		// the actual key is represented as a "?" this helps protect against SQL
+		// injection since these strings are passed in by the user.
+		jsonPath += "?"
+
+		sqlValues = append(sqlValues, k)
+	}
+
+	where := ""
+
+	switch {
+	case p.LessThanValue != 0:
+		sqlValues = append(sqlValues, p.LessThanValue)
+		where = fmt.Sprintf("json_extract_path_text(%s.data::JSON, %s)::int < ?", tblName, jsonPath)
+	case p.GreaterThanValue != 0:
+		sqlValues = append(sqlValues, p.GreaterThanValue)
+		where = fmt.Sprintf("json_extract_path_text(%s.data::JSON, %s)::int > ?", tblName, jsonPath)
+	case p.EqualValue != "":
+		sqlValues = append(sqlValues, p.EqualValue)
+		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s) = ?", tblName, jsonPath)
+	default:
+		// we only have keys so we just want to ensure the key is there
+		where = fmt.Sprintf("%s.data::JSONB", tblName)
+
+		if len(p.Keys) != 0 {
+			for range p.Keys[0 : len(p.Keys)-1] {
+				where += " -> ?"
+			}
+
+			// query is existing_where ? key
+			where += " \\? ?"
+		}
+	}
+
+	return qm.Expr(
+		nsMod,
+		qm.And(where, sqlValues...),
+	)
 }

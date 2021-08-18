@@ -1,7 +1,6 @@
 package hollow_test
 
 import (
-	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +12,7 @@ import (
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"go.metalkube.net/hollow/internal/gormdb"
+	"go.metalkube.net/hollow/internal/dbtools"
 	"go.metalkube.net/hollow/internal/hollowserver"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 	"go.metalkube.net/hollow/pkg/ginjwt"
@@ -27,16 +26,12 @@ type integrationServer struct {
 func serverTest(t *testing.T) *integrationServer {
 	jwksURI := ginjwt.TestHelperJWKSProvider()
 
-	store := gormdb.DatabaseTest(t)
+	db := dbtools.DatabaseTest(t)
 
-	l, _ := zap.NewDevelopment()
-
-	db, err := sql.Open("postgres", gormdb.TestDBURI)
-	require.NoError(t, err)
+	l := zap.NewNop()
 
 	hs := hollowserver.Server{
 		Logger: l,
-		Store:  store,
 		DB:     db,
 		AuthConfig: ginjwt.AuthConfig{
 			Enabled:    true,

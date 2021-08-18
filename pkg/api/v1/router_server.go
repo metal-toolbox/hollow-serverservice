@@ -1,19 +1,20 @@
 package hollow
 
 import (
+	"encoding/json"
+	"reflect"
+
 	"github.com/gin-gonic/gin"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/models"
 )
 
 func (r *Router) serverList(c *gin.Context) {
-	pager, err := parsePagination(c)
-	if err != nil {
-		badRequestResponse(c, "invalid pagination", err)
-		return
-	}
+	pager := parsePagination(c)
 
 	var params ServerListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
@@ -45,24 +46,13 @@ func (r *Router) serverList(c *gin.Context) {
 
 	params.ComponentListParams = sclp
 
-	_, err = params.dbFilter(r)
-	if err != nil {
-		badRequestResponse(c, "invalid list params", err)
-		return
-	}
+	params.PaginationParams = &pager
 
-	dbSRV, err := db.Servers(
-		qm.Load("Attributes"),
-		qm.Load("VersionedAttributes"),
-		qm.Load("ServerComponents.Attributes"),
-		qm.Load("ServerComponents.ServerComponentType"),
-	).All(c.Request.Context(), r.DB)
+	dbSRV, count, err := r.getServers(c, params)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
-
-	count := int64(1)
 
 	srvs := []Server{}
 
@@ -76,17 +66,9 @@ func (r *Router) serverList(c *gin.Context) {
 		srvs = append(srvs, s)
 	}
 
-	nextCursor := ""
-
-	sz := len(srvs)
-	if sz != 0 {
-		nextCursor = encodeCursor(srvs[sz-1].CreatedAt)
-	}
-
 	pd := paginationData{
 		pageCount:  len(srvs),
 		totalCount: count,
-		nextCursor: nextCursor,
 		pager:      pager,
 	}
 
@@ -144,31 +126,28 @@ func (r *Router) serverDelete(c *gin.Context) {
 }
 
 func (r *Router) serverUpdate(c *gin.Context) {
-	u, err := r.parseUUID(c)
+	srv, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
 
-	var srv Server
-	if err := c.ShouldBindJSON(&srv); err != nil {
+	var newValues Server
+	if err := c.ShouldBindJSON(&newValues); err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
 	}
 
-	dbSRV, err := srv.toDBModel()
-	if err != nil {
-		badRequestResponse(c, "invalid server", err)
-		return
-	}
+	srv.Name = null.StringFrom(newValues.Name)
+	srv.FacilityCode = null.StringFrom(newValues.FacilityCode)
 
-	cols := boil.Whitelist(db.ServerTableColumns.Name, db.ServerTableColumns.FacilityCode)
+	cols := boil.Infer()
 
-	if _, err := dbSRV.Update(c.Request.Context(), r.DB, cols); err != nil {
+	if _, err := srv.Update(c.Request.Context(), r.DB, cols); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	updatedResponse(c, u.String())
+	updatedResponse(c, srv.ID)
 }
 
 func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
@@ -177,21 +156,17 @@ func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
 		return
 	}
 
-	pager, err := parsePagination(c)
-	if err != nil {
-		badRequestResponse(c, "invalid pagination", err)
-		return
-	}
+	pager := parsePagination(c)
 
 	ns := c.Param("namespace")
 
-	dbVA, err := srv.VersionedAttributes(db.VersionedAttributeWhere.Namespace.EQ(ns)).All(c.Request.Context(), r.DB)
+	dbVA, err := srv.VersionedAttributes(models.VersionedAttributeWhere.Namespace.EQ(ns), qm.OrderBy("created_at DESC")).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	count, err := srv.VersionedAttributes(db.VersionedAttributeWhere.Namespace.EQ(ns)).Count(c.Request.Context(), r.DB)
+	count, err := srv.VersionedAttributes(models.VersionedAttributeWhere.Namespace.EQ(ns)).Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -209,17 +184,9 @@ func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
 		va = append(va, a)
 	}
 
-	nextCursor := ""
-
-	sz := len(va)
-	if sz != 0 {
-		nextCursor = encodeCursor(va[sz-1].CreatedAt)
-	}
-
 	pd := paginationData{
 		pageCount:  len(va),
 		totalCount: count,
-		nextCursor: nextCursor,
 		pager:      pager,
 	}
 
@@ -232,19 +199,13 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 		return
 	}
 
-	pager, err := parsePagination(c)
-	if err != nil {
-		badRequestResponse(c, "invalid pagination", err)
-		return
-	}
+	pager := parsePagination(c)
 
-	dbVA, err := srv.VersionedAttributes().All(c.Request.Context(), r.DB)
+	dbVA, err := srv.VersionedAttributes(qm.OrderBy("created_at DESC")).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
-
-	count := int64(1)
 
 	va := []VersionedAttributes{}
 
@@ -258,17 +219,11 @@ func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 		va = append(va, a)
 	}
 
-	nextCursor := ""
-
-	sz := len(va)
-	if sz != 0 {
-		nextCursor = encodeCursor(va[sz-1].CreatedAt)
-	}
+	count := int64(len(va))
 
 	pd := paginationData{
 		pageCount:  len(va),
 		totalCount: count,
-		nextCursor: nextCursor,
 		pager:      pager,
 	}
 
@@ -282,22 +237,51 @@ func (r *Router) serverVersionedAttributesCreate(c *gin.Context) {
 		return
 	}
 
-	dbVA, err := va.toDBModel()
-	if err != nil {
-		failedConvertingToVersioned(c, err)
-		return
-	}
+	dbVA := va.toDBModel()
 
 	srv, err := r.loadOrCreateServerFromParams(c)
 	if err != nil {
 		return
 	}
 
-	err = r.Store.CreateVersionedAttributes(srv, dbVA)
-	if err != nil {
+	// nolint:errcheck If this fails continue on
+	curVA, _ := srv.VersionedAttributes(qm.Where("namespace = ?", va.Namespace), qm.OrderBy("created_at DESC")).One(c.Request.Context(), r.DB)
+
+	if curVA != nil && areEqualJSON(dbVA.Data, curVA.Data) {
+		curVA.Tally++
+
+		_, err := curVA.Update(c.Request.Context(), r.DB, boil.Whitelist("tally", "updated_at"))
+		if err != nil {
+			dbErrorResponse(c, err)
+			return
+		}
+
+		createdResponse(c, curVA.Namespace)
+
+		return
+	}
+
+	if err := srv.AddVersionedAttributes(c.Request.Context(), r.DB, true, dbVA); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
 	createdResponse(c, dbVA.Namespace)
+}
+
+func areEqualJSON(s1, s2 types.JSON) bool {
+	var (
+		o1 interface{}
+		o2 interface{}
+	)
+
+	if err := json.Unmarshal([]byte(s1), &o1); err != nil {
+		return false
+	}
+
+	if err := json.Unmarshal([]byte(s2), &o2); err != nil {
+		return false
+	}
+
+	return reflect.DeepEqual(o1, o2)
 }

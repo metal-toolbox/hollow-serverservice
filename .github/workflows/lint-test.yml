@@ -59,8 +59,12 @@ jobs:
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
 
+      - name: Run go tests for generated models code
+        run: go test -race ./internal/models
+
+      # Don't include the models test that we tested above already. We don't want to calculate the test coverage from these into the app since we can't affect it
       - name: Run go tests and generate coverage report
-        run: HOLLOW_TEST_DB="host=localhost port=26257 user=root sslmode=disable dbname=hollow_test" go test ./... -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1
+        run: HOLLOW_TEST_DB="host=localhost port=26257 user=root sslmode=disable dbname=hollow_test" go test -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 `go list ./... | grep -v internal/models`
 
       - name: Stop test database
         run: make docker-down

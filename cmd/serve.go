@@ -1,10 +1,15 @@
 package cmd
 
 import (
+	"database/sql"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"go.metalkube.net/hollow/internal/gormdb"
+	// pq is imported to get our database connection
+	_ "github.com/lib/pq"
+
+	"go.metalkube.net/hollow/internal/dbtools"
 	"go.metalkube.net/hollow/internal/hollowserver"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
@@ -41,10 +46,12 @@ func init() {
 }
 
 func serve() {
-	store, err := gormdb.NewPostgresStore(viper.GetString("db.uri"), logger.Desugar())
+	db, err := sql.Open("postgres", viper.GetString("db.uri"))
 	if err != nil {
 		logger.Fatalw("failed to init data store", "error", err)
 	}
+
+	dbtools.RegisterHooks()
 
 	logger.Infow("starting server",
 		"address", viper.GetString("listen"),
@@ -54,7 +61,7 @@ func serve() {
 		Logger: logger.Desugar(),
 		Listen: viper.GetString("listen"),
 		Debug:  viper.GetBool("logging.debug"),
-		Store:  store,
+		DB:     db,
 		AuthConfig: ginjwt.AuthConfig{
 			Enabled:       viper.GetBool("oidc.enabled"),
 			Audience:      viper.GetString("oidc.audience"),

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"go.metalkube.net/hollow/internal/gormdb"
+	"go.metalkube.net/hollow/internal/dbtools"
 	"go.metalkube.net/hollow/internal/hollowserver"
 	"go.metalkube.net/hollow/pkg/ginjwt"
 )
@@ -58,7 +58,7 @@ func TestLivenessRoute(t *testing.T) {
 }
 
 func TestReadinessRouteDown(t *testing.T) {
-	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, Store: &gormdb.Store{}}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -71,9 +71,9 @@ func TestReadinessRouteDown(t *testing.T) {
 }
 
 func TestReadinessRouteUp(t *testing.T) {
-	store := gormdb.DatabaseTest(t)
+	db := dbtools.DatabaseTest(t)
 
-	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, Store: store}
+	hs := hollowserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
 	s := hs.NewServer()
 	router := s.Handler
 

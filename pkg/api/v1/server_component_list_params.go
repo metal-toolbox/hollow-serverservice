@@ -5,8 +5,7 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
-
-	"go.metalkube.net/hollow/internal/gormdb"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 // ServerComponentListParams allows you to filter the results by server components
@@ -36,42 +35,83 @@ func (p *ServerComponentListParams) empty() bool {
 	}
 }
 
-func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]gormdb.ServerComponentFilter, error) {
-	var err error
+// func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]gormdb.ServerComponentFilter, error) {
+// 	var err error
 
-	dbFilters := []gormdb.ServerComponentFilter{}
+// 	dbFilters := []gormdb.ServerComponentFilter{}
 
-	for _, p := range sclp {
-		dbF := gormdb.ServerComponentFilter{
-			Name:   p.Name,
-			Vendor: p.Vendor,
-			Model:  p.Model,
-			Serial: p.Serial,
-		}
+// 	for _, p := range sclp {
+// 		dbF := gormdb.ServerComponentFilter{
+// 			Name:   p.Name,
+// 			Vendor: p.Vendor,
+// 			Model:  p.Model,
+// 			Serial: p.Serial,
+// 		}
 
-		if p.ServerComponentType != "" {
-			sct, err := r.Store.FindServerComponentTypeBySlug(p.ServerComponentType)
-			if err != nil {
-				return nil, err
-			}
+// 		if p.ServerComponentType != "" {
+// 			sct, err := r.Store.FindServerComponentTypeBySlug(p.ServerComponentType)
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			dbF.ServerComponentTypeID = sct.ID
-		}
+// 			dbF.ServerComponentTypeID = sct.ID
+// 		}
 
-		dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
-		if err != nil {
-			return nil, err
-		}
+// 		dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		dbF.VersionedAttributesFilters, err = convertToDBAttributesFilter(p.VersionedAttributeListParams)
-		if err != nil {
-			return nil, err
-		}
+// 		dbF.VersionedAttributesFilters, err = convertToDBAttributesFilter(p.VersionedAttributeListParams)
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		dbFilters = append(dbFilters, dbF)
+// 		dbFilters = append(dbFilters, dbF)
+// 	}
+
+// 	return dbFilters, nil
+// }
+
+func (p *ServerComponentListParams) queryMods(tblName string) qm.QueryMod {
+	mods := []qm.QueryMod{}
+
+	if p.Name != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.name = ?", tblName), p.Name))
 	}
 
-	return dbFilters, nil
+	if p.Vendor != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.vendor = ?", tblName), p.Vendor))
+	}
+
+	if p.Model != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.model = ?", tblName), p.Model))
+	}
+
+	if p.Serial != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.serial = ?", tblName), p.Serial))
+	}
+
+	if p.ServerComponentType != "" {
+		joinTblName := fmt.Sprintf("%s_sct", tblName)
+		whereStmt := fmt.Sprintf("server_component_types as %s on %s.server_component_type_id = %s.id", joinTblName, tblName, joinTblName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt))
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.slug = ?", joinTblName), p.ServerComponentType))
+	}
+
+	// if f.AttributesFilters != nil {
+	// 	for i, af := range f.AttributesFilters {
+	// 		d = af.applyServerComponent(d, "server_components", i)
+	// 	}
+	// }
+
+	// if f.VersionedAttributesFilters != nil {
+	// 	for i, af := range f.VersionedAttributesFilters {
+	// 		d = af.applyVersionedServerComponent(d, "server_components", i)
+	// 	}
+	// }
+
+	return qm.Expr(mods...)
 }
 
 func encodeServerComponentListParams(sclp []ServerComponentListParams, q url.Values) {

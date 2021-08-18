@@ -1,6 +1,6 @@
 wipe = true
-pkgname = "db"
-output = "internal/db"
+pkgname = "models"
+output = "internal/models"
 
 [crdb]
 dbname = "hollow_test"

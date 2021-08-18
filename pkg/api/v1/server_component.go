@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/models"
 )
 
 // ServerComponent represents a component of a server. These can be things like
@@ -24,8 +24,11 @@ type ServerComponent struct {
 	UpdatedAt         time.Time    `json:"updated_at"`
 }
 
-func convertDBServerComponents(dbComponents db.ServerComponentSlice) ([]ServerComponent, error) {
+func convertDBServerComponents(dbComponents models.ServerComponentSlice) ([]ServerComponent, error) {
 	components := []ServerComponent{}
+	if dbComponents == nil {
+		return components, nil
+	}
 
 	for _, dbC := range dbComponents {
 		c := ServerComponent{}
@@ -39,7 +42,7 @@ func convertDBServerComponents(dbComponents db.ServerComponentSlice) ([]ServerCo
 	return components, nil
 }
 
-func (c *ServerComponent) fromDBModel(dbC *db.ServerComponent) error {
+func (c *ServerComponent) fromDBModel(dbC *models.ServerComponent) error {
 	var err error
 
 	c.UUID, err = uuid.Parse(dbC.ID)
@@ -56,10 +59,14 @@ func (c *ServerComponent) fromDBModel(dbC *db.ServerComponent) error {
 	c.Vendor = dbC.Vendor.String
 	c.Model = dbC.Model.String
 	c.Serial = dbC.Serial.String
-	c.ComponentTypeID = dbC.R.ServerComponentType.Slug
-	c.ComponentTypeName = dbC.R.ServerComponentType.Name
 	c.CreatedAt = dbC.CreatedAt.Time
 	c.UpdatedAt = dbC.UpdatedAt.Time
+
+	// TODO: REMOVE THIS ONE or return error maybe
+	if dbC.R != nil && dbC.R.ServerComponentType != nil {
+		c.ComponentTypeID = dbC.R.ServerComponentType.Slug
+		c.ComponentTypeName = dbC.R.ServerComponentType.Name
+	}
 
 	attrs, err := convertFromDBAttributes(dbC.R.Attributes)
 	if err != nil {
@@ -71,8 +78,8 @@ func (c *ServerComponent) fromDBModel(dbC *db.ServerComponent) error {
 	return nil
 }
 
-// func (c *ServerComponent) toDBModel() (*db.ServerComponent, error) {
-// 	dbC := &db.ServerComponent{
+// func (c *ServerComponent) toDBModel() (*models.ServerComponent, error) {
+// 	dbC := &models.ServerComponent{
 // 		ID:       c.UUID.String(),
 // 		ServerID: c.ServerUUID.String(),
 // 		Name:     null.StringFrom(c.Name),

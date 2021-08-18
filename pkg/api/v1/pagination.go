@@ -1,14 +1,20 @@
 package hollow
 
 import (
-	"encoding/base64"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
-	"go.metalkube.net/hollow/internal/gormdb"
+	"go.metalkube.net/hollow/internal/models"
+)
+
+var (
+	// maxPaginationSize represents the maximum number of records that can be returned per page
+	maxPaginationSize = 1000
+	// defaultPaginationSize represents the default number of records that are returned per page
+	defaultPaginationSize = 100
 )
 
 // PaginationParams allow you to paginate the results
@@ -21,39 +27,14 @@ type PaginationParams struct {
 type paginationData struct {
 	pageCount  int
 	totalCount int64
-	nextCursor string
-	pager      gormdb.Pagination
+	pager      PaginationParams
 }
 
-func encodeCursor(t time.Time) string {
-	key := t.Format(time.RFC3339Nano)
-	return base64.StdEncoding.EncodeToString([]byte(key))
-}
-
-func decodeCursor(encodedCursor string) (res *time.Time, err error) {
-	byt, err := base64.StdEncoding.DecodeString(encodedCursor)
-	if err != nil {
-		return
-	}
-
-	t, err := time.Parse(time.RFC3339Nano, string(byt))
-	if err != nil {
-		return
-	}
-
-	res = &t
-
-	return
-}
-
-func parsePagination(c *gin.Context) (gormdb.Pagination, error) {
-	var err error
+func parsePagination(c *gin.Context) PaginationParams {
 	// Initializing default
-	limit := gormdb.DefaultPaginationSize
+	limit := defaultPaginationSize
 	page := 1
 	query := c.Request.URL.Query()
-
-	var cursor *time.Time
 
 	for key, value := range query {
 		queryValue := value[len(value)-1]
@@ -63,19 +44,40 @@ func parsePagination(c *gin.Context) (gormdb.Pagination, error) {
 			limit, _ = strconv.Atoi(queryValue)
 		case "page":
 			page, _ = strconv.Atoi(queryValue)
-		case "cursor":
-			cursor, err = decodeCursor(queryValue)
-			if err != nil {
-				return gormdb.Pagination{}, err
-			}
 		}
 	}
 
-	return gormdb.Pagination{
-		Limit:  limit,
-		Page:   page,
-		Cursor: cursor,
-	}, nil
+	return PaginationParams{
+		Limit: limit,
+		Page:  page,
+	}
+}
+
+func (p *PaginationParams) queryMods() []qm.QueryMod {
+	if p == nil {
+		p = &PaginationParams{}
+	}
+
+	mods := []qm.QueryMod{}
+
+	mods = append(mods, qm.Limit(p.limitUsed()))
+
+	if p.Page != 0 {
+		mods = append(mods, qm.Offset(p.offset()))
+	}
+
+	// match the old functionality for now...will handle order and load as params later
+	mods = append(mods, qm.OrderBy(models.ServerTableColumns.CreatedAt+" DESC"))
+
+	preload := []qm.QueryMod{
+		qm.Load("Attributes"),
+		qm.Load("VersionedAttributes"),
+		qm.Load("ServerComponents.Attributes"),
+		qm.Load("ServerComponents.ServerComponentType"),
+	}
+	mods = append(mods, preload...)
+
+	return mods
 }
 
 func (p *PaginationParams) setQuery(q url.Values) {
@@ -94,4 +96,26 @@ func (p *PaginationParams) setQuery(q url.Values) {
 	if p.Limit != 0 {
 		q.Set("limit", strconv.Itoa(p.Limit))
 	}
+}
+
+func (p *PaginationParams) limitUsed() int {
+	limit := p.Limit
+
+	switch {
+	case limit > maxPaginationSize:
+		limit = maxPaginationSize
+	case limit <= 0:
+		limit = defaultPaginationSize
+	}
+
+	return limit
+}
+
+func (p *PaginationParams) offset() int {
+	page := p.Page
+	if page == 0 {
+		page = 1
+	}
+
+	return (page - 1) * p.limitUsed()
 }
