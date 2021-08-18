@@ -63,9 +63,7 @@ func (c *Client) NextPage(ctx context.Context, resp ServerResponse, recs interfa
 		return nil, ErrNoNextPage
 	}
 
-	var uri string
-
-	uri = resp.Links.Next.Href
+	uri := resp.Links.Next.Href
 
 	// for some reason in production the links are only the path
 	if strings.HasPrefix(uri, "/api") {

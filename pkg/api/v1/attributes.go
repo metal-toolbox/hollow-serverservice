@@ -162,10 +162,10 @@ func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
 	switch {
 	case p.LessThanValue != 0:
 		sqlValues = append(sqlValues, p.LessThanValue)
-		where = fmt.Sprintf("json_extract_path_text(%s.data::JSON, %s)::int < ?", tblName, jsonPath)
+		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s)::int < ?", tblName, jsonPath)
 	case p.GreaterThanValue != 0:
 		sqlValues = append(sqlValues, p.GreaterThanValue)
-		where = fmt.Sprintf("json_extract_path_text(%s.data::JSON, %s)::int > ?", tblName, jsonPath)
+		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s)::int > ?", tblName, jsonPath)
 	case p.EqualValue != "":
 		sqlValues = append(sqlValues, p.EqualValue)
 		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s) = ?", tblName, jsonPath)
