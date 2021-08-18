@@ -35,44 +35,6 @@ func (p *ServerComponentListParams) empty() bool {
 	}
 }
 
-// func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]gormdb.ServerComponentFilter, error) {
-// 	var err error
-
-// 	dbFilters := []gormdb.ServerComponentFilter{}
-
-// 	for _, p := range sclp {
-// 		dbF := gormdb.ServerComponentFilter{
-// 			Name:   p.Name,
-// 			Vendor: p.Vendor,
-// 			Model:  p.Model,
-// 			Serial: p.Serial,
-// 		}
-
-// 		if p.ServerComponentType != "" {
-// 			sct, err := r.Store.FindServerComponentTypeBySlug(p.ServerComponentType)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-
-// 			dbF.ServerComponentTypeID = sct.ID
-// 		}
-
-// 		dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		dbF.VersionedAttributesFilters, err = convertToDBAttributesFilter(p.VersionedAttributeListParams)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		dbFilters = append(dbFilters, dbF)
-// 	}
-
-// 	return dbFilters, nil
-// }
-
 func (p *ServerComponentListParams) queryMods(tblName string) qm.QueryMod {
 	mods := []qm.QueryMod{}
 

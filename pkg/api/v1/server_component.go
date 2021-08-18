@@ -62,7 +62,6 @@ func (c *ServerComponent) fromDBModel(dbC *models.ServerComponent) error {
 	c.CreatedAt = dbC.CreatedAt.Time
 	c.UpdatedAt = dbC.UpdatedAt.Time
 
-	// TODO: REMOVE THIS ONE or return error maybe
 	if dbC.R != nil && dbC.R.ServerComponentType != nil {
 		c.ComponentTypeID = dbC.R.ServerComponentType.Slug
 		c.ComponentTypeName = dbC.R.ServerComponentType.Name
@@ -77,30 +76,3 @@ func (c *ServerComponent) fromDBModel(dbC *models.ServerComponent) error {
 
 	return nil
 }
-
-// func (c *ServerComponent) toDBModel() (*models.ServerComponent, error) {
-// 	dbC := &models.ServerComponent{
-// 		ID:       c.UUID.String(),
-// 		ServerID: c.ServerUUID.String(),
-// 		Name:     null.StringFrom(c.Name),
-// 		Vendor:   null.StringFrom(c.Vendor),
-// 		Model:    null.StringFrom(c.Model),
-// 		Serial:   null.StringFrom(c.Serial),
-// 	}
-
-// 	// sct, err := s.FindServerComponentTypeBySlug(c.ComponentTypeID)
-// 	// if err != nil {
-// 	// 	return nil, err
-// 	// }
-
-// 	// dbC.ServerComponentTypeID = sct.ID
-
-// 	attrs, err := convertToDBAttributes(c.Attributes)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	dbC.R.Attributes = attrs
-
-// 	return dbC, nil
-// }

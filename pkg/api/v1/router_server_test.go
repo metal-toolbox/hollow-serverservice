@@ -15,38 +15,6 @@ import (
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
 )
 
-// var testServer = hollow.Server{
-// 	UUID:         uuid.New(),
-// 	FacilityCode: "int-test",
-// 	Components: []hollow.ServerComponent{
-// 		{
-// 			Name:   "Intel Xeon 123",
-// 			Model:  "Xeon 123",
-// 			Vendor: "Intel",
-// 			Serial: "987654321",
-// 			Attributes: []hollow.Attributes{
-// 				{
-// 					Namespace: "hollow.integration.test",
-// 					Data:      json.RawMessage([]byte(`{"firmware":1}`)),
-// 				},
-// 			},
-// 			ComponentTypeID: gormdb.FixtureSCTFins.Slug,
-// 		},
-// 	},
-// 	Attributes: []hollow.Attributes{
-// 		{
-// 			Namespace: "hollow.integration.test",
-// 			Data:      json.RawMessage([]byte(`{"plan_type":"large"}`)),
-// 		},
-// 	},
-// 	VersionedAttributes: []hollow.VersionedAttributes{
-// 		{
-// 			Namespace: "hollow.integration.settings",
-// 			Data:      json.RawMessage([]byte(`{"setting":"enabled"}`)),
-// 		},
-// 	},
-// }
-
 func TestIntegrationServerList(t *testing.T) {
 	s := serverTest(t)
 
