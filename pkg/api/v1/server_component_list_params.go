@@ -99,17 +99,20 @@ func (p *ServerComponentListParams) queryMods(tblName string) qm.QueryMod {
 		mods = append(mods, qm.Where(fmt.Sprintf("%s.slug = ?", joinTblName), p.ServerComponentType))
 	}
 
-	// if f.AttributesFilters != nil {
-	// 	for i, af := range f.AttributesFilters {
-	// 		d = af.applyServerComponent(d, "server_components", i)
-	// 	}
-	// }
+	for i, lp := range p.AttributeListParams {
+		tableName := fmt.Sprintf("%s_attr_%d", tblName, i)
+		whereStmt := fmt.Sprintf("attributes as %s on %s.server_component_id = %s.id", tableName, tableName, tblName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt))
 
-	// if f.VersionedAttributesFilters != nil {
-	// 	for i, af := range f.VersionedAttributesFilters {
-	// 		d = af.applyVersionedServerComponent(d, "server_components", i)
-	// 	}
-	// }
+		mods = append(mods, lp.queryMods(tableName))
+	}
+
+	for i, lp := range p.VersionedAttributeListParams {
+		tableName := fmt.Sprintf("%s_ver_attr_%d", tblName, i)
+		whereStmt := fmt.Sprintf("versioned_attributes as %s on %s.server_component_id = %s.id AND %s.created_at=(select max(created_at) from versioned_attributes where server_component_id = %s.id AND namespace = ?)", tableName, tableName, tblName, tableName, tblName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt, lp.Namespace))
+		mods = append(mods, lp.queryMods(tableName))
+	}
 
 	return qm.Expr(mods...)
 }

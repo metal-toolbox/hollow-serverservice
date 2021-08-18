@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"go.metalkube.net/hollow/internal/dbtools"
 	hollow "go.metalkube.net/hollow/pkg/api/v1"
@@ -311,7 +312,7 @@ func TestIntegrationServerList(t *testing.T) {
 			&hollow.ServerListParams{
 				ComponentListParams: []hollow.ServerComponentListParams{
 					{
-						Model: "A Lucky Fin",
+						Model: "Normal Fin",
 						VersionedAttributeListParams: []hollow.AttributeListParams{
 							{
 								Namespace:  dbtools.FixtureNamespaceVersioned,
@@ -327,11 +328,11 @@ func TestIntegrationServerList(t *testing.T) {
 			"",
 		},
 		{
-			"search by a component and server versioned attributes of the server",
+			"search by a component and server attributes of the server",
 			&hollow.ServerListParams{
 				ComponentListParams: []hollow.ServerComponentListParams{
 					{
-						Model: "A Lucky Fin",
+						Model: "Normal Fin",
 						VersionedAttributeListParams: []hollow.AttributeListParams{
 							{
 								Namespace:  dbtools.FixtureNamespaceVersioned,
@@ -341,11 +342,11 @@ func TestIntegrationServerList(t *testing.T) {
 						},
 					},
 				},
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+				AttributeListParams: []hollow.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceVersioned,
-						Keys:       []string{"name"},
-						EqualValue: "new",
+						Namespace:  dbtools.FixtureNamespaceOtherdata,
+						Keys:       []string{"type"},
+						EqualValue: "clown",
 					},
 				},
 			},
@@ -449,6 +450,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 	}
 
+	boil.DebugMode = true
+
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			r, _, err := s.Client.Server.List(context.TODO(), tt.params)
@@ -466,6 +469,8 @@ func TestIntegrationServerList(t *testing.T) {
 			assert.ElementsMatch(t, tt.expectedUUIDs, actual)
 		})
 	}
+
+	boil.DebugMode = false
 }
 
 func TestIntegrationServerListPagination(t *testing.T) {

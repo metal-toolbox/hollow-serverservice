@@ -23,14 +23,14 @@ var (
 	// Server Component Types
 	FixtureFinType *models.ServerComponentType
 
-	FixtureNemo                  *models.Server
-	FixtureNemoMetadata          *models.Attribute
-	FixtureNemoOtherdata         *models.Attribute
-	FixtureNemoLeftFin           *models.ServerComponent
-	FixtureNemoRightFin          *models.ServerComponent
-	FixtureNemoRightFinVersioned *models.VersionedAttribute
-	FixtureNemoVersionedNew      *models.VersionedAttribute
-	FixtureNemoVersionedOld      *models.VersionedAttribute
+	FixtureNemo                 *models.Server
+	FixtureNemoMetadata         *models.Attribute
+	FixtureNemoOtherdata        *models.Attribute
+	FixtureNemoLeftFin          *models.ServerComponent
+	FixtureNemoRightFin         *models.ServerComponent
+	FixtureNemoLeftFinVersioned *models.VersionedAttribute
+	FixtureNemoVersionedNew     *models.VersionedAttribute
+	FixtureNemoVersionedOld     *models.VersionedAttribute
 
 	FixtureDory          *models.Server
 	FixtureDoryMetadata  *models.Attribute
@@ -118,12 +118,12 @@ func setupNemo(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 
-	FixtureNemoRightFinVersioned = &models.VersionedAttribute{
+	FixtureNemoLeftFinVersioned = &models.VersionedAttribute{
 		Namespace: FixtureNamespaceVersioned,
 		Data:      types.JSON([]byte(`{"something": "cool"}`)),
 	}
 
-	if err := FixtureNemoRightFin.AddVersionedAttributes(ctx, db, true, FixtureNemoRightFinVersioned); err != nil {
+	if err := FixtureNemoLeftFin.AddVersionedAttributes(ctx, db, true, FixtureNemoLeftFinVersioned); err != nil {
 		return err
 	}
 
