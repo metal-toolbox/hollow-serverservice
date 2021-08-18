@@ -34,6 +34,8 @@ func (p *ServerListParams) setQuery(q url.Values) {
 	p.PaginationParams.setQuery(q)
 }
 
+// queryMods converts the list params into sql conditions that can be added to
+// sql queries
 func (p *ServerListParams) queryMods() []qm.QueryMod {
 	mods := []qm.QueryMod{}
 

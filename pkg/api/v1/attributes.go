@@ -135,6 +135,8 @@ func parseQueryAttributesListParams(c *gin.Context, key string) ([]AttributeList
 	return alp, nil
 }
 
+// queryMods converts the list params into sql conditions that can be added to
+// sql queries
 func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
 	nsMod := qm.Where(fmt.Sprintf("%s.namespace = ?", tblName), p.Namespace)
 

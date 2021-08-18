@@ -35,6 +35,8 @@ func (p *ServerComponentListParams) empty() bool {
 	}
 }
 
+// queryMods converts the list params into sql conditions that can be added to
+// sql queries
 func (p *ServerComponentListParams) queryMods(tblName string) qm.QueryMod {
 	mods := []qm.QueryMod{}
 
