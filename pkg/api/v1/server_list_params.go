@@ -1,9 +1,13 @@
 package hollow
 
 import (
+	"fmt"
 	"net/url"
 
-	"go.metalkube.net/hollow/internal/db"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"go.metalkube.net/hollow/internal/models"
 )
 
 // ServerListParams allows you to filter the results
@@ -30,27 +34,39 @@ func (p *ServerListParams) setQuery(q url.Values) {
 	p.PaginationParams.setQuery(q)
 }
 
-func (p *ServerListParams) dbFilter(r *Router) (*db.ServerFilter, error) {
-	var err error
+// queryMods converts the list params into sql conditions that can be added to
+// sql queries
+func (p *ServerListParams) queryMods() []qm.QueryMod {
+	mods := []qm.QueryMod{}
 
-	dbF := &db.ServerFilter{
-		FacilityCode: p.FacilityCode,
+	if p.FacilityCode != "" {
+		m := models.ServerWhere.FacilityCode.EQ(null.StringFrom(p.FacilityCode))
+		mods = append(mods, m)
 	}
 
-	dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
-	if err != nil {
-		return nil, err
+	mods = append(mods, qm.Select("distinct servers.*"))
+
+	for i, lp := range p.AttributeListParams {
+		tableName := fmt.Sprintf("attr_%d", i)
+		whereStmt := fmt.Sprintf("attributes as %s on %s.server_id = servers.id", tableName, tableName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt))
+
+		mods = append(mods, lp.queryMods(tableName))
 	}
 
-	dbF.VersionedAttributesFilters, err = convertToDBAttributesFilter(p.VersionedAttributeListParams)
-	if err != nil {
-		return nil, err
+	for i, lp := range p.VersionedAttributeListParams {
+		tableName := fmt.Sprintf("ver_attr_%d", i)
+		whereStmt := fmt.Sprintf("versioned_attributes as %s on %s.server_id = servers.id AND %s.created_at=(select max(created_at) from versioned_attributes where server_id = servers.id AND namespace = ?)", tableName, tableName, tableName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt, lp.Namespace))
+		mods = append(mods, lp.queryMods(tableName))
 	}
 
-	dbF.ComponentFilters, err = convertToDBComponentFilter(r, p.ComponentListParams)
-	if err != nil {
-		return nil, err
+	for i, lp := range p.ComponentListParams {
+		tableName := fmt.Sprintf("sc_%d", i)
+		whereStmt := fmt.Sprintf("server_components as %s on %s.server_id = servers.id", tableName, tableName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt))
+		mods = append(mods, lp.queryMods(tableName))
 	}
 
-	return dbF, nil
+	return mods
 }

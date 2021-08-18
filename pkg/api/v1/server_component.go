@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/models"
 )
 
 // ServerComponent represents a component of a server. These can be things like
@@ -24,8 +24,11 @@ type ServerComponent struct {
 	UpdatedAt         time.Time    `json:"updated_at"`
 }
 
-func convertDBServerComponents(dbComponents []db.ServerComponent) ([]ServerComponent, error) {
+func convertDBServerComponents(dbComponents models.ServerComponentSlice) ([]ServerComponent, error) {
 	components := []ServerComponent{}
+	if dbComponents == nil {
+		return components, nil
+	}
 
 	for _, dbC := range dbComponents {
 		c := ServerComponent{}
@@ -39,19 +42,32 @@ func convertDBServerComponents(dbComponents []db.ServerComponent) ([]ServerCompo
 	return components, nil
 }
 
-func (c *ServerComponent) fromDBModel(dbC db.ServerComponent) error {
-	c.UUID = dbC.ID
-	c.ServerUUID = dbC.ServerID
-	c.Name = dbC.Name
-	c.Vendor = dbC.Vendor
-	c.Model = dbC.Model
-	c.Serial = dbC.Serial
-	c.ComponentTypeID = dbC.ServerComponentType.Slug
-	c.ComponentTypeName = dbC.ServerComponentType.Name
-	c.CreatedAt = dbC.CreatedAt
-	c.UpdatedAt = dbC.UpdatedAt
+func (c *ServerComponent) fromDBModel(dbC *models.ServerComponent) error {
+	var err error
 
-	attrs, err := convertFromDBAttributes(dbC.Attributes)
+	c.UUID, err = uuid.Parse(dbC.ID)
+	if err != nil {
+		return err
+	}
+
+	c.ServerUUID, err = uuid.Parse(dbC.ServerID)
+	if err != nil {
+		return err
+	}
+
+	c.Name = dbC.Name.String
+	c.Vendor = dbC.Vendor.String
+	c.Model = dbC.Model.String
+	c.Serial = dbC.Serial.String
+	c.CreatedAt = dbC.CreatedAt.Time
+	c.UpdatedAt = dbC.UpdatedAt.Time
+
+	if dbC.R != nil && dbC.R.ServerComponentType != nil {
+		c.ComponentTypeID = dbC.R.ServerComponentType.Slug
+		c.ComponentTypeName = dbC.R.ServerComponentType.Name
+	}
+
+	attrs, err := convertFromDBAttributes(dbC.R.Attributes)
 	if err != nil {
 		return err
 	}
@@ -59,31 +75,4 @@ func (c *ServerComponent) fromDBModel(dbC db.ServerComponent) error {
 	c.Attributes = attrs
 
 	return nil
-}
-
-func (c *ServerComponent) toDBModel(s *db.Store) (*db.ServerComponent, error) {
-	dbC := &db.ServerComponent{
-		ID:       c.UUID,
-		ServerID: c.ServerUUID,
-		Name:     c.Name,
-		Vendor:   c.Vendor,
-		Model:    c.Model,
-		Serial:   c.Serial,
-	}
-
-	sct, err := s.FindServerComponentTypeBySlug(c.ComponentTypeID)
-	if err != nil {
-		return nil, err
-	}
-
-	dbC.ServerComponentTypeID = sct.ID
-
-	attrs, err := convertToDBAttributes(c.Attributes)
-	if err != nil {
-		return nil, err
-	}
-
-	dbC.Attributes = attrs
-
-	return dbC, nil
 }

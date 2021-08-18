@@ -1,0 +1,11 @@
+wipe = true
+pkgname = "models"
+output = "internal/models"
+
+[crdb]
+dbname = "hollow_test"
+host = "localhost"
+port = 26257
+user = "root"
+sslmode = "disable"
+blacklist = ["goose_db_version"]

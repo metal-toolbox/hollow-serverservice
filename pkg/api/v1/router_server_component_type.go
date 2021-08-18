@@ -2,8 +2,9 @@ package hollow
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/models"
 )
 
 func (r *Router) serverComponentTypeCreate(c *gin.Context) {
@@ -19,7 +20,7 @@ func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 		return
 	}
 
-	if err := r.Store.CreateServerComponentType(dbT); err != nil {
+	if err := dbT.Insert(c.Request.Context(), r.DB, boil.Infer()); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
@@ -28,17 +29,19 @@ func (r *Router) serverComponentTypeCreate(c *gin.Context) {
 }
 
 func (r *Router) serverComponentTypeList(c *gin.Context) {
-	pager, err := parsePagination(c)
+	pager := parsePagination(c)
+
+	// dbFilter := &gormdb.ServerComponentTypeFilter{
+	// 	Name: c.Query("name"),
+	// }
+
+	dbTypes, err := models.ServerComponentTypes().All(c.Request.Context(), r.DB)
 	if err != nil {
-		badRequestResponse(c, "invalid pagination", err)
+		dbErrorResponse(c, err)
 		return
 	}
 
-	dbFilter := &db.ServerComponentTypeFilter{
-		Name: c.Query("name"),
-	}
-
-	dbTypes, count, err := r.Store.GetServerComponentTypes(dbFilter, &pager)
+	count, err := models.ServerComponentTypes().Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -56,18 +59,9 @@ func (r *Router) serverComponentTypeList(c *gin.Context) {
 		types = append(types, t)
 	}
 
-	nextCursor := ""
-
-	// Use dbTypes since we don't expose CreatedAt
-	sz := len(dbTypes)
-	if sz != 0 {
-		nextCursor = encodeCursor(dbTypes[sz-1].CreatedAt)
-	}
-
 	pd := paginationData{
 		pageCount:  len(types),
 		totalCount: count,
-		nextCursor: nextCursor,
 		pager:      pager,
 	}
 

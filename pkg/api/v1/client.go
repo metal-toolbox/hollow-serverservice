@@ -63,13 +63,7 @@ func (c *Client) NextPage(ctx context.Context, resp ServerResponse, recs interfa
 		return nil, ErrNoNextPage
 	}
 
-	var uri string
-	// prefer the cursor for going through pages as long as it is available
-	if resp.Links.NextCursor != nil {
-		uri = resp.Links.NextCursor.Href
-	} else {
-		uri = resp.Links.Next.Href
-	}
+	uri := resp.Links.Next.Href
 
 	// for some reason in production the links are only the path
 	if strings.HasPrefix(uri, "/api") {

@@ -3,9 +3,11 @@ package hollow
 import (
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/volatiletech/null/v8"
 
-	"go.metalkube.net/hollow/internal/db"
+	"go.metalkube.net/hollow/internal/models"
 )
 
 // Server represents a server in a facility
@@ -20,62 +22,73 @@ type Server struct {
 	UpdatedAt           time.Time             `json:"updated_at"`
 }
 
-func (s *Server) fromDBModel(dbS db.Server) error {
+func (r *Router) getServers(c *gin.Context, params ServerListParams) (models.ServerSlice, int64, error) {
+	mods := params.queryMods()
+
+	count, err := models.Servers(mods...).Count(c.Request.Context(), r.DB)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// add pagination
+	mods = append(mods, params.PaginationParams.queryMods()...)
+
+	s, err := models.Servers(mods...).All(c.Request.Context(), r.DB)
+	if err != nil {
+		return s, 0, err
+	}
+
+	return s, count, nil
+}
+
+func (s *Server) fromDBModel(dbS *models.Server) error {
 	var err error
 
-	s.UUID = dbS.ID
-	s.Name = dbS.Name
-	s.FacilityCode = dbS.FacilityCode
-	s.CreatedAt = dbS.CreatedAt
-	s.UpdatedAt = dbS.UpdatedAt
-
-	s.Attributes, err = convertFromDBAttributes(dbS.Attributes)
+	s.UUID, err = uuid.Parse(dbS.ID)
 	if err != nil {
 		return err
 	}
 
-	s.Components, err = convertDBServerComponents(dbS.ServerComponents)
-	if err != nil {
-		return err
-	}
+	s.Name = dbS.Name.String
+	s.FacilityCode = dbS.FacilityCode.String
+	s.CreatedAt = dbS.CreatedAt.Time
+	s.UpdatedAt = dbS.UpdatedAt.Time
 
-	s.VersionedAttributes, err = convertFromDBVersionedAttributes(dbS.VersionedAttributes)
-	if err != nil {
-		return err
+	if dbS.R != nil {
+		if dbS.R.Attributes != nil {
+			s.Attributes, err = convertFromDBAttributes(dbS.R.Attributes)
+			if err != nil {
+				return err
+			}
+		}
+
+		if dbS.R.ServerComponents != nil {
+			s.Components, err = convertDBServerComponents(dbS.R.ServerComponents)
+			if err != nil {
+				return err
+			}
+		}
+
+		if dbS.R.VersionedAttributes != nil {
+			s.VersionedAttributes, err = convertFromDBVersionedAttributes(dbS.R.VersionedAttributes)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
 
-func (s *Server) toDBModel(store *db.Store) (*db.Server, error) {
-	dbS := &db.Server{
-		ID:           s.UUID,
-		Name:         s.Name,
-		FacilityCode: s.FacilityCode,
+func (s *Server) toDBModel() (*models.Server, error) {
+	dbS := &models.Server{
+		Name:         null.StringFrom(s.Name),
+		FacilityCode: null.StringFrom(s.FacilityCode),
 	}
 
-	for _, c := range s.Components {
-		dbC, err := c.toDBModel(store)
-		if err != nil {
-			return nil, err
-		}
-
-		dbS.ServerComponents = append(dbS.ServerComponents, *dbC)
+	if s.UUID.String() != uuid.Nil.String() {
+		dbS.ID = s.UUID.String()
 	}
-
-	attrs, err := convertToDBAttributes(s.Attributes)
-	if err != nil {
-		return nil, err
-	}
-
-	dbS.Attributes = attrs
-
-	verAttrs, err := convertToDBVersionedAttributes(s.VersionedAttributes)
-	if err != nil {
-		return nil, err
-	}
-
-	dbS.VersionedAttributes = verAttrs
 
 	return dbS, nil
 }

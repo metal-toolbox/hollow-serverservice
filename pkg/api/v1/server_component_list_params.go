@@ -5,8 +5,7 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
-
-	"go.metalkube.net/hollow/internal/db"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 // ServerComponentListParams allows you to filter the results by server components
@@ -36,42 +35,50 @@ func (p *ServerComponentListParams) empty() bool {
 	}
 }
 
-func convertToDBComponentFilter(r *Router, sclp []ServerComponentListParams) ([]db.ServerComponentFilter, error) {
-	var err error
+// queryMods converts the list params into sql conditions that can be added to
+// sql queries
+func (p *ServerComponentListParams) queryMods(tblName string) qm.QueryMod {
+	mods := []qm.QueryMod{}
 
-	dbFilters := []db.ServerComponentFilter{}
-
-	for _, p := range sclp {
-		dbF := db.ServerComponentFilter{
-			Name:   p.Name,
-			Vendor: p.Vendor,
-			Model:  p.Model,
-			Serial: p.Serial,
-		}
-
-		if p.ServerComponentType != "" {
-			sct, err := r.Store.FindServerComponentTypeBySlug(p.ServerComponentType)
-			if err != nil {
-				return nil, err
-			}
-
-			dbF.ServerComponentTypeID = sct.ID
-		}
-
-		dbF.AttributesFilters, err = convertToDBAttributesFilter(p.AttributeListParams)
-		if err != nil {
-			return nil, err
-		}
-
-		dbF.VersionedAttributesFilters, err = convertToDBAttributesFilter(p.VersionedAttributeListParams)
-		if err != nil {
-			return nil, err
-		}
-
-		dbFilters = append(dbFilters, dbF)
+	if p.Name != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.name = ?", tblName), p.Name))
 	}
 
-	return dbFilters, nil
+	if p.Vendor != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.vendor = ?", tblName), p.Vendor))
+	}
+
+	if p.Model != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.model = ?", tblName), p.Model))
+	}
+
+	if p.Serial != "" {
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.serial = ?", tblName), p.Serial))
+	}
+
+	if p.ServerComponentType != "" {
+		joinTblName := fmt.Sprintf("%s_sct", tblName)
+		whereStmt := fmt.Sprintf("server_component_types as %s on %s.server_component_type_id = %s.id", joinTblName, tblName, joinTblName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt))
+		mods = append(mods, qm.Where(fmt.Sprintf("%s.slug = ?", joinTblName), p.ServerComponentType))
+	}
+
+	for i, lp := range p.AttributeListParams {
+		tableName := fmt.Sprintf("%s_attr_%d", tblName, i)
+		whereStmt := fmt.Sprintf("attributes as %s on %s.server_component_id = %s.id", tableName, tableName, tblName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt))
+
+		mods = append(mods, lp.queryMods(tableName))
+	}
+
+	for i, lp := range p.VersionedAttributeListParams {
+		tableName := fmt.Sprintf("%s_ver_attr_%d", tblName, i)
+		whereStmt := fmt.Sprintf("versioned_attributes as %s on %s.server_component_id = %s.id AND %s.created_at=(select max(created_at) from versioned_attributes where server_component_id = %s.id AND namespace = ?)", tableName, tableName, tblName, tableName, tblName)
+		mods = append(mods, qm.LeftOuterJoin(whereStmt, lp.Namespace))
+		mods = append(mods, lp.queryMods(tableName))
+	}
+
+	return qm.Expr(mods...)
 }
 
 func encodeServerComponentListParams(sclp []ServerComponentListParams, q url.Values) {

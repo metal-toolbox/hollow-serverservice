@@ -2,25 +2,24 @@ package hollow
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func (r *Router) serverComponentList(c *gin.Context) {
-	u, err := r.parseUUID(c)
+	srv, err := r.loadServerFromParams(c)
 	if err != nil {
 		return
 	}
 
-	pager, err := parsePagination(c)
-	if err != nil {
-		badRequestResponse(c, "invalid pagination", err)
-		return
-	}
+	pager := parsePagination(c)
 
-	dbComps, count, err := r.Store.GetComponentsByServerUUID(u, nil, &pager)
+	dbComps, err := srv.ServerComponents(qm.Load("ServerComponentType")).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
+
+	count := int64(0)
 
 	comps, err := convertDBServerComponents(dbComps)
 	if err != nil {
@@ -28,17 +27,9 @@ func (r *Router) serverComponentList(c *gin.Context) {
 		return
 	}
 
-	nextCursor := ""
-
-	sz := len(comps)
-	if sz != 0 {
-		nextCursor = encodeCursor(comps[sz-1].CreatedAt)
-	}
-
 	pd := paginationData{
 		pageCount:  len(comps),
 		totalCount: count,
-		nextCursor: nextCursor,
 		pager:      pager,
 	}
 
