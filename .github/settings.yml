@@ -1,7 +1,7 @@
 repository:
   # See https://developer.github.com/v3/repos/#edit for all available settings.
   name: hollow
-  description: description of repo
+  description: The API service which leverages CockroachDB as a backend to inventory firmware, bios, and other hardware information required for cohesive fleet management
   homepage: https://tinkerbell.org/
   # private: false
   visibility: internal
@@ -22,10 +22,6 @@ repository:
 #   - name: first-timers-only
 #     # include the old name to rename and existing label
 #     oldname: Help Wanted
-
-collaborators:
-  - username: nicolerenee
-    permission: admin
 
 teams:
   - name: delivery-engineering

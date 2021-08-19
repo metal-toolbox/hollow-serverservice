@@ -2,5 +2,8 @@
   "go.buildTags": "testtools",
   "go.testFlags": [
     "--short"
+  ],
+  "cSpell.words": [
+    "cockroachdb"
   ]
 }
