@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 func (r *Router) serverList(c *gin.Context) {

@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // ServerListParams allows you to filter the results

@@ -1,4 +1,4 @@
-package hollow_test
+package dcim_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	hollow "go.metalkube.net/hollow/pkg/api/v1"
+	dcim "go.hollow.sh/dcim/pkg/api/v1"
 )
 
 func TestNewClient(t *testing.T) {
@@ -22,7 +22,7 @@ func TestNewClient(t *testing.T) {
 		{
 			"no authToken",
 			"",
-			"https://hollow.metalkube.net",
+			"https://dcim.hollow.sh",
 			true,
 			"failed to initialize: no auth token provided",
 		},
@@ -36,14 +36,14 @@ func TestNewClient(t *testing.T) {
 		{
 			"happy path",
 			"SuperSecret",
-			"https://hollow.metalkube.net",
+			"https://dcim.hollow.sh",
 			false,
 			"",
 		},
 	}
 
 	for _, tt := range testCases {
-		c, err := hollow.NewClient(tt.authToken, tt.url, nil)
+		c, err := dcim.NewClient(tt.authToken, tt.url, nil)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

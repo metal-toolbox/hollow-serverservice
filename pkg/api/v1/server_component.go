@@ -1,11 +1,11 @@
-package hollow
+package dcim
 
 import (
 	"time"
 
 	"github.com/google/uuid"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // ServerComponent represents a component of a server. These can be things like

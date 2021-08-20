@@ -15,7 +15,7 @@ import (
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"go.metalkube.net/hollow/pkg/ginjwt"
+	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 func TestMiddlewareValidatesTokens(t *testing.T) {

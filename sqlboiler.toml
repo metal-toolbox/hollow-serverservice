@@ -3,7 +3,7 @@ pkgname = "models"
 output = "internal/models"
 
 [crdb]
-dbname = "hollow_test"
+dbname = "hollow_dcim_test"
 host = "localhost"
 port = 26257
 user = "root"

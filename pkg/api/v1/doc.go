@@ -1,2 +1,2 @@
-// Package hollow provides the v1 api for hollow.
-package hollow
+// Package dcim provides the v1 api for hollow.
+package dcim

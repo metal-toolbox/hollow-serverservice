@@ -1,7 +1,7 @@
-package hollow
+package dcim
 
 import (
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // ServerComponentType provides a way to group server components by the type

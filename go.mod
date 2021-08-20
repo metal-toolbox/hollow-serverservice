@@ -1,4 +1,4 @@
-module go.metalkube.net/hollow
+module go.hollow.sh/dcim
 
 go 1.16
 

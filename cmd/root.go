@@ -18,8 +18,8 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "hollow",
-	Short: "Hardware information datastore",
+	Use:   "hollow-dcim",
+	Short: "Hollow DCIM datastore",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -53,7 +53,7 @@ func initConfig() {
 	}
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.SetEnvPrefix("hollow")
+	viper.SetEnvPrefix("hollow_dcim")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.

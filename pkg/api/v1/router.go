@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"database/sql"
@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"go.metalkube.net/hollow/internal/models"
-	"go.metalkube.net/hollow/pkg/ginjwt"
+	"go.hollow.sh/dcim/internal/models"
+	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 // Router provides a router for the v1 API
