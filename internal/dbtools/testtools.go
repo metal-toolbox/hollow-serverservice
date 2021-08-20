@@ -12,11 +12,11 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // TestDBURI is the URI for the test database
-var TestDBURI = os.Getenv("HOLLOW_TEST_DB")
+var TestDBURI = os.Getenv("HOLLOW_DCIM_TEST_DB")
 var testDB *sql.DB
 
 func testDatastore() error {

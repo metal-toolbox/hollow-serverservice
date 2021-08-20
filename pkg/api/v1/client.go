@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 var apiVersion = "v1"
 
-// Client has the ability to talk to a hollow server running at the given URI
+// Client has the ability to talk to a hollow dcim server running at the given URI
 type Client struct {
 	url                 string
 	authToken           string

@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"github.com/gin-gonic/gin"

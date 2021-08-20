@@ -1,6 +1,7 @@
-[![slack](https://img.shields.io/badge/slack-delivery--eng-brightgreen.svg?style=for-the-badge&logo=slack)](https://app.slack.com/client/T02BWUJ78/C013J3XQHM4) [![pagerduty](https://img.shields.io/badge/pagerduty-oncall-red.svg?style=for-the-badge&logo=pagerduty)](https://packet.pagerduty.com/schedules#P09YKZW)
-
 # Hollow
+
+> This repository is [Experimental](https://github.com/packethost/standards/blob/master/experimental-statement.md) meaning that it's based on untested ideas or techniques and not yet established or finalized or involves a radically new and innovative style!
+> This means that support is best effort (at best!) and we strongly encourage you to NOT use this in production.
 
 North of Neverland, `Hollow` is the magical kingdom where fairies are born and is their home.
 

@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // Attributes provide the ability to apply namespaced settings to an entity.

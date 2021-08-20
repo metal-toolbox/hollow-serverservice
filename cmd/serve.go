@@ -9,9 +9,9 @@ import (
 	// pq is imported to get our database connection
 	_ "github.com/lib/pq"
 
-	"go.metalkube.net/hollow/internal/dbtools"
-	"go.metalkube.net/hollow/internal/hollowserver"
-	"go.metalkube.net/hollow/pkg/ginjwt"
+	"go.hollow.sh/dcim/internal/dbtools"
+	"go.hollow.sh/dcim/internal/dcimserver"
+	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 // serveCmd represents the serve command
@@ -57,7 +57,7 @@ func serve() {
 		"address", viper.GetString("listen"),
 	)
 
-	hs := &hollowserver.Server{
+	hs := &dcimserver.Server{
 		Logger: logger.Desugar(),
 		Listen: viper.GetString("listen"),
 		Debug:  viper.GetBool("logging.debug"),

@@ -1,4 +1,4 @@
-package hollowserver
+package dcimserver
 
 import (
 	"database/sql"
@@ -11,8 +11,8 @@ import (
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.uber.org/zap"
 
-	v1api "go.metalkube.net/hollow/pkg/api/v1"
-	"go.metalkube.net/hollow/pkg/ginjwt"
+	v1api "go.hollow.sh/dcim/pkg/api/v1"
+	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 // Server implements the Hollow server

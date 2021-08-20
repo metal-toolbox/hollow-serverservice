@@ -1,4 +1,4 @@
-package hollow_test
+package dcim_test
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	hollow "go.metalkube.net/hollow/pkg/api/v1"
+	hollow "go.hollow.sh/dcim/pkg/api/v1"
 )
 
 func TestServerServiceCreate(t *testing.T) {

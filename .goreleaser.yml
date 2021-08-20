@@ -1,4 +1,4 @@
-project_name: hollow
+project_name: hollow-dcim
 before:
   hooks:
     - go mod download
@@ -13,10 +13,11 @@ builds:
       - darwin
     ldflags:
       - -s -w
-      - -X go.metalkube.net/hollow/pkg/version.version={{.Version}}
-      - -X go.metalkube.net/hollow/pkg/version.commit={{.Commit}}
-      - -X go.metalkube.net/hollow/pkg/version.date={{.Date}}
-      - -X go.metalkube.net/hollow/pkg/version.builtBy=goreleaser
+      - -X go.hollow.sh/toolbox/version.appName={{.ProjectName}}
+      - -X go.hollow.sh/toolbox/version.version={{.Version}}
+      - -X go.hollow.sh/toolbox/version.commit={{.Commit}}
+      - -X go.hollow.sh/toolbox/version.date={{.Date}}
+      - -X go.hollow.sh/toolbox/version.builtBy=goreleaser
 
 archives:
   -
@@ -49,7 +50,7 @@ changelog:
 dockers:
   -
     image_templates:
-      - "quay.io/packet/{{.ProjectName}}:{{ .Tag }}"
+      - "ghcr.io/metal-toolbox/{{.ProjectName}}:{{ .Tag }}"
     dockerfile: Dockerfile
     extra_files:
     - db/migrations

@@ -2,7 +2,7 @@ package main
 
 //go:generate sqlboiler crdb
 
-import "go.metalkube.net/hollow/cmd"
+import "go.hollow.sh/dcim/cmd"
 
 func main() {
 	cmd.Execute()

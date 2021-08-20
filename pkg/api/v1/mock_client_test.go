@@ -1,4 +1,4 @@
-package hollow_test
+package dcim_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	hollow "go.metalkube.net/hollow/pkg/api/v1"
+	hollow "go.hollow.sh/dcim/pkg/api/v1"
 )
 
 // MockHTTPRequestDoer implements the standard http.Client interface.

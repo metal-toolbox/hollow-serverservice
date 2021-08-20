@@ -6,7 +6,7 @@ import (
 	"github.com/gosimple/slug"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // RegisterHooks adds any hooks that are configured to the models library

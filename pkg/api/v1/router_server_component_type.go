@@ -1,10 +1,10 @@
-package hollow
+package dcim
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 func (r *Router) serverComponentTypeCreate(c *gin.Context) {

@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"go.metalkube.net/hollow/pkg/version"
+	"go.hollow.sh/dcim/pkg/version"
 )
 
 func newGetRequest(ctx context.Context, uri, path string) (*http.Request, error) {

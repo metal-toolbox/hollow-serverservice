@@ -10,12 +10,12 @@ FROM alpine:3
 RUN apk add --no-cache ca-certificates
 
 # Copy the binary to the production image from the builder stage.
-COPY hollow /hollow
+COPY hollow-dcim /hollow-dcim
 
 # Copy goose and database migration files
 COPY --from=builder /go/bin/goose /goose
 COPY db/migrations /db-migrations
 
 # Run the web service on container startup.
-ENTRYPOINT ["/hollow"]
+ENTRYPOINT ["/hollow-dcim"]
 CMD ["serve"]

@@ -64,7 +64,7 @@ jobs:
 
       # Don't include the models test that we tested above already. We don't want to calculate the test coverage from these into the app since we can't affect it
       - name: Run go tests and generate coverage report
-        run: HOLLOW_TEST_DB="host=localhost port=26257 user=root sslmode=disable dbname=hollow_test" go test -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 `go list ./... | grep -v internal/models`
+        run: HOLLOW_DCIM_TEST_DB="host=localhost port=26257 user=root sslmode=disable dbname=hollow_dcim_test" go test -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 `go list ./... | grep -v internal/models`
 
       - name: Stop test database
         run: make docker-down

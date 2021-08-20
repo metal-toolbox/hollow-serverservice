@@ -1,4 +1,4 @@
-package hollow_test
+package dcim_test
 
 import (
 	"net/http"
@@ -12,10 +12,10 @@ import (
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"go.metalkube.net/hollow/internal/dbtools"
-	"go.metalkube.net/hollow/internal/hollowserver"
-	hollow "go.metalkube.net/hollow/pkg/api/v1"
-	"go.metalkube.net/hollow/pkg/ginjwt"
+	"go.hollow.sh/dcim/internal/dbtools"
+	"go.hollow.sh/dcim/internal/dcimserver"
+	hollow "go.hollow.sh/dcim/pkg/api/v1"
+	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 type integrationServer struct {
@@ -30,7 +30,7 @@ func serverTest(t *testing.T) *integrationServer {
 
 	l := zap.NewNop()
 
-	hs := hollowserver.Server{
+	hs := dcimserver.Server{
 		Logger: l,
 		DB:     db,
 		AuthConfig: ginjwt.AuthConfig{

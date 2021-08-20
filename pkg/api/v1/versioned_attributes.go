@@ -1,4 +1,4 @@
-package hollow
+package dcim
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.metalkube.net/hollow/internal/models"
+	"go.hollow.sh/dcim/internal/models"
 )
 
 // VersionedAttributes represents a set of attributes of an entity at a given time
