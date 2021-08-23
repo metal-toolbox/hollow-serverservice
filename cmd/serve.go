@@ -3,11 +3,10 @@ package cmd
 import (
 	"database/sql"
 
+	// import the crdbpgx for automatic retries of errors for crdb that support retry
+	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	// pq is imported to get our database connection
-	_ "github.com/lib/pq"
 
 	"go.hollow.sh/dcim/internal/dbtools"
 	"go.hollow.sh/dcim/internal/dcimserver"

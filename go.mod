@@ -3,6 +3,7 @@ module go.hollow.sh/dcim
 go 1.16
 
 require (
+	github.com/cockroachdb/cockroach-go/v2 v2.1.1
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/zap v0.0.1
