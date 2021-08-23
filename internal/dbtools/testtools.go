@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	// pq is imported to get our database connection
-	_ "github.com/lib/pq"
+	// import the crdbpgx for automatic retries of errors for crdb that support retry
+	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
 	"github.com/stretchr/testify/require"
 
 	"go.hollow.sh/dcim/internal/models"
