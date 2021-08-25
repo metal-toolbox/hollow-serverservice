@@ -1,4 +1,4 @@
-FROM golang:1.16 as builder
+FROM golang:1.17 as builder
 
 # Build the goose binary
 RUN CGO_ENABLED=0 GOOS=linux go install github.com/pressly/goose/cmd/goose@v2.7.0
