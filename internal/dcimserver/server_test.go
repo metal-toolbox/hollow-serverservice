@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
 
 	"go.hollow.sh/dcim/internal/dbtools"
 	"go.hollow.sh/dcim/internal/dcimserver"
-	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 var serverAuthConfig = ginjwt.AuthConfig{

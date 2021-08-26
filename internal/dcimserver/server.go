@@ -9,10 +9,10 @@ import (
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
+	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
 
 	v1api "go.hollow.sh/dcim/pkg/api/v1"
-	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 // Server implements the Hollow server
