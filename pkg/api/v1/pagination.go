@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
-	"go.hollow.sh/dcim/internal/models"
+	"go.hollow.sh/serverservice/internal/models"
 )
 
 var (

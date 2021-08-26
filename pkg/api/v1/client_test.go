@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	dcim "go.hollow.sh/dcim/pkg/api/v1"
+	dcim "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 func TestNewClient(t *testing.T) {

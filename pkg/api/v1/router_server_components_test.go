@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.hollow.sh/dcim/internal/dbtools"
+	"go.hollow.sh/serverservice/internal/dbtools"
 )
 
 func TestIntegrationServerListComponents(t *testing.T) {

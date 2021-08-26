@@ -1,4 +1,4 @@
-package dcimserver_test
+package httpsrv_test
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
 
-	"go.hollow.sh/dcim/internal/dbtools"
-	"go.hollow.sh/dcim/internal/dcimserver"
+	"go.hollow.sh/serverservice/internal/dbtools"
+	"go.hollow.sh/serverservice/internal/httpsrv"
 )
 
 var serverAuthConfig = ginjwt.AuthConfig{
@@ -19,7 +19,7 @@ var serverAuthConfig = ginjwt.AuthConfig{
 }
 
 func TestUnknownRoute(t *testing.T) {
-	hs := dcimserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -32,7 +32,7 @@ func TestUnknownRoute(t *testing.T) {
 }
 
 func TestHealthzRoute(t *testing.T) {
-	hs := dcimserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -45,7 +45,7 @@ func TestHealthzRoute(t *testing.T) {
 }
 
 func TestLivenessRoute(t *testing.T) {
-	hs := dcimserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -58,7 +58,7 @@ func TestLivenessRoute(t *testing.T) {
 }
 
 func TestReadinessRouteDown(t *testing.T) {
-	hs := dcimserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -73,7 +73,7 @@ func TestReadinessRouteDown(t *testing.T) {
 func TestReadinessRouteUp(t *testing.T) {
 	db := dbtools.DatabaseTest(t)
 
-	hs := dcimserver.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
 	s := hs.NewServer()
 	router := s.Handler
 

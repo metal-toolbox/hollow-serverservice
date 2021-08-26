@@ -13,9 +13,9 @@ import (
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"go.hollow.sh/dcim/internal/dbtools"
-	"go.hollow.sh/dcim/internal/dcimserver"
-	hollow "go.hollow.sh/dcim/pkg/api/v1"
+	"go.hollow.sh/serverservice/internal/dbtools"
+	"go.hollow.sh/serverservice/internal/httpsrv"
+	hollow "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 type integrationServer struct {
@@ -30,7 +30,7 @@ func serverTest(t *testing.T) *integrationServer {
 
 	l := zap.NewNop()
 
-	hs := dcimserver.Server{
+	hs := httpsrv.Server{
 		Logger: l,
 		DB:     db,
 		AuthConfig: ginjwt.AuthConfig{

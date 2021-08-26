@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go.hollow.sh/dcim/internal/models"
+	"go.hollow.sh/serverservice/internal/models"
 )
 
 // ServerComponent represents a component of a server. These can be things like

@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
-	"go.hollow.sh/dcim/internal/dbtools"
-	hollow "go.hollow.sh/dcim/pkg/api/v1"
+	"go.hollow.sh/serverservice/internal/dbtools"
+	hollow "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 func TestIntegrationServerList(t *testing.T) {
