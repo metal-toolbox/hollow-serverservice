@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"go.hollow.sh/dcim/pkg/version"
+	"go.hollow.sh/toolbox/version"
 )
 
 func newGetRequest(ctx context.Context, uri, path string) (*http.Request, error) {

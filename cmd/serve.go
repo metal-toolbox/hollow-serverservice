@@ -7,10 +7,10 @@ import (
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.hollow.sh/toolbox/ginjwt"
 
 	"go.hollow.sh/dcim/internal/dbtools"
 	"go.hollow.sh/dcim/internal/dcimserver"
-	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 // serveCmd represents the serve command

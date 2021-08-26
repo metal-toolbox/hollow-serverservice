@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
+	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
@@ -15,7 +16,6 @@ import (
 	"go.hollow.sh/dcim/internal/dbtools"
 	"go.hollow.sh/dcim/internal/dcimserver"
 	hollow "go.hollow.sh/dcim/pkg/api/v1"
-	"go.hollow.sh/dcim/pkg/ginjwt"
 )
 
 type integrationServer struct {
