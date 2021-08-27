@@ -484,6 +484,34 @@ func TestIntegrationServerListPagination(t *testing.T) {
 	assert.False(t, resp.HasNextPage())
 }
 
+func TestIntegrationServerGetPreload(t *testing.T) {
+	s := serverTest(t)
+	s.Client.SetToken(validToken([]string{"read", "write"}))
+
+	r, _, err := s.Client.Server.Get(context.TODO(), uuid.MustParse(dbtools.FixtureNemo.ID))
+
+	assert.NoError(t, err)
+	assert.Len(t, r.Attributes, 2)
+	assert.Len(t, r.VersionedAttributes, 1)
+	assert.JSONEq(t, string(r.VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
+	assert.Len(t, r.Components, 2)
+}
+
+func TestIntegrationServerListPreload(t *testing.T) {
+	s := serverTest(t)
+	s.Client.SetToken(validToken([]string{"read", "write"}))
+
+	// should only return nemo
+	r, _, err := s.Client.Server.List(context.TODO(), &hollow.ServerListParams{FacilityCode: "Sydney"})
+
+	assert.NoError(t, err)
+	assert.Len(t, r, 1)
+	assert.Len(t, r[0].Attributes, 2)
+	assert.Len(t, r[0].VersionedAttributes, 1)
+	assert.JSONEq(t, string(r[0].VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
+	assert.Len(t, r[0].Components, 2)
+}
+
 func TestIntegrationServerCreate(t *testing.T) {
 	s := serverTest(t)
 
