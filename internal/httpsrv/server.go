@@ -52,12 +52,6 @@ func (s *Server) setup() *gin.Engine {
 		MaxAge:           corsMaxAge,
 	}))
 
-	// Health endpoints
-	// These are defined before zap so that they are not logged
-	r.GET("/healthz", s.livenessCheck)
-	r.GET("/healthz/liveness", s.livenessCheck)
-	r.GET("/healthz/readiness", s.readinessCheck)
-
 	p := ginprometheus.NewPrometheus("gin")
 
 	v1Rtr := v1api.Router{DB: s.DB, AuthMW: authMW}
@@ -77,6 +71,11 @@ func (s *Server) setup() *gin.Engine {
 		),
 	))
 	r.Use(ginzap.RecoveryWithZap(s.Logger, true))
+
+	// Health endpoints
+	r.GET("/healthz", s.livenessCheck)
+	r.GET("/healthz/liveness", s.livenessCheck)
+	r.GET("/healthz/readiness", s.readinessCheck)
 
 	v1 := r.Group("/api/v1")
 	{
