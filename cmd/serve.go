@@ -47,6 +47,10 @@ func serve() {
 		logger.Fatalw("failed to init data store", "error", err)
 	}
 
+	if _, err := db.Exec("select 1;"); err != nil {
+		logger.Fatalw("failed verifying database connection", "error", err)
+	}
+
 	dbtools.RegisterHooks()
 
 	logger.Infow("starting server",

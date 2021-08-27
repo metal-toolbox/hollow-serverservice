@@ -2,6 +2,7 @@ package httpsrv_test
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -58,7 +59,9 @@ func TestLivenessRoute(t *testing.T) {
 }
 
 func TestReadinessRouteDown(t *testing.T) {
-	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	db, _ := sql.Open("postgres", "localhost:12341")
+
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
 	s := hs.NewServer()
 	router := s.Handler
 
