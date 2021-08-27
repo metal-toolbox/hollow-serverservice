@@ -123,7 +123,8 @@ func (s *Server) livenessCheck(c *gin.Context) {
 // requests. Currently our only dependency is the DB so we just ensure that is
 // responding.
 func (s *Server) readinessCheck(c *gin.Context) {
-	if s.DB == nil || s.DB.PingContext(c.Request.Context()) != nil {
+	if err := s.DB.PingContext(c.Request.Context()); err != nil {
+		s.Logger.Sugar().Errorf("readiness check db ping failed", "err", err)
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"status": "DOWN",
 		})

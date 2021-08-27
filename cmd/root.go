@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"go.hollow.sh/toolbox/version"
 	"go.uber.org/zap"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -88,7 +89,7 @@ func setupLogging() {
 		panic(err)
 	}
 
-	logger = l.Sugar()
+	logger = l.Sugar().With("app", "serverservice", "version", version.Version())
 	defer logger.Sync() //nolint:errcheck
 }
 
