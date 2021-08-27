@@ -76,8 +76,17 @@ func (r *Router) serverList(c *gin.Context) {
 }
 
 func (r *Router) serverGet(c *gin.Context) {
-	dbSRV, err := r.loadServerFromParams(c)
+	mods := []qm.QueryMod{
+		qm.Where("id=?", c.Param("uuid")),
+		qm.Load("Attributes"),
+		qm.Load("VersionedAttributes", qm.Where("(namespace, created_at)=(select namespace, max(created_at) from versioned_attributes where server_id=? group by namespace)", c.Param("uuid"))),
+		qm.Load("ServerComponents"),
+		qm.Load("ServerComponents.ServerComponentType"),
+	}
+
+	dbSRV, err := models.Servers(mods...).One(c.Request.Context(), r.DB)
 	if err != nil {
+		dbErrorResponse(c, err)
 		return
 	}
 

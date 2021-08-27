@@ -73,7 +73,7 @@ func (p *PaginationParams) queryMods() []qm.QueryMod {
 
 	preload := []qm.QueryMod{
 		qm.Load("Attributes"),
-		qm.Load("VersionedAttributes"),
+		qm.Load("VersionedAttributes", qm.Where("(server_id, namespace, created_at) IN (select server_id, namespace, max(created_at) from versioned_attributes group by server_id, namespace)")),
 		qm.Load("ServerComponents.Attributes"),
 		qm.Load("ServerComponents.ServerComponentType"),
 	}
