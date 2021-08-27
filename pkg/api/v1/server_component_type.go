@@ -1,7 +1,7 @@
 package dcim
 
 import (
-	"go.hollow.sh/dcim/internal/models"
+	"go.hollow.sh/serverservice/internal/models"
 )
 
 // ServerComponentType provides a way to group server components by the type

@@ -10,7 +10,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.hollow.sh/toolbox/ginjwt"
 
-	"go.hollow.sh/dcim/internal/models"
+	"go.hollow.sh/serverservice/internal/models"
 )
 
 // Router provides a router for the v1 API

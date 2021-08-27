@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/viper"
 	"go.hollow.sh/toolbox/ginjwt"
 
-	"go.hollow.sh/dcim/internal/dbtools"
-	"go.hollow.sh/dcim/internal/dcimserver"
+	"go.hollow.sh/serverservice/internal/dbtools"
+	"go.hollow.sh/serverservice/internal/httpsrv"
 )
 
 // serveCmd represents the serve command
@@ -26,9 +26,6 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 	serveCmd.Flags().String("listen", "0.0.0.0:8000", "address to listen on")
 	viperBindFlag("listen", serveCmd.Flags().Lookup("listen"))
-
-	serveCmd.Flags().String("db-uri", "postgresql://root@db:26257/hollow_dev?sslmode=disable", "URI for database connection")
-	viperBindFlag("db.uri", serveCmd.Flags().Lookup("db-uri"))
 
 	serveCmd.Flags().Bool("oidc", true, "use oidc auth")
 	viperBindFlag("oidc.enabled", serveCmd.Flags().Lookup("oidc"))
@@ -56,7 +53,7 @@ func serve() {
 		"address", viper.GetString("listen"),
 	)
 
-	hs := &dcimserver.Server{
+	hs := &httpsrv.Server{
 		Logger: logger.Desugar(),
 		Listen: viper.GetString("listen"),
 		Debug:  viper.GetBool("logging.debug"),

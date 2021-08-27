@@ -1,4 +1,4 @@
-package dcimserver
+package httpsrv
 
 import (
 	"database/sql"
@@ -12,10 +12,10 @@ import (
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
 
-	v1api "go.hollow.sh/dcim/pkg/api/v1"
+	v1api "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
-// Server implements the Hollow server
+// Server implements the HTTP Server
 type Server struct {
 	Logger     *zap.Logger
 	Listen     string

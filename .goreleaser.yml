@@ -1,4 +1,4 @@
-project_name: hollow-dcim
+project_name: serverservice
 before:
   hooks:
     - go mod download
@@ -50,7 +50,5 @@ changelog:
 dockers:
   -
     image_templates:
-      - "ghcr.io/metal-toolbox/{{.ProjectName}}:{{ .Tag }}"
+      - "ghcr.io/metal-toolbox/hollow-{{.ProjectName}}:{{ .Tag }}"
     dockerfile: Dockerfile
-    extra_files:
-    - db/migrations

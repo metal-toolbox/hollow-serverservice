@@ -12,11 +12,11 @@ import (
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
 	"github.com/stretchr/testify/require"
 
-	"go.hollow.sh/dcim/internal/models"
+	"go.hollow.sh/serverservice/internal/models"
 )
 
 // TestDBURI is the URI for the test database
-var TestDBURI = os.Getenv("HOLLOW_DCIM_TEST_DB")
+var TestDBURI = os.Getenv("SERVERSERVICE_DB_URI")
 var testDB *sql.DB
 
 func testDatastore() error {

@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.hollow.sh/dcim/internal/dbtools"
-	hollow "go.hollow.sh/dcim/pkg/api/v1"
+	"go.hollow.sh/serverservice/internal/dbtools"
+	hollow "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 func TestIntegrationServerCreateAttributes(t *testing.T) {

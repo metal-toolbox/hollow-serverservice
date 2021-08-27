@@ -18,8 +18,8 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "hollow-dcim",
-	Short: "Hollow DCIM datastore",
+	Use:   "serverservice",
+	Short: "Server Service for Hollow ecosystem",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -35,6 +35,9 @@ func init() {
 	viperBindFlag("logging.debug", rootCmd.PersistentFlags().Lookup("debug"))
 	rootCmd.PersistentFlags().Bool("pretty", false, "enable pretty (human readable) logging output")
 	viperBindFlag("logging.pretty", rootCmd.PersistentFlags().Lookup("pretty"))
+
+	rootCmd.PersistentFlags().String("db-uri", "postgresql://root@localhost:26257/serverservice?sslmode=disable", "URI for database connection")
+	viperBindFlag("db.uri", rootCmd.PersistentFlags().Lookup("db-uri"))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -53,7 +56,7 @@ func initConfig() {
 	}
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.SetEnvPrefix("hollow_dcim")
+	viper.SetEnvPrefix("serverservice")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.

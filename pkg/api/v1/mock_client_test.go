@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	hollow "go.hollow.sh/dcim/pkg/api/v1"
+	hollow "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 // MockHTTPRequestDoer implements the standard http.Client interface.

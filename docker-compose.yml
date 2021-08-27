@@ -16,7 +16,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     environment:
-      - HOLLOW_JWT_AUDIENCE=https://staging.hollow.platformequinix.net
+      - SERVERSERVICE_OIDC_ENABLED=false
+      - SERVERSERVICE_DB_URI="postgresql://root@db:26257/serverservice?sslmode=disable"
     ports:
       - "8000:8000"
     links:
