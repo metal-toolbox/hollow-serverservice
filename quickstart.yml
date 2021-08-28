@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  serverservice:
+    image: ghcr.io/metal-toolbox/hollow-serverservice:v0.11.2
+    depends_on:
+      - crdb
+      - serverservice-migrate
+    environment:
+      - SERVERSERVICE_OIDC_ENABLED=false
+      - SERVERSERVICE_DB_URI=postgresql://root@crdb:26257/defaultdb?sslmode=disable
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - hollow
+
+  serverservice-migrate:
+    image: ghcr.io/metal-toolbox/hollow-serverservice:v0.11.2
+    command:
+      migrate up
+    depends_on:
+      - crdb
+    environment:
+      - SERVERSERVICE_DB_URI=postgresql://root@crdb:26257/defaultdb?sslmode=disable
+    restart: on-failure
+    networks:
+      - hollow
+
+  crdb:
+    image: cockroachdb/cockroach:latest-v21.1
+    volumes:
+      - db:/cockroach/cockroach-data
+    command: start-single-node --insecure
+    ports:
+        - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - hollow
+
+
+volumes:
+  db:
+
+networks:
+  hollow:

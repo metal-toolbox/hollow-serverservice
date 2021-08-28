@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"database/sql"
-
-	// import the crdbpgx for automatic retries of errors for crdb that support retry
-	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
+	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx" // crdb retries and postgres interface
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.hollow.sh/toolbox/ginjwt"
@@ -26,7 +23,16 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 	serveCmd.Flags().String("listen", "0.0.0.0:8000", "address to listen on")
 	viperBindFlag("listen", serveCmd.Flags().Lookup("listen"))
-
+	// Tracing Flags
+	serveCmd.Flags().Bool("tracing", false, "enable tracing support")
+	viperBindFlag("tracing.enabled", serveCmd.Flags().Lookup("tracing"))
+	serveCmd.Flags().String("tracing-provider", "jaeger", "tracing provider to use")
+	viperBindFlag("tracing.provider", serveCmd.Flags().Lookup("tracing-provider"))
+	serveCmd.Flags().String("tracing-endpoint", "", "endpoint where traces are sent")
+	viperBindFlag("tracing.endpoint", serveCmd.Flags().Lookup("tracing-endpoint"))
+	serveCmd.Flags().String("tracing-environment", "production", "environment value in traces")
+	viperBindFlag("tracing.environment", serveCmd.Flags().Lookup("tracing-environment"))
+	// OIDC Flags
 	serveCmd.Flags().Bool("oidc", true, "use oidc auth")
 	viperBindFlag("oidc.enabled", serveCmd.Flags().Lookup("oidc"))
 	serveCmd.Flags().String("oidc-aud", "", "expected audience on OIDC JWT")
@@ -42,14 +48,7 @@ func init() {
 }
 
 func serve() {
-	db, err := sql.Open("postgres", viper.GetString("db.uri"))
-	if err != nil {
-		logger.Fatalw("failed to init data store", "error", err)
-	}
-
-	if _, err := db.Exec("select 1;"); err != nil {
-		logger.Fatalw("failed verifying database connection", "error", err)
-	}
+	db := initTracingAndDB()
 
 	dbtools.RegisterHooks()
 

@@ -27,4 +27,5 @@ RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/serverservice /serverservice
 
 # Run the web service on container startup.
-CMD ["/serverservice", "serve"]
+ENTRYPOINT ["/serverservice"]
+CMD ["serve"]

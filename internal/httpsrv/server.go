@@ -3,6 +3,7 @@ package httpsrv
 import (
 	"database/sql"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -10,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.hollow.sh/toolbox/ginjwt"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 
 	v1api "go.hollow.sh/serverservice/pkg/api/v1"
@@ -63,14 +66,24 @@ func (s *Server) setup() *gin.Engine {
 
 	p.Use(r)
 
-	r.Use(ginzap.Logger(s.Logger, ginzap.WithTimeFormat(time.RFC3339),
+	r.Use(ginzap.Logger(s.Logger.With(zap.String("component", "httpsrv")), ginzap.WithTimeFormat(time.RFC3339),
 		ginzap.WithUTC(true),
 		ginzap.WithCustomFields(
 			func(c *gin.Context) zap.Field { return zap.String("jwt_subject", ginjwt.GetSubject(c)) },
 			func(c *gin.Context) zap.Field { return zap.String("jwt_user", ginjwt.GetUser(c)) },
 		),
 	))
-	r.Use(ginzap.RecoveryWithZap(s.Logger, true))
+	r.Use(ginzap.RecoveryWithZap(s.Logger.With(zap.String("component", "httpsrv")), true))
+
+	tp := otel.GetTracerProvider()
+	if tp != nil {
+		hostname, err := os.Hostname()
+		if err != nil {
+			hostname = "unknown"
+		}
+
+		r.Use(otelgin.Middleware(hostname, otelgin.WithTracerProvider(tp)))
+	}
 
 	// Health endpoints
 	r.GET("/healthz", s.livenessCheck)

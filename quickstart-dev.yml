@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  serverservice:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+  serverservice-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
