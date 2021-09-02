@@ -1,9 +1,7 @@
 package cmd
 
 import (
-
-	// import the crdbpgx for automatic retries of errors for crdb that support retry
-	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
+	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx" // crdb retries and postgres interface
 	"github.com/pressly/goose/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
