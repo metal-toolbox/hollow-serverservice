@@ -34,10 +34,10 @@ services:
     command: start-single-node --insecure
     ports:
         - "8080:8080"
+        - "26257:26257"
     restart: unless-stopped
     networks:
       - hollow
-
 
 volumes:
   db:

@@ -29,6 +29,7 @@ type Server struct {
 	FacilityCode null.String `boil:"facility_code" json:"facility_code,omitempty" toml:"facility_code" yaml:"facility_code,omitempty"`
 	CreatedAt    null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt    null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	DeletedAt    null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *serverR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L serverL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,12 +41,14 @@ var ServerColumns = struct {
 	FacilityCode string
 	CreatedAt    string
 	UpdatedAt    string
+	DeletedAt    string
 }{
 	ID:           "id",
 	Name:         "name",
 	FacilityCode: "facility_code",
 	CreatedAt:    "created_at",
 	UpdatedAt:    "updated_at",
+	DeletedAt:    "deleted_at",
 }
 
 var ServerTableColumns = struct {
@@ -54,12 +57,14 @@ var ServerTableColumns = struct {
 	FacilityCode string
 	CreatedAt    string
 	UpdatedAt    string
+	DeletedAt    string
 }{
 	ID:           "servers.id",
 	Name:         "servers.name",
 	FacilityCode: "servers.facility_code",
 	CreatedAt:    "servers.created_at",
 	UpdatedAt:    "servers.updated_at",
+	DeletedAt:    "servers.deleted_at",
 }
 
 // Generated where
@@ -70,12 +75,14 @@ var ServerWhere = struct {
 	FacilityCode whereHelpernull_String
 	CreatedAt    whereHelpernull_Time
 	UpdatedAt    whereHelpernull_Time
+	DeletedAt    whereHelpernull_Time
 }{
 	ID:           whereHelperstring{field: "\"servers\".\"id\""},
 	Name:         whereHelpernull_String{field: "\"servers\".\"name\""},
 	FacilityCode: whereHelpernull_String{field: "\"servers\".\"facility_code\""},
 	CreatedAt:    whereHelpernull_Time{field: "\"servers\".\"created_at\""},
 	UpdatedAt:    whereHelpernull_Time{field: "\"servers\".\"updated_at\""},
+	DeletedAt:    whereHelpernull_Time{field: "\"servers\".\"deleted_at\""},
 }
 
 // ServerRels is where relationship names are stored.
@@ -105,9 +112,9 @@ func (*serverR) NewStruct() *serverR {
 type serverL struct{}
 
 var (
-	serverAllColumns            = []string{"id", "name", "facility_code", "created_at", "updated_at"}
+	serverAllColumns            = []string{"id", "name", "facility_code", "created_at", "updated_at", "deleted_at"}
 	serverColumnsWithoutDefault = []string{}
-	serverColumnsWithDefault    = []string{"id", "name", "facility_code", "created_at", "updated_at"}
+	serverColumnsWithDefault    = []string{"id", "name", "facility_code", "created_at", "updated_at", "deleted_at"}
 	serverPrimaryKeyColumns     = []string{"id"}
 )
 

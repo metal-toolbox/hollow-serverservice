@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +39,7 @@ func TestServerServiceDelete(t *testing.T) {
 }
 func TestServerServiceGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		srv := hollow.Server{UUID: uuid.New(), FacilityCode: "Test1"}
+		srv := hollow.Server{UUID: uuid.New(), FacilityCode: "Test1", DeletedAt: time.Now()}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: srv})
 		require.Nil(t, err)
 

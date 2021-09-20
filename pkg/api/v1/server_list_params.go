@@ -3,6 +3,7 @@ package dcim
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -12,7 +13,8 @@ import (
 
 // ServerListParams allows you to filter the results
 type ServerListParams struct {
-	FacilityCode                 string `form:"facility-code"`
+	FacilityCode                 string    `form:"facility-code"`
+	DeletedAt                    time.Time `form:"deleted-at"`
 	ComponentListParams          []ServerComponentListParams
 	AttributeListParams          []AttributeListParams
 	VersionedAttributeListParams []AttributeListParams

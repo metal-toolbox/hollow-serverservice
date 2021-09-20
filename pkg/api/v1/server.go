@@ -20,6 +20,7 @@ type Server struct {
 	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
 	CreatedAt           time.Time             `json:"created_at"`
 	UpdatedAt           time.Time             `json:"updated_at"`
+	DeletedAt           time.Time             `json:"deleted_at"`
 }
 
 func (r *Router) getServers(c *gin.Context, params ServerListParams) (models.ServerSlice, int64, error) {

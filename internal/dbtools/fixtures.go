@@ -1,10 +1,12 @@
-//+build testtools
+//go:build testtools
+// +build testtools
 
 package dbtools
 
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -44,6 +46,13 @@ var (
 	FixtureMarlinLeftFin   *models.ServerComponent
 	FixtureMarlinRightFin  *models.ServerComponent
 
+	// FixtureChuckles represents the fish that was deleted
+	// https://pixar.fandom.com/wiki/Chuckles_(Finding_Nemo)
+	FixtureChuckles          *models.Server
+	FixtureChucklesMetadata  *models.Attribute
+	FixtureChucklesOtherdata *models.Attribute
+	FixtureChucklesLeftFin   *models.ServerComponent
+
 	FixtureServers models.ServerSlice
 )
 
@@ -71,7 +80,11 @@ func addFixtures() error {
 		return err
 	}
 
-	FixtureServers = models.ServerSlice{FixtureNemo, FixtureDory, FixtureMarlin}
+	if err := setupChuckles(ctx, testDB); err != nil {
+		return err
+	}
+
+	FixtureServers = models.ServerSlice{FixtureNemo, FixtureDory, FixtureMarlin, FixtureChuckles}
 
 	return nil
 }
@@ -221,4 +234,38 @@ func setupMarlin(ctx context.Context, db *sql.DB) error {
 	}
 
 	return FixtureMarlin.AddServerComponents(ctx, db, true, FixtureMarlinLeftFin, FixtureMarlinRightFin)
+}
+
+func setupChuckles(ctx context.Context, db *sql.DB) error {
+	FixtureChuckles = &models.Server{
+		Name:         null.StringFrom("Chuckles"),
+		FacilityCode: null.StringFrom("Aquarium"),
+		DeletedAt:    null.TimeFrom(time.Date(2003, 5, 30, 0, 0, 0, 0, time.UTC)),
+	}
+
+	if err := FixtureChuckles.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureChucklesMetadata = &models.Attribute{
+		Namespace: FixtureNamespaceMetadata,
+		Data:      types.JSON([]byte(`{"age":1,"location":"Old shipwreck"}`)),
+	}
+
+	FixtureChucklesOtherdata = &models.Attribute{
+		Namespace: FixtureNamespaceOtherdata,
+		Data:      types.JSON([]byte(`{"enabled": false, "type": "goldfish", "lastUpdated": 1624960000, "nested": {"tag": "finding-nemo", "number": 4}}`)),
+	}
+
+	if err := FixtureChuckles.AddAttributes(ctx, db, true, FixtureChucklesMetadata, FixtureChucklesOtherdata); err != nil {
+		return err
+	}
+
+	FixtureChucklesLeftFin = &models.ServerComponent{
+		ServerComponentTypeID: FixtureFinType.ID,
+		Model:                 null.StringFrom("Belly"),
+		Serial:                null.StringFrom("Up"),
+	}
+
+	return FixtureChuckles.AddServerComponents(ctx, db, true, FixtureChucklesLeftFin)
 }

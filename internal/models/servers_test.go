@@ -1377,7 +1377,7 @@ func testServersSelect(t *testing.T) {
 }
 
 var (
-	serverDBTypes = map[string]string{`ID`: `uuid`, `Name`: `string`, `FacilityCode`: `string`, `CreatedAt`: `timestamptz`, `UpdatedAt`: `timestamptz`}
+	serverDBTypes = map[string]string{`ID`: `uuid`, `Name`: `string`, `FacilityCode`: `string`, `CreatedAt`: `timestamptz`, `UpdatedAt`: `timestamptz`, `DeletedAt`: `timestamptz`}
 	_             = bytes.MinRead
 )
 
