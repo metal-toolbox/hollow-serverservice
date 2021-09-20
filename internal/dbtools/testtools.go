@@ -71,6 +71,6 @@ func cleanDB() {
 	models.VersionedAttributes().DeleteAll(ctx, testDB)
 	models.ServerComponents().DeleteAll(ctx, testDB)
 	models.ServerComponentTypes().DeleteAll(ctx, testDB)
-	models.Servers().DeleteAll(ctx, testDB)
+	models.Servers().DeleteAll(ctx, testDB, true)
 	testDB.Exec("SET sql_safe_updates = true;")
 }

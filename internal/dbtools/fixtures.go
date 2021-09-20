@@ -53,7 +53,9 @@ var (
 	FixtureChucklesOtherdata *models.Attribute
 	FixtureChucklesLeftFin   *models.ServerComponent
 
-	FixtureServers models.ServerSlice
+	FixtureServers        models.ServerSlice
+	FixtureDeletedServers models.ServerSlice
+	FixtureAllServers     models.ServerSlice
 )
 
 func addFixtures() error {
@@ -84,7 +86,12 @@ func addFixtures() error {
 		return err
 	}
 
-	FixtureServers = models.ServerSlice{FixtureNemo, FixtureDory, FixtureMarlin, FixtureChuckles}
+	// excluding Chuckles here since that server is deleted
+	FixtureServers = models.ServerSlice{FixtureNemo, FixtureDory, FixtureMarlin}
+	FixtureDeletedServers = models.ServerSlice{FixtureChuckles}
+
+	//nolint:gocritic
+	FixtureAllServers = append(FixtureServers, FixtureDeletedServers...)
 
 	return nil
 }
