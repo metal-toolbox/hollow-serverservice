@@ -1,7 +1,6 @@
 wipe = true
 pkgname = "models"
 output = "internal/models"
-add_soft_deletes = true
 
 [crdb]
 dbname = "serverservice_test"

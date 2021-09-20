@@ -421,6 +421,7 @@ func (q serverComponentQuery) Exists(ctx context.Context, exec boil.ContextExecu
 func (o *ServerComponent) Server(mods ...qm.QueryMod) serverQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.ServerID),
+		qmhelper.WhereIsNull("deleted_at"),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -531,6 +532,7 @@ func (serverComponentL) LoadServer(ctx context.Context, e boil.ContextExecutor, 
 	query := NewQuery(
 		qm.From(`servers`),
 		qm.WhereIn(`servers.id in ?`, args...),
+		qmhelper.WhereIsNull(`servers.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
