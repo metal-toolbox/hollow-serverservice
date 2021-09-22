@@ -45,10 +45,6 @@ func (p *ServerListParams) queryMods() []qm.QueryMod {
 		mods = append(mods, m)
 	}
 
-	if p.IncludeDeleted {
-		mods = append(mods, qm.WithDeleted())
-	}
-
 	mods = append(mods, qm.Select("distinct servers.*"))
 
 	for i, lp := range p.AttributeListParams {
