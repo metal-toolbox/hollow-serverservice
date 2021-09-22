@@ -416,6 +416,20 @@ func TestIntegrationServerList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search for server that is deleted without IncludeDeleted defined",
+			&hollow.ServerListParams{},
+			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID},
+			false,
+			"",
+		},
+		{
+			"search for server that is deleted with IncludeDeleted defined",
+			&hollow.ServerListParams{IncludeDeleted: true},
+			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID, dbtools.FixtureChuckles.ID},
+			false,
+			"",
+		},
 	}
 
 	boil.DebugMode = true
@@ -495,6 +509,23 @@ func TestIntegrationServerGetPreload(t *testing.T) {
 	assert.Len(t, r.VersionedAttributes, 1)
 	assert.JSONEq(t, string(r.VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
 	assert.Len(t, r.Components, 2)
+}
+
+func TestIntegrationServerGetDeleted(t *testing.T) {
+	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
+		r, _, err := s.Client.Server.Get(ctx, uuid.MustParse(dbtools.FixtureChuckles.ID))
+		if !expectError {
+			require.NoError(t, err)
+			assert.Equal(t, r.UUID, uuid.MustParse(dbtools.FixtureChuckles.ID), "Expected UUID %s, got %s", dbtools.FixtureChuckles.ID, r.UUID.String())
+			assert.Equal(t, r.Name, dbtools.FixtureChuckles.Name.String)
+		}
+
+		return err
+	})
 }
 
 func TestIntegrationServerListPreload(t *testing.T) {

@@ -3,7 +3,6 @@ package dcim
 import (
 	"fmt"
 	"net/url"
-	"time"
 
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -13,10 +12,10 @@ import (
 
 // ServerListParams allows you to filter the results
 type ServerListParams struct {
-	FacilityCode                 string    `form:"facility-code"`
-	DeletedAt                    time.Time `form:"deleted-at"`
+	FacilityCode                 string `form:"facility-code"`
 	ComponentListParams          []ServerComponentListParams
 	AttributeListParams          []AttributeListParams
+	IncludeDeleted               bool
 	VersionedAttributeListParams []AttributeListParams
 	PaginationParams             *PaginationParams
 }
@@ -44,6 +43,10 @@ func (p *ServerListParams) queryMods() []qm.QueryMod {
 	if p.FacilityCode != "" {
 		m := models.ServerWhere.FacilityCode.EQ(null.StringFrom(p.FacilityCode))
 		mods = append(mods, m)
+	}
+
+	if p.IncludeDeleted {
+		mods = append(mods, qm.WithDeleted())
 	}
 
 	mods = append(mods, qm.Select("distinct servers.*"))

@@ -56,6 +56,8 @@ func (p *ServerComponentListParams) queryMods(tblName string) qm.QueryMod {
 		mods = append(mods, qm.Where(fmt.Sprintf("%s.serial = ?", tblName), p.Serial))
 	}
 
+	mods = append(mods, qm.Where(fmt.Sprintf("%s.deleted_at = NULL", tblName)))
+
 	if p.ServerComponentType != "" {
 		joinTblName := fmt.Sprintf("%s_sct", tblName)
 		whereStmt := fmt.Sprintf("server_component_types as %s on %s.server_component_type_id = %s.id", joinTblName, tblName, joinTblName)
