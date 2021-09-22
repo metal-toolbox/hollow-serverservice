@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -34,10 +33,6 @@ func (r *Router) getServers(c *gin.Context, params ServerListParams) (models.Ser
 
 	// add pagination
 	mods = append(mods, params.PaginationParams.queryMods()...)
-
-	if params.IncludeDeleted {
-		mods = append(mods, qm.WithDeleted())
-	}
 
 	s, err := models.Servers(mods...).All(c.Request.Context(), r.DB)
 	if err != nil {

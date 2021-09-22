@@ -15,7 +15,7 @@ type ServerListParams struct {
 	FacilityCode                 string `form:"facility-code"`
 	ComponentListParams          []ServerComponentListParams
 	AttributeListParams          []AttributeListParams
-	IncludeDeleted               bool
+	IncludeDeleted               bool `form:"include-deleted"`
 	VersionedAttributeListParams []AttributeListParams
 	PaginationParams             *PaginationParams
 }
@@ -27,6 +27,10 @@ func (p *ServerListParams) setQuery(q url.Values) {
 
 	if p.FacilityCode != "" {
 		q.Set("facility-code", p.FacilityCode)
+	}
+
+	if p.IncludeDeleted {
+		q.Set("include-deleted", "true")
 	}
 
 	encodeAttributesListParams(p.AttributeListParams, "attr", q)
@@ -67,6 +71,10 @@ func (p *ServerListParams) queryMods() []qm.QueryMod {
 		whereStmt := fmt.Sprintf("server_components as %s on %s.server_id = servers.id", tableName, tableName)
 		mods = append(mods, qm.LeftOuterJoin(whereStmt))
 		mods = append(mods, lp.queryMods(tableName))
+	}
+
+	if p.IncludeDeleted {
+		mods = append(mods, qm.WithDeleted())
 	}
 
 	return mods
