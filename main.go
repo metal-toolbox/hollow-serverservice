@@ -1,6 +1,6 @@
 package main
 
-//go:generate sqlboiler crdb
+//go:generate sqlboiler crdb --add-soft-deletes
 
 import "go.hollow.sh/serverservice/cmd"
 

@@ -82,6 +82,7 @@ func (r *Router) serverGet(c *gin.Context) {
 		qm.Load("VersionedAttributes", qm.Where("(namespace, created_at)=(select namespace, max(created_at) from versioned_attributes where server_id=? group by namespace)", c.Param("uuid"))),
 		qm.Load("ServerComponents"),
 		qm.Load("ServerComponents.ServerComponentType"),
+		qm.WithDeleted(),
 	}
 
 	dbSRV, err := models.Servers(mods...).One(c.Request.Context(), r.DB)
@@ -126,7 +127,7 @@ func (r *Router) serverDelete(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbSRV.Delete(c.Request.Context(), r.DB); err != nil {
+	if _, err = dbSRV.Delete(c.Request.Context(), r.DB, false); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}

@@ -38,13 +38,13 @@ vendor:
 	@go mod tidy
 
 docker-up:
-	@docker-compose up -d db
+	@docker-compose -f quickstart.yml up -d crdb
 
 docker-down:
-	@docker-compose down
+	@docker-compose -f quickstart.yml down
 
 docker-clean:
-	@docker-compose down --volumes
+	@docker-compose -f quickstart.yml down --volumes
 
 dev-database: | vendor
 	@cockroach sql --insecure -e "drop database if exists serverservice"

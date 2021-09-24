@@ -1,4 +1,5 @@
-//+build testtools
+//go:build testtools
+// +build testtools
 
 package dbtools
 
@@ -11,6 +12,7 @@ import (
 	// import the crdbpgx for automatic retries of errors for crdb that support retry
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
 	"github.com/stretchr/testify/require"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -71,6 +73,6 @@ func cleanDB() {
 	models.VersionedAttributes().DeleteAll(ctx, testDB)
 	models.ServerComponents().DeleteAll(ctx, testDB)
 	models.ServerComponentTypes().DeleteAll(ctx, testDB)
-	models.Servers().DeleteAll(ctx, testDB)
+	models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true)
 	testDB.Exec("SET sql_safe_updates = true;")
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
@@ -416,6 +417,20 @@ func TestIntegrationServerList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search for server without IncludeDeleted defined",
+			&hollow.ServerListParams{},
+			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID},
+			false,
+			"",
+		},
+		{
+			"search for server with IncludeDeleted defined",
+			&hollow.ServerListParams{IncludeDeleted: true},
+			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID, dbtools.FixtureChuckles.ID},
+			false,
+			"",
+		},
 	}
 
 	boil.DebugMode = true
@@ -497,6 +512,24 @@ func TestIntegrationServerGetPreload(t *testing.T) {
 	assert.Len(t, r.Components, 2)
 }
 
+func TestIntegrationServerGetDeleted(t *testing.T) {
+	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
+		r, _, err := s.Client.Server.Get(ctx, uuid.MustParse(dbtools.FixtureChuckles.ID))
+		if !expectError {
+			require.NoError(t, err)
+			assert.Equal(t, r.UUID, uuid.MustParse(dbtools.FixtureChuckles.ID), "Expected UUID %s, got %s", dbtools.FixtureChuckles.ID, r.UUID.String())
+			assert.Equal(t, r.Name, dbtools.FixtureChuckles.Name.String)
+			assert.NotEqual(t, r.DeletedAt, null.Time{}.Time)
+		}
+
+		return err
+	})
+}
+
 func TestIntegrationServerListPreload(t *testing.T) {
 	s := serverTest(t)
 	s.Client.SetToken(validToken([]string{"read", "write"}))
@@ -571,22 +604,48 @@ func TestIntegrationServerDelete(t *testing.T) {
 	})
 
 	var testCases = []struct {
-		testName string
-		uuid     uuid.UUID
-		errorMsg string
+		testName  string
+		uuid      uuid.UUID
+		errorMsg  string
+		expectErr bool
+		create    bool
 	}{
 		{
 			"fails on unknown uuid",
 			uuid.New(),
 			"resource not found",
+			true,
+			false,
+		},
+		{
+			"ensure soft deleted server is retrievable",
+			uuid.New(),
+			"",
+			false,
+			true,
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
+			if tt.create {
+				_, _, err := s.Client.Server.Create(context.TODO(), hollow.Server{UUID: tt.uuid})
+				assert.NoError(t, err)
+			}
+
 			_, err := s.Client.Server.Delete(context.TODO(), hollow.Server{UUID: tt.uuid})
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), tt.errorMsg)
+			if tt.expectErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+			} else {
+				assert.NoError(t, err)
+
+				server, _, err := s.Client.Server.Get(context.TODO(), tt.uuid)
+
+				assert.NoError(t, err)
+				assert.NotNil(t, server)
+				assert.NotEqual(t, server.DeletedAt, null.Time{}.Time)
+			}
 		})
 	}
 }
