@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -9,18 +9,18 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
-	hollow "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
-func TestIntegrationServerComponentTypeServiceCreate(t *testing.T) {
+func TestIntegrationCreateServerComponentType(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		hct := hollow.ServerComponentType{Name: "integration-test"}
+		hct := serverservice.ServerComponentType{Name: "integration-test"}
 
-		resp, err := s.Client.ServerComponentType.Create(ctx, hct)
+		resp, err := s.Client.CreateServerComponentType(ctx, hct)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Equal(t, "integration-test", resp.Slug)
@@ -33,13 +33,13 @@ func TestIntegrationServerComponentTypeServiceCreate(t *testing.T) {
 	})
 }
 
-func TestIntegrationServerComponentTypeServiceList(t *testing.T) {
+func TestIntegrationListServerComponentTypes(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		r, resp, err := s.Client.ServerComponentType.List(ctx, nil)
+		r, resp, err := s.Client.ListServerComponentTypes(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 1)

@@ -1,4 +1,4 @@
-package dcim
+package serverservice
 
 import (
 	"github.com/gin-gonic/gin"

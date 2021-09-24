@@ -1,4 +1,4 @@
-package dcim
+package serverservice
 
 import (
 	"go.hollow.sh/serverservice/internal/models"

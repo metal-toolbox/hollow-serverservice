@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.7.4
 	github.com/google/uuid v1.2.0
 	github.com/gosimple/slug v1.10.0
+	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
@@ -63,7 +64,6 @@ require (
 	github.com/jackc/pgx/v4 v4.10.1 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect

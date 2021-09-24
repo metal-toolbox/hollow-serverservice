@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -17,7 +17,7 @@ func TestServerComponentTypeServiceCreate(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"slug-1"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		resp, err := c.ServerComponentType.Create(ctx, hct)
+		resp, err := c.CreateServerComponentType(ctx, hct)
 		if !expectError {
 			assert.Equal(t, "slug-1", resp.Slug)
 		}
@@ -33,7 +33,7 @@ func TestServerComponentTypeServiceList(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.ServerComponentType.List(ctx, nil)
+		res, _, err := c.ListServerComponentTypes(ctx, nil)
 		if !expectError {
 			assert.ElementsMatch(t, hct, res)
 		}

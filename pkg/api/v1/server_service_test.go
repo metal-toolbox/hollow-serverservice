@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func TestServerServiceCreate(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.Create(ctx, srv)
+		res, _, err := c.Create(ctx, srv)
 		if !expectError {
 			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
 		}
@@ -31,7 +31,7 @@ func TestServerServiceDelete(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource deleted"}`))
 		c := mockClient(string(jsonResponse), respCode)
-		_, err := c.Server.Delete(ctx, hollow.Server{UUID: uuid.New()})
+		_, err := c.Delete(ctx, hollow.Server{UUID: uuid.New()})
 
 		return err
 	})
@@ -43,7 +43,7 @@ func TestServerServiceGet(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.Get(ctx, srv.UUID)
+		res, _, err := c.Get(ctx, srv.UUID)
 		if !expectError {
 			assert.Equal(t, srv.UUID, res.UUID)
 			assert.Equal(t, srv.FacilityCode, res.FacilityCode)
@@ -60,7 +60,7 @@ func TestServerServiceList(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.List(ctx, nil)
+		res, _, err := c.List(ctx, nil)
 		if !expectError {
 			assert.ElementsMatch(t, srv, res)
 		}
@@ -75,7 +75,7 @@ func TestServerServiceUpdate(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		_, err = c.Server.Update(ctx, uuid.UUID{}, hollow.Server{Name: "new-name"})
+		_, err = c.Update(ctx, uuid.UUID{}, hollow.Server{Name: "new-name"})
 
 		return err
 	})
@@ -87,7 +87,7 @@ func TestServerServiceCreateAttributes(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		_, err := c.Server.CreateAttributes(ctx, uuid.New(), attr)
+		_, err := c.CreateAttributes(ctx, uuid.New(), attr)
 
 		return err
 	})
@@ -99,7 +99,7 @@ func TestServerServiceGetAttributes(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.GetAttributes(ctx, uuid.UUID{}, "unit-test")
+		res, _, err := c.GetAttributes(ctx, uuid.UUID{}, "unit-test")
 		if !expectError {
 			assert.Equal(t, attr, res)
 		}
@@ -114,7 +114,7 @@ func TestServerServiceDeleteAttributes(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		_, err = c.Server.DeleteAttributes(ctx, uuid.UUID{}, "unit-test")
+		_, err = c.DeleteAttributes(ctx, uuid.UUID{}, "unit-test")
 
 		return err
 	})
@@ -127,7 +127,7 @@ func TestServerServiceListAttributes(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.ListAttributes(ctx, uuid.UUID{}, nil)
+		res, _, err := c.ListAttributes(ctx, uuid.UUID{}, nil)
 		if !expectError {
 			assert.ElementsMatch(t, attrs, res)
 		}
@@ -142,7 +142,7 @@ func TestServerServiceUpdateAttributes(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		_, err = c.Server.UpdateAttributes(ctx, uuid.UUID{}, "unit-test", json.RawMessage([]byte(`{"test":"unit"}`)))
+		_, err = c.UpdateAttributes(ctx, uuid.UUID{}, "unit-test", json.RawMessage([]byte(`{"test":"unit"}`)))
 
 		return err
 	})
@@ -155,7 +155,7 @@ func TestServerServiceListComponents(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.ListComponents(ctx, uuid.UUID{}, nil)
+		res, _, err := c.ListComponents(ctx, uuid.UUID{}, nil)
 		if !expectError {
 			assert.ElementsMatch(t, sc, res)
 		}
@@ -170,7 +170,7 @@ func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"the-namespace"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
-		resp, err := c.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
+		resp, err := c.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
 			assert.Equal(t, "the-namespace", resp.Slug)
 		}
@@ -186,7 +186,7 @@ func TestServerServiceGetVersionedAttributess(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.GetVersionedAttributes(ctx, uuid.New(), "namespace")
+		res, _, err := c.GetVersionedAttributes(ctx, uuid.New(), "namespace")
 		if !expectError {
 			assert.ElementsMatch(t, va, res)
 		}
@@ -202,7 +202,7 @@ func TestServerServiceListVersionedAttributess(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.Server.ListVersionedAttributes(ctx, uuid.New())
+		res, _, err := c.ListVersionedAttributes(ctx, uuid.New())
 		if !expectError {
 			assert.ElementsMatch(t, va, res)
 		}
