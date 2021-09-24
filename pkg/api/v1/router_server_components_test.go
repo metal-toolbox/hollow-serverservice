@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -17,7 +17,7 @@ func TestIntegrationServerListComponents(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs, _, err := s.Client.Server.ListComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
+		attrs, _, err := s.Client.ListComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, attrs, 2)
@@ -40,7 +40,7 @@ func TestIntegrationServerListComponents(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.Server.ListComponents(context.TODO(), tt.srvUUID, nil)
+			_, _, err := s.Client.ListComponents(context.TODO(), tt.srvUUID, nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})

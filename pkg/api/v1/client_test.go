@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	dcim "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
-func TestNewClient(t *testing.T) {
+func TestNewClientWithToken(t *testing.T) {
 	var testCases = []struct {
 		testName    string
 		authToken   string
@@ -43,7 +43,7 @@ func TestNewClient(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		c, err := dcim.NewClient(tt.authToken, tt.url, nil)
+		c, err := serverservice.NewClientWithToken(tt.authToken, tt.url, nil)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)
@@ -51,8 +51,6 @@ func TestNewClient(t *testing.T) {
 		} else {
 			assert.NoError(t, err, tt.testName)
 			assert.NotNil(t, c, tt.testName)
-			assert.NotNil(t, c.Server, tt.testName)
-			assert.NotNil(t, c.ServerComponentType, tt.testName)
 		}
 	}
 }

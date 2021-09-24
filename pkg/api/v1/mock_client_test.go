@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	hollow "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 // MockHTTPRequestDoer implements the standard http.Client interface.
@@ -35,7 +35,7 @@ func (md *MockHTTPRequestDoer) Do(req *http.Request) (*http.Response, error) {
 }
 
 // mockClient that can be used for testing
-func mockClient(body string, status int) *hollow.Client {
+func mockClient(body string, status int) *serverservice.Client {
 	mockDoer := &MockHTTPRequestDoer{
 		Response: &http.Response{
 			StatusCode: status,
@@ -44,7 +44,7 @@ func mockClient(body string, status int) *hollow.Client {
 		Error: nil,
 	}
 
-	c, err := hollow.NewClient("mocked", "mocked", mockDoer)
+	c, err := serverservice.NewClientWithToken("mocked", "mocked", mockDoer)
 	if err != nil {
 		return nil
 	}

@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"net/http"
@@ -47,7 +47,7 @@ func serverTest(t *testing.T) *integrationServer {
 		h: s.Handler,
 	}
 
-	c, err := hollow.NewClient("testToken", "http://test.hollow.com", ts)
+	c, err := hollow.NewClientWithToken("testToken", "http://test.hollow.com", ts)
 	require.NoError(t, err)
 
 	ts.Client = c

@@ -1,2 +1,2 @@
-// Package dcim provides the v1 api for hollow.
-package dcim
+// Package serverservice provides the v1 api for the server service
+package serverservice

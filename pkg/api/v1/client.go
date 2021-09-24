@@ -1,4 +1,4 @@
-package dcim
+package serverservice
 
 import (
 	"context"
@@ -9,13 +9,11 @@ import (
 
 var apiVersion = "v1"
 
-// Client has the ability to talk to a hollow dcim server running at the given URI
+// Client has the ability to talk to a hollow server service api server running at the given URI
 type Client struct {
-	url                 string
-	authToken           string
-	httpClient          Doer
-	Server              ServerService
-	ServerComponentType ServerComponentTypeService
+	url        string
+	authToken  string
+	httpClient Doer
 }
 
 // Doer is an interface for an HTTP client that can make requests
@@ -23,12 +21,39 @@ type Doer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-// NewClient will initialize a new hollow client with the given auth token and URL
-func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
+// NewClientWithToken will initialize a new hollow client with the given auth token and URL
+func NewClientWithToken(authToken, url string, doerClient Doer) (*Client, error) {
 	if authToken == "" {
 		return nil, newClientError("failed to initialize: no auth token provided")
 	}
 
+	c, err := NewClient(url, doerClient)
+	if err != nil {
+		return nil, err
+	}
+
+	c.authToken = authToken
+
+	return c, nil
+}
+
+// NewClient will return a server service client configured to talk to the given URL.
+// This client will not set the authorization header for you automatically and is left to be handled by the Doer that is provided.
+//
+// Example:
+// 	ctx := context.TODO()
+// 	provider, _ := oidc.NewProvider(ctx, "https://OIDC_ISSUER.COM")
+//
+// 	oauthConfig := clientcredentials.Config{
+// 		ClientID:       "CLIENT_ID",
+// 		ClientSecret:   "CLIENT_SECRET",
+// 		TokenURL:       provider.Endpoint().TokenURL,
+// 		Scopes:         []string{"SCOPE", "SCOPE2"},
+// 		EndpointParams: url.Values{"audience": []string{"HOLLOW_AUDIENCE_VALUE"}},
+// 	}
+//
+// 	c, _ := serverservice.NewClient("HOLLOW_URI", oauthConfig.Client(ctx))
+func NewClient(url string, doerClient Doer) (*Client, error) {
 	if url == "" {
 		return nil, newClientError("failed to initialize: no hollow api url provided")
 	}
@@ -36,8 +61,7 @@ func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
 	url = strings.TrimSuffix(url, "/")
 
 	c := &Client{
-		url:       url,
-		authToken: authToken,
+		url: url,
 	}
 
 	c.httpClient = doerClient
@@ -45,9 +69,6 @@ func NewClient(authToken, url string, doerClient Doer) (*Client, error) {
 		// Use the default client as a fallback if one isn't passed
 		c.httpClient = http.DefaultClient
 	}
-
-	c.Server = &ServerServiceClient{client: c}
-	c.ServerComponentType = &ServerComponentTypeServiceClient{client: c}
 
 	return c, nil
 }

@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
-	hollow "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 func TestIntegrationServerCreateAttributes(t *testing.T) {
@@ -20,12 +20,12 @@ func TestIntegrationServerCreateAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs := hollow.Attributes{
+		attrs := serverservice.Attributes{
 			Namespace: "integration.tests",
 			Data:      json.RawMessage([]byte(`{"setting":"enabled"}`)),
 		}
 
-		resp, err := s.Client.Server.CreateAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), attrs)
+		resp, err := s.Client.CreateAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), attrs)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -43,7 +43,7 @@ func TestIntegrationServerListAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs, resp, err := s.Client.Server.ListAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
+		attrs, resp, err := s.Client.ListAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -68,7 +68,7 @@ func TestIntegrationServerListAttributes(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.Server.ListAttributes(context.TODO(), tt.srvUUID, nil)
+			_, _, err := s.Client.ListAttributes(context.TODO(), tt.srvUUID, nil)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
@@ -81,7 +81,7 @@ func TestIntegrationServerGetAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attr, resp, err := s.Client.Server.GetAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), dbtools.FixtureNamespaceMetadata)
+		attr, resp, err := s.Client.GetAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), dbtools.FixtureNamespaceMetadata)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -99,12 +99,12 @@ func TestIntegrationServerDeleteAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.Server.DeleteAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), dbtools.FixtureNamespaceMetadata)
+		_, err := s.Client.DeleteAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), dbtools.FixtureNamespaceMetadata)
 		if !expectError {
 			require.NoError(t, err)
 
 			// ensure the attributes are gone
-			_, _, err2 := s.Client.Server.GetAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), dbtools.FixtureNamespaceMetadata)
+			_, _, err2 := s.Client.GetAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), dbtools.FixtureNamespaceMetadata)
 			require.Error(t, err2)
 			assert.Contains(t, err2.Error(), "response code: 404, message: resource not found")
 		}
@@ -119,7 +119,7 @@ func TestIntegrationServerUpdateAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.Server.UpdateAttributes(ctx, uuid.MustParse(dbtools.FixtureDory.ID), dbtools.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"setting":"enabled"}`)))
+		_, err := s.Client.UpdateAttributes(ctx, uuid.MustParse(dbtools.FixtureDory.ID), dbtools.FixtureNamespaceMetadata, json.RawMessage([]byte(`{"setting":"enabled"}`)))
 		if !expectError {
 			// assert.Nil(t, resp.Links.Self)
 			require.NoError(t, err)

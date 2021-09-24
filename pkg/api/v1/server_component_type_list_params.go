@@ -1,4 +1,4 @@
-package dcim
+package serverservice
 
 import "net/url"
 

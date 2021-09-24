@@ -1,4 +1,4 @@
-package dcim
+package serverservice
 
 import (
 	"bytes"
@@ -71,7 +71,7 @@ func newDeleteRequest(ctx context.Context, uri, path string) (*http.Request, err
 }
 
 func userAgentString() string {
-	return fmt.Sprintf("hollow/%s (%s)", version.Version(), version.String())
+	return fmt.Sprintf("go-hollow-client (%s)", version.String())
 }
 
 func (c *Client) do(req *http.Request, result interface{}) error {

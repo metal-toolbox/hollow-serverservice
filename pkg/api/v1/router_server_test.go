@@ -1,4 +1,4 @@
-package dcim_test
+package serverservice_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
-	hollow "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 func TestIntegrationServerList(t *testing.T) {
@@ -22,7 +22,7 @@ func TestIntegrationServerList(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		r, resp, err := s.Client.Server.List(ctx, nil)
+		r, resp, err := s.Client.List(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 3)
@@ -41,15 +41,15 @@ func TestIntegrationServerList(t *testing.T) {
 	// These are the same test cases used in db/server_test.go
 	var testCases = []struct {
 		testName      string
-		params        *hollow.ServerListParams
+		params        *serverservice.ServerListParams
 		expectedUUIDs []string
 		expectError   bool
 		errorMsg      string
 	}{
 		{
 			"search by age less than 7",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:     dbtools.FixtureNamespaceMetadata,
 						Keys:          []string{"age"},
@@ -63,8 +63,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by age greater than 11 and facility code",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:        dbtools.FixtureNamespaceMetadata,
 						Keys:             []string{"age"},
@@ -79,7 +79,7 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by facility",
-			&hollow.ServerListParams{
+			&serverservice.ServerListParams{
 				FacilityCode: "Ocean",
 			},
 			[]string{dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID},
@@ -88,8 +88,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by type and location from different attributes",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
@@ -108,8 +108,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by nested tag",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceOtherdata,
 						Keys:       []string{"nested", "tag"},
@@ -123,8 +123,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by nested number greater than 1",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:        dbtools.FixtureNamespaceOtherdata,
 						Keys:             []string{"nested", "number"},
@@ -145,7 +145,7 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"facility filter that doesn't match",
-			&hollow.ServerListParams{
+			&serverservice.ServerListParams{
 				FacilityCode: "Neverland",
 			},
 			[]string{},
@@ -154,15 +154,15 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by type from attributes and name from versioned attributes",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "clown",
 					},
 				},
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
@@ -176,15 +176,15 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by type from attributes and name from versioned attributes, using the not current value, so nothing should return",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
 						EqualValue: "clown",
 					},
 				},
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
@@ -198,8 +198,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by multiple components of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Model:  "A Lucky Fin",
 						Serial: "Right",
@@ -216,8 +216,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"ensure both components have to match when searching by multiple components of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Name:   "My Lucky Fin",
 						Vendor: "Barracuda",
@@ -236,14 +236,14 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by a single component and versioned attributes of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Model:  "A Lucky Fin",
 						Serial: "Right",
 					},
 				},
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
@@ -257,14 +257,14 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by a single component and versioned attributes of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Model:  "A Lucky Fin",
 						Serial: "Right",
 					},
 				},
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
@@ -278,11 +278,11 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by a single component and it's versioned attributes of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Model: "Normal Fin",
-						VersionedAttributeListParams: []hollow.AttributeListParams{
+						VersionedAttributeListParams: []serverservice.AttributeListParams{
 							{
 								Namespace:  dbtools.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
@@ -298,11 +298,11 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by a component and server attributes of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Model: "Normal Fin",
-						VersionedAttributeListParams: []hollow.AttributeListParams{
+						VersionedAttributeListParams: []serverservice.AttributeListParams{
 							{
 								Namespace:  dbtools.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
@@ -311,7 +311,7 @@ func TestIntegrationServerList(t *testing.T) {
 						},
 					},
 				},
-				AttributeListParams: []hollow.AttributeListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceOtherdata,
 						Keys:       []string{"type"},
@@ -325,11 +325,11 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by a component and server versioned attributes of the server",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						Model: "A Lucky Fin",
-						VersionedAttributeListParams: []hollow.AttributeListParams{
+						VersionedAttributeListParams: []serverservice.AttributeListParams{
 							{
 								Namespace:  dbtools.FixtureNamespaceVersioned,
 								Keys:       []string{"something"},
@@ -338,7 +338,7 @@ func TestIntegrationServerList(t *testing.T) {
 						},
 					},
 				},
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace:  dbtools.FixtureNamespaceVersioned,
 						Keys:       []string{"name"},
@@ -352,8 +352,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search by a component slug",
-			&hollow.ServerListParams{
-				ComponentListParams: []hollow.ServerComponentListParams{
+			&serverservice.ServerListParams{
+				ComponentListParams: []serverservice.ServerComponentListParams{
 					{
 						ServerComponentType: dbtools.FixtureFinType.Slug,
 					},
@@ -365,8 +365,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search for devices with a versioned attributes in a namespace with key that exists",
-			&hollow.ServerListParams{
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace: dbtools.FixtureNamespaceVersioned,
 						Keys:      []string{"name"},
@@ -379,8 +379,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search for devices with a versioned attributes in a namespace with key that doesn't exists",
-			&hollow.ServerListParams{
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace: dbtools.FixtureNamespaceVersioned,
 						Keys:      []string{"doesntExist"},
@@ -393,8 +393,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search for devices that have versioned attributes in a namespace - no filters",
-			&hollow.ServerListParams{
-				VersionedAttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace: dbtools.FixtureNamespaceVersioned,
 					},
@@ -406,8 +406,8 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search for devices that have attributes in a namespace - no filters",
-			&hollow.ServerListParams{
-				AttributeListParams: []hollow.AttributeListParams{
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
 					{
 						Namespace: dbtools.FixtureNamespaceMetadata,
 					},
@@ -419,14 +419,14 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 		{
 			"search for server without IncludeDeleted defined",
-			&hollow.ServerListParams{},
+			&serverservice.ServerListParams{},
 			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID},
 			false,
 			"",
 		},
 		{
 			"search for server with IncludeDeleted defined",
-			&hollow.ServerListParams{IncludeDeleted: true},
+			&serverservice.ServerListParams{IncludeDeleted: true},
 			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID, dbtools.FixtureChuckles.ID},
 			false,
 			"",
@@ -437,7 +437,7 @@ func TestIntegrationServerList(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			r, _, err := s.Client.Server.List(context.TODO(), tt.params)
+			r, _, err := s.Client.List(context.TODO(), tt.params)
 			if tt.expectError {
 				assert.NoError(t, err)
 				return
@@ -460,8 +460,8 @@ func TestIntegrationServerListPagination(t *testing.T) {
 	s := serverTest(t)
 	s.Client.SetToken(validToken([]string{"read", "write"}))
 
-	p := &hollow.ServerListParams{PaginationParams: &hollow.PaginationParams{Limit: 2, Page: 1}}
-	r, resp, err := s.Client.Server.List(context.TODO(), p)
+	p := &serverservice.ServerListParams{PaginationParams: &serverservice.PaginationParams{Limit: 2, Page: 1}}
+	r, resp, err := s.Client.List(context.TODO(), p)
 
 	assert.NoError(t, err)
 	assert.Len(t, r, 2)
@@ -503,7 +503,7 @@ func TestIntegrationServerGetPreload(t *testing.T) {
 	s := serverTest(t)
 	s.Client.SetToken(validToken([]string{"read", "write"}))
 
-	r, _, err := s.Client.Server.Get(context.TODO(), uuid.MustParse(dbtools.FixtureNemo.ID))
+	r, _, err := s.Client.Get(context.TODO(), uuid.MustParse(dbtools.FixtureNemo.ID))
 
 	assert.NoError(t, err)
 	assert.Len(t, r.Attributes, 2)
@@ -518,7 +518,7 @@ func TestIntegrationServerGetDeleted(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		r, _, err := s.Client.Server.Get(ctx, uuid.MustParse(dbtools.FixtureChuckles.ID))
+		r, _, err := s.Client.Get(ctx, uuid.MustParse(dbtools.FixtureChuckles.ID))
 		if !expectError {
 			require.NoError(t, err)
 			assert.Equal(t, r.UUID, uuid.MustParse(dbtools.FixtureChuckles.ID), "Expected UUID %s, got %s", dbtools.FixtureChuckles.ID, r.UUID.String())
@@ -535,7 +535,7 @@ func TestIntegrationServerListPreload(t *testing.T) {
 	s.Client.SetToken(validToken([]string{"read", "write"}))
 
 	// should only return nemo
-	r, _, err := s.Client.Server.List(context.TODO(), &hollow.ServerListParams{FacilityCode: "Sydney"})
+	r, _, err := s.Client.List(context.TODO(), &serverservice.ServerListParams{FacilityCode: "Sydney"})
 
 	assert.NoError(t, err)
 	assert.Len(t, r, 1)
@@ -551,13 +551,13 @@ func TestIntegrationServerCreate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		testServer := hollow.Server{
+		testServer := serverservice.Server{
 			UUID:         uuid.New(),
 			Name:         "test-server",
 			FacilityCode: "int",
 		}
 
-		id, resp, err := s.Client.Server.Create(ctx, testServer)
+		id, resp, err := s.Client.Create(ctx, testServer)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, id)
@@ -571,12 +571,12 @@ func TestIntegrationServerCreate(t *testing.T) {
 
 	var testCases = []struct {
 		testName string
-		srv      *hollow.Server
+		srv      *serverservice.Server
 		errorMsg string
 	}{
 		{
 			"fails on a duplicate uuid",
-			&hollow.Server{
+			&serverservice.Server{
 				UUID:         uuid.MustParse(dbtools.FixtureNemo.ID),
 				FacilityCode: "int-test",
 			},
@@ -586,7 +586,7 @@ func TestIntegrationServerCreate(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.Server.Create(context.TODO(), *tt.srv)
+			_, _, err := s.Client.Create(context.TODO(), *tt.srv)
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), tt.errorMsg)
 		})
@@ -598,7 +598,7 @@ func TestIntegrationServerDelete(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		_, err := s.Client.Server.Delete(ctx, hollow.Server{UUID: uuid.MustParse(dbtools.FixtureNemo.ID)})
+		_, err := s.Client.Delete(ctx, serverservice.Server{UUID: uuid.MustParse(dbtools.FixtureNemo.ID)})
 
 		return err
 	})
@@ -629,18 +629,18 @@ func TestIntegrationServerDelete(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			if tt.create {
-				_, _, err := s.Client.Server.Create(context.TODO(), hollow.Server{UUID: tt.uuid})
+				_, _, err := s.Client.Create(context.TODO(), serverservice.Server{UUID: tt.uuid})
 				assert.NoError(t, err)
 			}
 
-			_, err := s.Client.Server.Delete(context.TODO(), hollow.Server{UUID: tt.uuid})
+			_, err := s.Client.Delete(context.TODO(), serverservice.Server{UUID: tt.uuid})
 			if tt.expectErr {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 			} else {
 				assert.NoError(t, err)
 
-				server, _, err := s.Client.Server.Get(context.TODO(), tt.uuid)
+				server, _, err := s.Client.Get(context.TODO(), tt.uuid)
 
 				assert.NoError(t, err)
 				assert.NotNil(t, server)
@@ -656,7 +656,7 @@ func TestIntegrationServerUpdate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		resp, err := s.Client.Server.Update(ctx, uuid.MustParse(dbtools.FixtureDory.ID), hollow.Server{Name: "The New Dory"})
+		resp, err := s.Client.Update(ctx, uuid.MustParse(dbtools.FixtureDory.ID), serverservice.Server{Name: "The New Dory"})
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -673,9 +673,9 @@ func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
+		va := serverservice.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
 
-		resp, err := s.Client.Server.CreateVersionedAttributes(ctx, uuid.New(), va)
+		resp, err := s.Client.CreateVersionedAttributes(ctx, uuid.New(), va)
 		if !expectError {
 			assert.Equal(t, va.Namespace, resp.Slug)
 		}
@@ -691,33 +691,33 @@ func TestIntegrationServerServiceCreateVersionedAttributesIncrementCounter(t *te
 	u := uuid.New()
 	ctx := context.TODO()
 
-	va := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
-	newVA := hollow.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration", "something":"else"}`))}
+	va := serverservice.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration"}`))}
+	newVA := serverservice.VersionedAttributes{Namespace: "hollow.integegration.test", Data: json.RawMessage([]byte(`{"test":"integration", "something":"else"}`))}
 
-	_, err := s.Client.Server.CreateVersionedAttributes(ctx, u, va)
+	_, err := s.Client.CreateVersionedAttributes(ctx, u, va)
 	require.NoError(t, err)
 
 	// Ensure we only have one versioned attribute now
-	r, _, err := s.Client.Server.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
+	r, _, err := s.Client.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
 	require.NoError(t, err)
 	assert.Len(t, r, 1)
 
 	// Create with the same data again. This should just increase the counter, not create a new one.
-	_, err = s.Client.Server.CreateVersionedAttributes(ctx, u, va)
+	_, err = s.Client.CreateVersionedAttributes(ctx, u, va)
 	require.NoError(t, err)
 
 	// Ensure we still have only one versioned attribute and that the counter increased
-	r, _, err = s.Client.Server.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
+	r, _, err = s.Client.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
 	require.NoError(t, err)
 	assert.Len(t, r, 1)
 	assert.Equal(t, 1, r[0].Tally)
 
 	// Create with different data and ensure a new one is created
-	_, err = s.Client.Server.CreateVersionedAttributes(ctx, u, newVA)
+	_, err = s.Client.CreateVersionedAttributes(ctx, u, newVA)
 	require.NoError(t, err)
 
 	// Ensure we still have only one versioned attribute and that the counter increased
-	r, _, err = s.Client.Server.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
+	r, _, err = s.Client.GetVersionedAttributes(ctx, u, "hollow.integegration.test")
 	require.NoError(t, err)
 	assert.Len(t, r, 2)
 	assert.Equal(t, 0, r[0].Tally)
@@ -730,7 +730,7 @@ func TestIntegrationServerServiceListVersionedAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		res, _, err := s.Client.Server.ListVersionedAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID))
+		res, _, err := s.Client.ListVersionedAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID))
 		if !expectError {
 			require.Len(t, res, 2)
 			assert.Equal(t, dbtools.FixtureNamespaceVersioned, res[0].Namespace)
