@@ -127,19 +127,8 @@ func parseQueryServerComponentsListParams(c *gin.Context) ([]ServerComponentList
 			ServerComponentType: queryMap["type"],
 		}
 
-		alp, err := parseQueryAttributesListParams(c, keyPrefix+"_attr")
-		if err != nil {
-			return nil, err
-		}
-
-		p.AttributeListParams = alp
-
-		valp, err := parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
-		if err != nil {
-			return nil, err
-		}
-
-		p.VersionedAttributeListParams = valp
+		p.AttributeListParams = parseQueryAttributesListParams(c, keyPrefix+"_attr")
+		p.VersionedAttributeListParams = parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
 
 		if p.empty() {
 			// if no attributes are set then one wasn't passed in. Break out of the loop
