@@ -9,6 +9,7 @@ on:
       - go.sum
       - '**.go'
       - '**.yaml'
+      - '**.sql'
     branches:
       - main
   pull_request:
@@ -17,6 +18,7 @@ on:
       - go.sum
       - '**.go'
       - '**.yaml'
+      - '**.sql'
 
 jobs:
   golangci:
