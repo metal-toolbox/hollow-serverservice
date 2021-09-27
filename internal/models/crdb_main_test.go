@@ -19,7 +19,9 @@ import (
 	"github.com/volatiletech/randomize"
 )
 
-var rgxCDBFkey = regexp.MustCompile(`(?m)((\n)?.*CONSTRAINT.*?FOREIGN KEY.*?\n|(\n)?[a-zA-Z _]*VALIDATE CONSTRAINT.*?.*?\n)`)
+// This manual edit is important, try not to merge in overrides when running `go generate`:
+// https://github.com/glerchundi/sqlboiler-crdb/pull/40
+var rgxCDBFkey = regexp.MustCompile(`(?m)((\n)?.*CONSTRAINT.*?FOREIGN KEY.*?\n|(\n)?[a-zA-Z _\.]*VALIDATE CONSTRAINT.*?.*?\n)`)
 
 type crdbTester struct {
 	dbConn *sql.DB
