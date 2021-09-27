@@ -51,9 +51,10 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:     dbtools.FixtureNamespaceMetadata,
-						Keys:          []string{"age"},
-						LessThanValue: 7,
+						Namespace: dbtools.FixtureNamespaceMetadata,
+						Keys:      []string{"age"},
+						Operator:  serverservice.OperatorLessThan,
+						Value:     "7",
 					},
 				},
 			},
@@ -66,9 +67,10 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:        dbtools.FixtureNamespaceMetadata,
-						Keys:             []string{"age"},
-						GreaterThanValue: 11,
+						Namespace: dbtools.FixtureNamespaceMetadata,
+						Keys:      []string{"age"},
+						Operator:  serverservice.OperatorGreaterThan,
+						Value:     "11",
 					},
 				},
 				FacilityCode: "Ocean",
@@ -91,14 +93,16 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceOtherdata,
-						Keys:       []string{"type"},
-						EqualValue: "blue-tang",
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"type"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "blue-tang",
 					},
 					{
-						Namespace:  dbtools.FixtureNamespaceMetadata,
-						Keys:       []string{"location"},
-						EqualValue: "East Australian Current",
+						Namespace: dbtools.FixtureNamespaceMetadata,
+						Keys:      []string{"location"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "East Australian Current",
 					},
 				},
 			},
@@ -111,9 +115,10 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceOtherdata,
-						Keys:       []string{"nested", "tag"},
-						EqualValue: "finding-nemo",
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"nested", "tag"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "finding-nemo",
 					},
 				},
 			},
@@ -126,9 +131,10 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:        dbtools.FixtureNamespaceOtherdata,
-						Keys:             []string{"nested", "number"},
-						GreaterThanValue: 1,
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"nested", "number"},
+						Operator:  serverservice.OperatorGreaterThan,
+						Value:     "1",
 					},
 				},
 			},
@@ -157,16 +163,18 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceOtherdata,
-						Keys:       []string{"type"},
-						EqualValue: "clown",
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"type"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "clown",
 					},
 				},
 				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceVersioned,
-						Keys:       []string{"name"},
-						EqualValue: "new",
+						Namespace: dbtools.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "new",
 					},
 				},
 			},
@@ -179,16 +187,18 @@ func TestIntegrationServerList(t *testing.T) {
 			&serverservice.ServerListParams{
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceOtherdata,
-						Keys:       []string{"type"},
-						EqualValue: "clown",
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"type"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "clown",
 					},
 				},
 				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceVersioned,
-						Keys:       []string{"name"},
-						EqualValue: "old",
+						Namespace: dbtools.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "old",
 					},
 				},
 			},
@@ -245,9 +255,10 @@ func TestIntegrationServerList(t *testing.T) {
 				},
 				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceVersioned,
-						Keys:       []string{"name"},
-						EqualValue: "new",
+						Namespace: dbtools.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "new",
 					},
 				},
 			},
@@ -266,9 +277,10 @@ func TestIntegrationServerList(t *testing.T) {
 				},
 				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceVersioned,
-						Keys:       []string{"name"},
-						EqualValue: "new",
+						Namespace: dbtools.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "new",
 					},
 				},
 			},
@@ -284,9 +296,10 @@ func TestIntegrationServerList(t *testing.T) {
 						Model: "Normal Fin",
 						VersionedAttributeListParams: []serverservice.AttributeListParams{
 							{
-								Namespace:  dbtools.FixtureNamespaceVersioned,
-								Keys:       []string{"something"},
-								EqualValue: "cool",
+								Namespace: dbtools.FixtureNamespaceVersioned,
+								Keys:      []string{"something"},
+								Operator:  serverservice.OperatorEqual,
+								Value:     "cool",
 							},
 						},
 					},
@@ -304,18 +317,20 @@ func TestIntegrationServerList(t *testing.T) {
 						Model: "Normal Fin",
 						VersionedAttributeListParams: []serverservice.AttributeListParams{
 							{
-								Namespace:  dbtools.FixtureNamespaceVersioned,
-								Keys:       []string{"something"},
-								EqualValue: "cool",
+								Namespace: dbtools.FixtureNamespaceVersioned,
+								Keys:      []string{"something"},
+								Operator:  serverservice.OperatorEqual,
+								Value:     "cool",
 							},
 						},
 					},
 				},
 				AttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceOtherdata,
-						Keys:       []string{"type"},
-						EqualValue: "clown",
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"type"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "clown",
 					},
 				},
 			},
@@ -331,18 +346,20 @@ func TestIntegrationServerList(t *testing.T) {
 						Model: "A Lucky Fin",
 						VersionedAttributeListParams: []serverservice.AttributeListParams{
 							{
-								Namespace:  dbtools.FixtureNamespaceVersioned,
-								Keys:       []string{"something"},
-								EqualValue: "cool",
+								Namespace: dbtools.FixtureNamespaceVersioned,
+								Keys:      []string{"something"},
+								Operator:  serverservice.OperatorEqual,
+								Value:     "cool",
 							},
 						},
 					},
 				},
 				VersionedAttributeListParams: []serverservice.AttributeListParams{
 					{
-						Namespace:  dbtools.FixtureNamespaceVersioned,
-						Keys:       []string{"name"},
-						EqualValue: "old",
+						Namespace: dbtools.FixtureNamespaceVersioned,
+						Keys:      []string{"name"},
+						Operator:  serverservice.OperatorEqual,
+						Value:     "old",
 					},
 				},
 			},
@@ -428,6 +445,38 @@ func TestIntegrationServerList(t *testing.T) {
 			"search for server with IncludeDeleted defined",
 			&serverservice.ServerListParams{IncludeDeleted: true},
 			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureDory.ID, dbtools.FixtureMarlin.ID, dbtools.FixtureChuckles.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices by attributes that have a type like %lo%",
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
+					{
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"type"},
+						Operator:  serverservice.OperatorLike,
+						Value:     "%lo%",
+					},
+				},
+			},
+			[]string{dbtools.FixtureNemo.ID, dbtools.FixtureMarlin.ID},
+			false,
+			"",
+		},
+		{
+			"search for devices by attributes that have a type like %lo",
+			&serverservice.ServerListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
+					{
+						Namespace: dbtools.FixtureNamespaceOtherdata,
+						Keys:      []string{"type"},
+						Operator:  serverservice.OperatorLike,
+						Value:     "%lo",
+					},
+				},
+			},
+			[]string{},
 			false,
 			"",
 		},

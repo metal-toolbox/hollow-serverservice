@@ -22,21 +22,8 @@ func (r *Router) serverList(c *gin.Context) {
 		return
 	}
 
-	alp, err := parseQueryAttributesListParams(c, "attr")
-	if err != nil {
-		badRequestResponse(c, "invalid attributes list params", err)
-		return
-	}
-
-	params.AttributeListParams = alp
-
-	valp, err := parseQueryAttributesListParams(c, "ver_attr")
-	if err != nil {
-		badRequestResponse(c, "invalid versioned attributes list params", err)
-		return
-	}
-
-	params.VersionedAttributeListParams = valp
+	params.AttributeListParams = parseQueryAttributesListParams(c, "attr")
+	params.VersionedAttributeListParams = parseQueryAttributesListParams(c, "ver_attr")
 
 	sclp, err := parseQueryServerComponentsListParams(c)
 	if err != nil {
