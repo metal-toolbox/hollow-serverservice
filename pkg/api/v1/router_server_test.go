@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -559,6 +560,7 @@ func TestIntegrationServerGetPreload(t *testing.T) {
 	assert.Len(t, r.VersionedAttributes, 1)
 	assert.JSONEq(t, string(r.VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
 	assert.Len(t, r.Components, 2)
+	assert.Nil(t, r.DeletedAt, "DeletedAt should be nil for non deleted server")
 }
 
 func TestIntegrationServerGetDeleted(t *testing.T) {
@@ -572,7 +574,8 @@ func TestIntegrationServerGetDeleted(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, r.UUID, uuid.MustParse(dbtools.FixtureChuckles.ID), "Expected UUID %s, got %s", dbtools.FixtureChuckles.ID, r.UUID.String())
 			assert.Equal(t, r.Name, dbtools.FixtureChuckles.Name.String)
-			assert.NotEqual(t, r.DeletedAt, null.Time{}.Time)
+			assert.NotNil(t, r.DeletedAt, "A deleted server should not have a nil interface")
+			assert.Equal(t, dbtools.FixtureChuckles.DeletedAt.Time.Format(time.RFC3339), r.DeletedAt.(string))
 		}
 
 		return err
