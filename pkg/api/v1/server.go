@@ -56,10 +56,7 @@ func (s *Server) fromDBModel(dbS *models.Server) error {
 	s.CreatedAt = dbS.CreatedAt.Time
 	s.UpdatedAt = dbS.UpdatedAt.Time
 
-	nullTime := null.Time{}.Time
-	if dbS.DeletedAt.Time == nullTime {
-		s.DeletedAt = nil
-	} else {
+	if !dbS.DeletedAt.IsZero() {
 		s.DeletedAt = &dbS.DeletedAt.Time
 	}
 
