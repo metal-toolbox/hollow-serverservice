@@ -20,7 +20,8 @@ type Server struct {
 	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
 	CreatedAt           time.Time             `json:"created_at"`
 	UpdatedAt           time.Time             `json:"updated_at"`
-	DeletedAt           time.Time             `json:"deleted_at,omitempty"`
+	// DeletedAt is a pointer to a Time in order to be able to support checks for nil time
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
 func (r *Router) getServers(c *gin.Context, params ServerListParams) (models.ServerSlice, int64, error) {
@@ -54,7 +55,10 @@ func (s *Server) fromDBModel(dbS *models.Server) error {
 	s.FacilityCode = dbS.FacilityCode.String
 	s.CreatedAt = dbS.CreatedAt.Time
 	s.UpdatedAt = dbS.UpdatedAt.Time
-	s.DeletedAt = dbS.DeletedAt.Time
+
+	if !dbS.DeletedAt.IsZero() {
+		s.DeletedAt = &dbS.DeletedAt.Time
+	}
 
 	if dbS.R != nil {
 		if dbS.R.Attributes != nil {
