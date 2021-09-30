@@ -559,7 +559,7 @@ func TestIntegrationServerGetPreload(t *testing.T) {
 	assert.Len(t, r.VersionedAttributes, 1)
 	assert.JSONEq(t, string(r.VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
 	assert.Len(t, r.Components, 2)
-	assert.True(t, reflect.ValueOf(r.DeletedAt).IsNil(), "DeletedAt should be nil for non deleted server")
+	assert.Nil(t, r.DeletedAt, "DeletedAt should be nil for non deleted server")
 }
 
 func TestIntegrationServerGetDeleted(t *testing.T) {
