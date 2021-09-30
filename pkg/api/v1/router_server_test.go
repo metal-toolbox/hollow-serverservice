@@ -573,7 +573,7 @@ func TestIntegrationServerGetDeleted(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, r.UUID, uuid.MustParse(dbtools.FixtureChuckles.ID), "Expected UUID %s, got %s", dbtools.FixtureChuckles.ID, r.UUID.String())
 			assert.Equal(t, r.Name, dbtools.FixtureChuckles.Name.String)
-			assert.False(t, reflect.ValueOf(r.DeletedAt).IsNil())
+			assert.NotNil(t, r.DeletedAt)
 		}
 
 		return err
