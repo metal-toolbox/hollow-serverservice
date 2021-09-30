@@ -96,9 +96,5 @@ func (s *Server) toDBModel() (*models.Server, error) {
 		dbS.ID = s.UUID.String()
 	}
 
-	if s.DeletedAt == nil {
-		dbS.DeletedAt = null.Time{}
-	}
-
 	return dbS, nil
 }
