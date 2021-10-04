@@ -1,13 +1,19 @@
 package cmd
 
 import (
-	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx" // crdb retries and postgres interface
+	"time"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.hollow.sh/toolbox/ginjwt"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
 	"go.hollow.sh/serverservice/internal/httpsrv"
+)
+
+const (
+	defaultDBMaxOpenConns int = 25
+	defaultDBMaxIdleConns int = 25
 )
 
 // serveCmd represents the serve command
@@ -45,6 +51,13 @@ func init() {
 	viperBindFlag("oidc.claims.roles", serveCmd.Flags().Lookup("oidc-roles-claim"))
 	serveCmd.Flags().String("oidc-username-claim", "", "additional fields to output in logs from the JWT token, ex (email)")
 	viperBindFlag("oidc.claims.username", serveCmd.Flags().Lookup("oidc-username-claim"))
+	// DB Flags
+	serveCmd.Flags().Int("db-conns-max-open", defaultDBMaxOpenConns, "max number of open database connections")
+	viperBindFlag("db.connections.max_open", serveCmd.Flags().Lookup("db-conns-max-open"))
+	serveCmd.Flags().Int("db-conns-max-idle", defaultDBMaxIdleConns, "max number of idle database connections")
+	viperBindFlag("db.connections.max_idle", serveCmd.Flags().Lookup("db-conns-max-idle"))
+	serveCmd.Flags().Duration("db-conns-max-lifetime", 5*60*time.Second, "max database connections lifetime in seconds")
+	viperBindFlag("db.connections.max_lifetime", serveCmd.Flags().Lookup("db-conns-max-lifetime"))
 }
 
 func serve() {

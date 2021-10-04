@@ -2,11 +2,11 @@ package httpsrv_test
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
@@ -59,7 +59,7 @@ func TestLivenessRoute(t *testing.T) {
 }
 
 func TestReadinessRouteDown(t *testing.T) {
-	db, _ := sql.Open("postgres", "localhost:12341")
+	db, _ := sqlx.Open("postgres", "localhost:12341")
 
 	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
 	s := hs.NewServer()

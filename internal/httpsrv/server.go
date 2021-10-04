@@ -1,7 +1,6 @@
 package httpsrv
 
 import (
-	"database/sql"
 	"net/http"
 	"os"
 	"time"
@@ -9,6 +8,7 @@ import (
 	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -23,7 +23,7 @@ type Server struct {
 	Logger     *zap.Logger
 	Listen     string
 	Debug      bool
-	DB         *sql.DB
+	DB         *sqlx.DB
 	AuthConfig ginjwt.AuthConfig
 }
 

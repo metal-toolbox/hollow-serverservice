@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.hollow.sh/toolbox/ginjwt"
 
@@ -16,7 +17,7 @@ import (
 // Router provides a router for the v1 API
 type Router struct {
 	AuthMW *ginjwt.Middleware
-	DB     *sql.DB
+	DB     *sqlx.DB
 }
 
 // Routes will add the routes for this API version to a router group

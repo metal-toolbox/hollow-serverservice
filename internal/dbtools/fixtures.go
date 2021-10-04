@@ -5,9 +5,9 @@ package dbtools
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/types"
@@ -96,7 +96,7 @@ func addFixtures() error {
 	return nil
 }
 
-func setupNemo(ctx context.Context, db *sql.DB) error {
+func setupNemo(ctx context.Context, db *sqlx.DB) error {
 	FixtureNemo = &models.Server{
 		Name:         null.StringFrom("Nemo"),
 		FacilityCode: null.StringFrom("Sydney"),
@@ -165,7 +165,7 @@ func setupNemo(ctx context.Context, db *sql.DB) error {
 	return FixtureNemo.AddVersionedAttributes(ctx, db, true, FixtureNemoVersionedNew)
 }
 
-func setupDory(ctx context.Context, db *sql.DB) error {
+func setupDory(ctx context.Context, db *sqlx.DB) error {
 	FixtureDory = &models.Server{
 		Name:         null.StringFrom("Dory"),
 		FacilityCode: null.StringFrom("Ocean"),
@@ -204,7 +204,7 @@ func setupDory(ctx context.Context, db *sql.DB) error {
 	return FixtureDory.AddServerComponents(ctx, db, true, FixtureDoryLeftFin, FixtureDoryRightFin)
 }
 
-func setupMarlin(ctx context.Context, db *sql.DB) error {
+func setupMarlin(ctx context.Context, db *sqlx.DB) error {
 	FixtureMarlin = &models.Server{
 		Name:         null.StringFrom("Marlin"),
 		FacilityCode: null.StringFrom("Ocean"),
@@ -243,7 +243,7 @@ func setupMarlin(ctx context.Context, db *sql.DB) error {
 	return FixtureMarlin.AddServerComponents(ctx, db, true, FixtureMarlinLeftFin, FixtureMarlinRightFin)
 }
 
-func setupChuckles(ctx context.Context, db *sql.DB) error {
+func setupChuckles(ctx context.Context, db *sqlx.DB) error {
 	FixtureChuckles = &models.Server{
 		Name:         null.StringFrom("Chuckles"),
 		FacilityCode: null.StringFrom("Aquarium"),
