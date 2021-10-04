@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"database/sql"
-
 	"github.com/XSAM/otelsql"
+	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx" // crdb retries and postgres interface
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -13,7 +13,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func initTracingAndDB() *sql.DB {
+func initTracingAndDB() *sqlx.DB {
 	dbDriverName := "postgres"
 
 	if viper.GetBool("tracing.enabled") {
@@ -28,14 +28,18 @@ func initTracingAndDB() *sql.DB {
 		}
 	}
 
-	db, err := sql.Open(dbDriverName, viper.GetString("db.uri"))
+	db, err := sqlx.Open(dbDriverName, viper.GetString("db.uri"))
 	if err != nil {
 		logger.Fatalw("failed to initialize database connection", "error", err)
 	}
 
-	if _, err := db.Exec("select 1;"); err != nil {
+	if err := db.Ping(); err != nil {
 		logger.Fatalw("failed verifying database connection", "error", err)
 	}
+
+	db.SetMaxOpenConns(viper.GetInt("db.connections.max_open"))
+	db.SetMaxIdleConns(viper.GetInt("db.connections.max_idle"))
+	db.SetConnMaxIdleTime(viper.GetDuration("db.connections.max_lifetime"))
 
 	return db
 }

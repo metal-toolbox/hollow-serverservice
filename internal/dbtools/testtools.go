@@ -5,12 +5,12 @@ package dbtools
 
 import (
 	"context"
-	"database/sql"
 	"os"
 	"testing"
 
 	// import the crdbpgx for automatic retries of errors for crdb that support retry
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
@@ -19,7 +19,7 @@ import (
 
 // TestDBURI is the URI for the test database
 var TestDBURI = os.Getenv("SERVERSERVICE_DB_URI")
-var testDB *sql.DB
+var testDB *sqlx.DB
 
 func testDatastore() error {
 	// don't setup the datastore if we already have one
@@ -32,7 +32,7 @@ func testDatastore() error {
 	// You can also enable at the beginning of your test and then disable it again at the end
 	// boil.DebugMode = true
 
-	db, err := sql.Open("postgres", TestDBURI)
+	db, err := sqlx.Open("postgres", TestDBURI)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func testDatastore() error {
 }
 
 // DatabaseTest allows you to run tests that interact with the database
-func DatabaseTest(t *testing.T) *sql.DB {
+func DatabaseTest(t *testing.T) *sqlx.DB {
 	RegisterHooks()
 
 	if testing.Short() {
