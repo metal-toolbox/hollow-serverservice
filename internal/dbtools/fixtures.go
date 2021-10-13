@@ -18,9 +18,10 @@ import (
 //nolint:revive
 var (
 	// Namespaces used in Attributes and VersionedAttributes
-	FixtureNamespaceMetadata  = "hollow.metadata"
-	FixtureNamespaceOtherdata = "hollow.other_data"
-	FixtureNamespaceVersioned = "hollow.versioned"
+	FixtureNamespaceMetadata    = "hollow.metadata"
+	FixtureNamespaceOtherdata   = "hollow.other_data"
+	FixtureNamespaceVersioned   = "hollow.versioned"
+	FixtureNamespaceVersionedV2 = "hollow.versioned.v2"
 
 	// Server Component Types
 	FixtureFinType *models.ServerComponentType
@@ -33,6 +34,7 @@ var (
 	FixtureNemoLeftFinVersioned *models.VersionedAttribute
 	FixtureNemoVersionedNew     *models.VersionedAttribute
 	FixtureNemoVersionedOld     *models.VersionedAttribute
+	FixtureNemoVersionedV2      *models.VersionedAttribute
 
 	FixtureDory          *models.Server
 	FixtureDoryMetadata  *models.Attribute
@@ -144,6 +146,15 @@ func setupNemo(ctx context.Context, db *sqlx.DB) error {
 	}
 
 	if err := FixtureNemoLeftFin.AddVersionedAttributes(ctx, db, true, FixtureNemoLeftFinVersioned); err != nil {
+		return err
+	}
+
+	FixtureNemoVersionedV2 = &models.VersionedAttribute{
+		Namespace: FixtureNamespaceVersionedV2,
+		Data:      types.JSON([]byte(`{"something": "cool"}`)),
+	}
+
+	if err := FixtureNemo.AddVersionedAttributes(ctx, db, true, FixtureNemoVersionedV2); err != nil {
 		return err
 	}
 

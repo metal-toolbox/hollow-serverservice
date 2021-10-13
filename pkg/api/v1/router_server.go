@@ -66,7 +66,7 @@ func (r *Router) serverGet(c *gin.Context) {
 	mods := []qm.QueryMod{
 		qm.Where("id=?", c.Param("uuid")),
 		qm.Load("Attributes"),
-		qm.Load("VersionedAttributes", qm.Where("(namespace, created_at)=(select namespace, max(created_at) from versioned_attributes where server_id=? group by namespace)", c.Param("uuid"))),
+		qm.Load("VersionedAttributes", qm.Where("(namespace, created_at) IN (select namespace, max(created_at) from versioned_attributes where server_id=? group by namespace)", c.Param("uuid"))),
 		qm.Load("ServerComponents"),
 		qm.Load("ServerComponents.ServerComponentType"),
 		qm.WithDeleted(),
