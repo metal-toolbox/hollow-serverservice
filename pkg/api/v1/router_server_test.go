@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
@@ -482,8 +481,6 @@ func TestIntegrationServerList(t *testing.T) {
 		},
 	}
 
-	boil.DebugMode = true
-
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			r, _, err := s.Client.List(context.TODO(), tt.params)
@@ -501,8 +498,6 @@ func TestIntegrationServerList(t *testing.T) {
 			assert.ElementsMatch(t, tt.expectedUUIDs, actual)
 		})
 	}
-
-	boil.DebugMode = false
 }
 
 func TestIntegrationServerListPagination(t *testing.T) {
@@ -556,8 +551,7 @@ func TestIntegrationServerGetPreload(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r.Attributes, 2)
-	assert.Len(t, r.VersionedAttributes, 1)
-	assert.JSONEq(t, string(r.VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
+	assert.Len(t, r.VersionedAttributes, 2)
 	assert.Len(t, r.Components, 2)
 	assert.Nil(t, r.DeletedAt, "DeletedAt should be nil for non deleted server")
 }
@@ -590,8 +584,7 @@ func TestIntegrationServerListPreload(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r, 1)
 	assert.Len(t, r[0].Attributes, 2)
-	assert.Len(t, r[0].VersionedAttributes, 1)
-	assert.JSONEq(t, string(r[0].VersionedAttributes[0].Data), string(dbtools.FixtureNemoVersionedNew.Data))
+	assert.Len(t, r[0].VersionedAttributes, 2)
 	assert.Len(t, r[0].Components, 2)
 }
 
@@ -782,7 +775,7 @@ func TestIntegrationServerServiceListVersionedAttributes(t *testing.T) {
 
 		res, _, err := s.Client.ListVersionedAttributes(ctx, uuid.MustParse(dbtools.FixtureNemo.ID))
 		if !expectError {
-			require.Len(t, res, 2)
+			require.Len(t, res, 3)
 			assert.Equal(t, dbtools.FixtureNamespaceVersioned, res[0].Namespace)
 			assert.Equal(t, json.RawMessage([]byte(`{"name":"new"}`)), res[0].Data)
 			assert.Equal(t, dbtools.FixtureNamespaceVersioned, res[1].Namespace)
