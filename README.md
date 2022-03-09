@@ -1,6 +1,6 @@
 # Server Service
 
-> This repository is [Experimental](https://github.com/packethost/standards/blob/master/experimental-statement.md) meaning that it's based on untested ideas or techniques and not yet established or finalized or involves a radically new and innovative style!
+> This repository is experimental meaning that it's based on untested ideas or techniques and not yet established or finalized or involves a radically new and innovative style!
 > This means that support is best effort (at best!) and we strongly encourage you to NOT use this in production.
 
 The server service is a microservice within the Hollow eco-system. Server service is responsible for providing a store for physical server information. Support to storing the device components that make up the server is available. You are also able to create attributes and versioned-attributes for both servers and the server components.
