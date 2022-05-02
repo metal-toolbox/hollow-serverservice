@@ -5,12 +5,14 @@ package models
 
 var TableNames = struct {
 	Attributes           string
+	Firmwares            string
 	ServerComponentTypes string
 	ServerComponents     string
 	Servers              string
 	VersionedAttributes  string
 }{
 	Attributes:           "attributes",
+	Firmwares:            "firmwares",
 	ServerComponentTypes: "server_component_types",
 	ServerComponents:     "server_components",
 	Servers:              "servers",
