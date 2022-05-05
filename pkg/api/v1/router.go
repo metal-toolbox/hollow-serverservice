@@ -46,6 +46,12 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 
 	rg.GET("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(readScopes("server-component-types")), r.serverComponentTypeList)
 	rg.POST("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server-component-types")), r.serverComponentTypeCreate)
+
+	rg.GET("/firmwares ", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.firmwareList)
+	rg.POST("/firmwares", amw.AuthRequired(), amw.RequiredScopes(createScopes("server")), r.firmwareCreate)
+	rg.GET("/firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.firmwareGet)
+	rg.PUT("/firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server")), r.firmwareUpdate)
+	rg.DELETE("/firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server")), r.firmwareDelete)
 }
 
 func createScopes(items ...string) []string {
@@ -133,4 +139,20 @@ func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*models.Server, e
 	}
 
 	return srv, nil
+}
+
+func (r *Router) loadFirmwareFromParams(c *gin.Context) (*models.Firmware, error) {
+	u, err := r.parseUUID(c)
+	if err != nil {
+		return nil, err
+	}
+
+	firmware, err := models.FindFirmware(c.Request.Context(), r.DB, u.String())
+	if err != nil {
+		dbErrorResponse(c, err)
+
+		return nil, err
+	}
+
+	return firmware, nil
 }
