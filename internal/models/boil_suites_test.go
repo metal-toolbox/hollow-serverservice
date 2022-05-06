@@ -142,7 +142,6 @@ func TestInsert(t *testing.T) {
 func TestToOne(t *testing.T) {
 	t.Run("AttributeToServerUsingServer", testAttributeToOneServerUsingServer)
 	t.Run("AttributeToServerComponentUsingServerComponent", testAttributeToOneServerComponentUsingServerComponent)
-	t.Run("FirmwareToServerComponentUsingComponent", testFirmwareToOneServerComponentUsingComponent)
 	t.Run("ServerComponentToServerUsingServer", testServerComponentToOneServerUsingServer)
 	t.Run("ServerComponentToServerComponentTypeUsingServerComponentType", testServerComponentToOneServerComponentTypeUsingServerComponentType)
 	t.Run("VersionedAttributeToServerUsingServer", testVersionedAttributeToOneServerUsingServer)
@@ -158,7 +157,6 @@ func TestOneToOne(t *testing.T) {}
 func TestToMany(t *testing.T) {
 	t.Run("ServerComponentTypeToServerComponents", testServerComponentTypeToManyServerComponents)
 	t.Run("ServerComponentToAttributes", testServerComponentToManyAttributes)
-	t.Run("ServerComponentToComponentFirmwares", testServerComponentToManyComponentFirmwares)
 	t.Run("ServerComponentToVersionedAttributes", testServerComponentToManyVersionedAttributes)
 	t.Run("ServerToAttributes", testServerToManyAttributes)
 	t.Run("ServerToServerComponents", testServerToManyServerComponents)
@@ -170,7 +168,6 @@ func TestToMany(t *testing.T) {
 func TestToOneSet(t *testing.T) {
 	t.Run("AttributeToServerUsingAttributes", testAttributeToOneSetOpServerUsingServer)
 	t.Run("AttributeToServerComponentUsingAttributes", testAttributeToOneSetOpServerComponentUsingServerComponent)
-	t.Run("FirmwareToServerComponentUsingComponentFirmwares", testFirmwareToOneSetOpServerComponentUsingComponent)
 	t.Run("ServerComponentToServerUsingServerComponents", testServerComponentToOneSetOpServerUsingServer)
 	t.Run("ServerComponentToServerComponentTypeUsingServerComponents", testServerComponentToOneSetOpServerComponentTypeUsingServerComponentType)
 	t.Run("VersionedAttributeToServerUsingVersionedAttributes", testVersionedAttributeToOneSetOpServerUsingServer)
@@ -199,7 +196,6 @@ func TestOneToOneRemove(t *testing.T) {}
 func TestToManyAdd(t *testing.T) {
 	t.Run("ServerComponentTypeToServerComponents", testServerComponentTypeToManyAddOpServerComponents)
 	t.Run("ServerComponentToAttributes", testServerComponentToManyAddOpAttributes)
-	t.Run("ServerComponentToComponentFirmwares", testServerComponentToManyAddOpComponentFirmwares)
 	t.Run("ServerComponentToVersionedAttributes", testServerComponentToManyAddOpVersionedAttributes)
 	t.Run("ServerToAttributes", testServerToManyAddOpAttributes)
 	t.Run("ServerToServerComponents", testServerToManyAddOpServerComponents)

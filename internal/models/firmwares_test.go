@@ -494,115 +494,6 @@ func testFirmwaresInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testFirmwareToOneServerComponentUsingComponent(t *testing.T) {
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var local Firmware
-	var foreign ServerComponent
-
-	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, firmwareDBTypes, false, firmwareColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Firmware struct: %s", err)
-	}
-	if err := randomize.Struct(seed, &foreign, serverComponentDBTypes, false, serverComponentColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize ServerComponent struct: %s", err)
-	}
-
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	local.ComponentID = foreign.ID
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := local.Component().One(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if check.ID != foreign.ID {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
-	}
-
-	slice := FirmwareSlice{&local}
-	if err = local.L.LoadComponent(ctx, tx, false, (*[]*Firmware)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Component == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	local.R.Component = nil
-	if err = local.L.LoadComponent(ctx, tx, true, &local, nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Component == nil {
-		t.Error("struct should have been eager loaded")
-	}
-}
-
-func testFirmwareToOneSetOpServerComponentUsingComponent(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Firmware
-	var b, c ServerComponent
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, firmwareDBTypes, false, strmangle.SetComplement(firmwarePrimaryKeyColumns, firmwareColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, serverComponentDBTypes, false, strmangle.SetComplement(serverComponentPrimaryKeyColumns, serverComponentColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, serverComponentDBTypes, false, strmangle.SetComplement(serverComponentPrimaryKeyColumns, serverComponentColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	for i, x := range []*ServerComponent{&b, &c} {
-		err = a.SetComponent(ctx, tx, i != 0, x)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if a.R.Component != x {
-			t.Error("relationship struct not set to correct value")
-		}
-
-		if x.R.ComponentFirmwares[0] != &a {
-			t.Error("failed to append to foreign relationship struct")
-		}
-		if a.ComponentID != x.ID {
-			t.Error("foreign key was wrong value", a.ComponentID)
-		}
-
-		zero := reflect.Zero(reflect.TypeOf(a.ComponentID))
-		reflect.Indirect(reflect.ValueOf(&a.ComponentID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
-		}
-
-		if a.ComponentID != x.ID {
-			t.Error("foreign key was wrong value", a.ComponentID, x.ID)
-		}
-	}
-}
-
 func testFirmwaresReload(t *testing.T) {
 	t.Parallel()
 
@@ -677,7 +568,7 @@ func testFirmwaresSelect(t *testing.T) {
 }
 
 var (
-	firmwareDBTypes = map[string]string{`ID`: `uuid`, `ComponentID`: `uuid`, `Vendor`: `string`, `Model`: `string`, `Filename`: `string`, `Version`: `string`, `Utility`: `string`, `Sha`: `string`, `UpstreamURL`: `string`}
+	firmwareDBTypes = map[string]string{`ID`: `uuid`, `Component`: `string`, `Vendor`: `string`, `Model`: `string`, `Filename`: `string`, `Version`: `string`, `Utility`: `string`, `Sha`: `string`, `UpstreamURL`: `string`}
 	_               = bytes.MinRead
 )
 

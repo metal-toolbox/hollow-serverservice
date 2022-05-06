@@ -111,13 +111,11 @@ var ServerComponentRels = struct {
 	Server              string
 	ServerComponentType string
 	Attributes          string
-	ComponentFirmwares  string
 	VersionedAttributes string
 }{
 	Server:              "Server",
 	ServerComponentType: "ServerComponentType",
 	Attributes:          "Attributes",
-	ComponentFirmwares:  "ComponentFirmwares",
 	VersionedAttributes: "VersionedAttributes",
 }
 
@@ -126,7 +124,6 @@ type serverComponentR struct {
 	Server              *Server                 `boil:"Server" json:"Server" toml:"Server" yaml:"Server"`
 	ServerComponentType *ServerComponentType    `boil:"ServerComponentType" json:"ServerComponentType" toml:"ServerComponentType" yaml:"ServerComponentType"`
 	Attributes          AttributeSlice          `boil:"Attributes" json:"Attributes" toml:"Attributes" yaml:"Attributes"`
-	ComponentFirmwares  FirmwareSlice           `boil:"ComponentFirmwares" json:"ComponentFirmwares" toml:"ComponentFirmwares" yaml:"ComponentFirmwares"`
 	VersionedAttributes VersionedAttributeSlice `boil:"VersionedAttributes" json:"VersionedAttributes" toml:"VersionedAttributes" yaml:"VersionedAttributes"`
 }
 
@@ -470,27 +467,6 @@ func (o *ServerComponent) Attributes(mods ...qm.QueryMod) attributeQuery {
 	return query
 }
 
-// ComponentFirmwares retrieves all the firmware's Firmwares with an executor via component_id column.
-func (o *ServerComponent) ComponentFirmwares(mods ...qm.QueryMod) firmwareQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"firmwares\".\"component_id\"=?", o.ID),
-	)
-
-	query := Firmwares(queryMods...)
-	queries.SetFrom(query.Query, "\"firmwares\"")
-
-	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"\"firmwares\".*"})
-	}
-
-	return query
-}
-
 // VersionedAttributes retrieves all the versioned_attribute's VersionedAttributes with an executor.
 func (o *ServerComponent) VersionedAttributes(mods ...qm.QueryMod) versionedAttributeQuery {
 	var queryMods []qm.QueryMod
@@ -819,104 +795,6 @@ func (serverComponentL) LoadAttributes(ctx context.Context, e boil.ContextExecut
 	return nil
 }
 
-// LoadComponentFirmwares allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (serverComponentL) LoadComponentFirmwares(ctx context.Context, e boil.ContextExecutor, singular bool, maybeServerComponent interface{}, mods queries.Applicator) error {
-	var slice []*ServerComponent
-	var object *ServerComponent
-
-	if singular {
-		object = maybeServerComponent.(*ServerComponent)
-	} else {
-		slice = *maybeServerComponent.(*[]*ServerComponent)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &serverComponentR{}
-		}
-		args = append(args, object.ID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &serverComponentR{}
-			}
-
-			for _, a := range args {
-				if a == obj.ID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`firmwares`),
-		qm.WhereIn(`firmwares.component_id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load firmwares")
-	}
-
-	var resultSlice []*Firmware
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice firmwares")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on firmwares")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for firmwares")
-	}
-
-	if len(firmwareAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.ComponentFirmwares = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &firmwareR{}
-			}
-			foreign.R.Component = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.ID == foreign.ComponentID {
-				local.R.ComponentFirmwares = append(local.R.ComponentFirmwares, foreign)
-				if foreign.R == nil {
-					foreign.R = &firmwareR{}
-				}
-				foreign.R.Component = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // LoadVersionedAttributes allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (serverComponentL) LoadVersionedAttributes(ctx context.Context, e boil.ContextExecutor, singular bool, maybeServerComponent interface{}, mods queries.Applicator) error {
@@ -1233,59 +1111,6 @@ func (o *ServerComponent) RemoveAttributes(ctx context.Context, exec boil.Contex
 		}
 	}
 
-	return nil
-}
-
-// AddComponentFirmwares adds the given related objects to the existing relationships
-// of the server_component, optionally inserting them as new records.
-// Appends related to o.R.ComponentFirmwares.
-// Sets related.R.Component appropriately.
-func (o *ServerComponent) AddComponentFirmwares(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Firmware) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.ComponentID = o.ID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"firmwares\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"component_id"}),
-				strmangle.WhereClause("\"", "\"", 2, firmwarePrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.ComponentID = o.ID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &serverComponentR{
-			ComponentFirmwares: related,
-		}
-	} else {
-		o.R.ComponentFirmwares = append(o.R.ComponentFirmwares, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &firmwareR{
-				Component: o,
-			}
-		} else {
-			rel.R.Component = o
-		}
-	}
 	return nil
 }
 

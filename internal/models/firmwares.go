@@ -25,7 +25,7 @@ import (
 // Firmware is an object representing the database table.
 type Firmware struct {
 	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ComponentID string      `boil:"component_id" json:"component_id" toml:"component_id" yaml:"component_id"`
+	Component   null.String `boil:"component" json:"component,omitempty" toml:"component" yaml:"component,omitempty"`
 	Vendor      null.String `boil:"vendor" json:"vendor,omitempty" toml:"vendor" yaml:"vendor,omitempty"`
 	Model       null.String `boil:"model" json:"model,omitempty" toml:"model" yaml:"model,omitempty"`
 	Filename    null.String `boil:"filename" json:"filename,omitempty" toml:"filename" yaml:"filename,omitempty"`
@@ -40,7 +40,7 @@ type Firmware struct {
 
 var FirmwareColumns = struct {
 	ID          string
-	ComponentID string
+	Component   string
 	Vendor      string
 	Model       string
 	Filename    string
@@ -50,7 +50,7 @@ var FirmwareColumns = struct {
 	UpstreamURL string
 }{
 	ID:          "id",
-	ComponentID: "component_id",
+	Component:   "component",
 	Vendor:      "vendor",
 	Model:       "model",
 	Filename:    "filename",
@@ -62,7 +62,7 @@ var FirmwareColumns = struct {
 
 var FirmwareTableColumns = struct {
 	ID          string
-	ComponentID string
+	Component   string
 	Vendor      string
 	Model       string
 	Filename    string
@@ -72,7 +72,7 @@ var FirmwareTableColumns = struct {
 	UpstreamURL string
 }{
 	ID:          "firmwares.id",
-	ComponentID: "firmwares.component_id",
+	Component:   "firmwares.component",
 	Vendor:      "firmwares.vendor",
 	Model:       "firmwares.model",
 	Filename:    "firmwares.filename",
@@ -86,7 +86,7 @@ var FirmwareTableColumns = struct {
 
 var FirmwareWhere = struct {
 	ID          whereHelperstring
-	ComponentID whereHelperstring
+	Component   whereHelpernull_String
 	Vendor      whereHelpernull_String
 	Model       whereHelpernull_String
 	Filename    whereHelpernull_String
@@ -96,7 +96,7 @@ var FirmwareWhere = struct {
 	UpstreamURL whereHelpernull_String
 }{
 	ID:          whereHelperstring{field: "\"firmwares\".\"id\""},
-	ComponentID: whereHelperstring{field: "\"firmwares\".\"component_id\""},
+	Component:   whereHelpernull_String{field: "\"firmwares\".\"component\""},
 	Vendor:      whereHelpernull_String{field: "\"firmwares\".\"vendor\""},
 	Model:       whereHelpernull_String{field: "\"firmwares\".\"model\""},
 	Filename:    whereHelpernull_String{field: "\"firmwares\".\"filename\""},
@@ -108,14 +108,10 @@ var FirmwareWhere = struct {
 
 // FirmwareRels is where relationship names are stored.
 var FirmwareRels = struct {
-	Component string
-}{
-	Component: "Component",
-}
+}{}
 
 // firmwareR is where relationships are stored.
 type firmwareR struct {
-	Component *ServerComponent `boil:"Component" json:"Component" toml:"Component" yaml:"Component"`
 }
 
 // NewStruct creates a new relationship struct
@@ -127,9 +123,9 @@ func (*firmwareR) NewStruct() *firmwareR {
 type firmwareL struct{}
 
 var (
-	firmwareAllColumns            = []string{"id", "component_id", "vendor", "model", "filename", "version", "utility", "sha", "upstream_url"}
-	firmwareColumnsWithoutDefault = []string{"component_id"}
-	firmwareColumnsWithDefault    = []string{"id", "vendor", "model", "filename", "version", "utility", "sha", "upstream_url"}
+	firmwareAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "utility", "sha", "upstream_url"}
+	firmwareColumnsWithoutDefault = []string{}
+	firmwareColumnsWithDefault    = []string{"id", "component", "vendor", "model", "filename", "version", "utility", "sha", "upstream_url"}
 	firmwarePrimaryKeyColumns     = []string{"id"}
 )
 
@@ -406,171 +402,6 @@ func (q firmwareQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (b
 	}
 
 	return count > 0, nil
-}
-
-// Component pointed to by the foreign key.
-func (o *Firmware) Component(mods ...qm.QueryMod) serverComponentQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.ComponentID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	query := ServerComponents(queryMods...)
-	queries.SetFrom(query.Query, "\"server_components\"")
-
-	return query
-}
-
-// LoadComponent allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (firmwareL) LoadComponent(ctx context.Context, e boil.ContextExecutor, singular bool, maybeFirmware interface{}, mods queries.Applicator) error {
-	var slice []*Firmware
-	var object *Firmware
-
-	if singular {
-		object = maybeFirmware.(*Firmware)
-	} else {
-		slice = *maybeFirmware.(*[]*Firmware)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &firmwareR{}
-		}
-		args = append(args, object.ComponentID)
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &firmwareR{}
-			}
-
-			for _, a := range args {
-				if a == obj.ComponentID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ComponentID)
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`server_components`),
-		qm.WhereIn(`server_components.id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load ServerComponent")
-	}
-
-	var resultSlice []*ServerComponent
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice ServerComponent")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for server_components")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for server_components")
-	}
-
-	if len(firmwareAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Component = foreign
-		if foreign.R == nil {
-			foreign.R = &serverComponentR{}
-		}
-		foreign.R.ComponentFirmwares = append(foreign.R.ComponentFirmwares, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if local.ComponentID == foreign.ID {
-				local.R.Component = foreign
-				if foreign.R == nil {
-					foreign.R = &serverComponentR{}
-				}
-				foreign.R.ComponentFirmwares = append(foreign.R.ComponentFirmwares, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// SetComponent of the firmware to the related item.
-// Sets o.R.Component to related.
-// Adds o to related.R.ComponentFirmwares.
-func (o *Firmware) SetComponent(ctx context.Context, exec boil.ContextExecutor, insert bool, related *ServerComponent) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"firmwares\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"component_id"}),
-		strmangle.WhereClause("\"", "\"", 2, firmwarePrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.ComponentID = related.ID
-	if o.R == nil {
-		o.R = &firmwareR{
-			Component: related,
-		}
-	} else {
-		o.R.Component = related
-	}
-
-	if related.R == nil {
-		related.R = &serverComponentR{
-			ComponentFirmwares: FirmwareSlice{o},
-		}
-	} else {
-		related.R.ComponentFirmwares = append(related.R.ComponentFirmwares, o)
-	}
-
-	return nil
 }
 
 // Firmwares retrieves all the records using an executor.

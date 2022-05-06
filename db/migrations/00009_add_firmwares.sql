@@ -3,7 +3,7 @@
 
 CREATE TABLE firmwares (
   id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-  component_id UUID NOT NULL REFERENCES server_components(id) ON DELETE CASCADE,
+  component STRING NULL,
   vendor STRING NULL,
   model STRING NULL,
   filename STRING NULL,
