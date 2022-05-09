@@ -4,21 +4,9 @@ name: Linting and Test
 # Run for all pushes to main and pull requests when Go or YAML files change
 on:
   push:
-    paths:
-      - go.mod
-      - go.sum
-      - '**.go'
-      - '**.yaml'
-      - '**.sql'
     branches:
       - main
   pull_request:
-    paths:
-      - go.mod
-      - go.sum
-      - '**.go'
-      - '**.yaml'
-      - '**.sql'
 
 jobs:
   golangci:
