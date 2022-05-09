@@ -44,7 +44,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.42
+          version: v1.45
           args: --timeout=5m
 
       - name: Run go tests for generated models code
