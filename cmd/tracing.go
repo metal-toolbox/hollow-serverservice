@@ -22,7 +22,8 @@ func initTracingAndDB() *sqlx.DB {
 		initTracer(viper.GetString("tracing.endpoint"))
 
 		// Register an OTel SQL driver
-		dbDriverName, err = otelsql.Register(dbDriverName, semconv.DBSystemCockroachdb.Value.AsString())
+		dbDriverName, err = otelsql.Register(dbDriverName,
+			otelsql.WithAttributes(semconv.DBSystemCockroachdb))
 		if err != nil {
 			logger.Fatalw("failed initializing sql tracer", "error", err)
 		}

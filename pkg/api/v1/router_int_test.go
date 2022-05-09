@@ -24,7 +24,7 @@ type integrationServer struct {
 }
 
 func serverTest(t *testing.T) *integrationServer {
-	jwksURI := ginjwt.TestHelperJWKSProvider()
+	jwksURI := ginjwt.TestHelperJWKSProvider(ginjwt.TestPrivRSAKey1ID, ginjwt.TestPrivRSAKey2ID)
 
 	db := dbtools.DatabaseTest(t)
 

@@ -24,28 +24,28 @@ type Router struct {
 func (r *Router) Routes(rg *gin.RouterGroup) {
 	amw := r.AuthMW
 
-	rg.GET("/servers", amw.AuthRequired(readScopes("server")), r.serverList)
-	rg.POST("/servers", amw.AuthRequired(createScopes("server")), r.serverCreate)
-	rg.GET("/servers/:uuid", amw.AuthRequired(readScopes("server")), r.serverGet)
-	rg.PUT("/servers/:uuid", amw.AuthRequired(updateScopes("server")), r.serverUpdate)
-	rg.DELETE("/servers/:uuid", amw.AuthRequired(deleteScopes("server")), r.serverDelete)
+	rg.GET("/servers", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverList)
+	rg.POST("/servers", amw.AuthRequired(), amw.RequiredScopes(createScopes("server")), r.serverCreate)
+	rg.GET("/servers/:uuid", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverGet)
+	rg.PUT("/servers/:uuid", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server")), r.serverUpdate)
+	rg.DELETE("/servers/:uuid", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server")), r.serverDelete)
 
-	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(readScopes("server", "server:attributes")), r.serverAttributesList)
-	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(createScopes("server", "server:attributes")), r.serverAttributesCreate)
-	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(readScopes("server", "server:attributes")), r.serverAttributesGet)
-	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
-	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
+	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:attributes")), r.serverAttributesList)
+	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:attributes")), r.serverAttributesCreate)
+	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:attributes")), r.serverAttributesGet)
+	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
+	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
 
-	rg.GET("/servers/:uuid/components", amw.AuthRequired(readScopes("server", "server:component")), r.serverComponentList)
-	// rg.POST("/servers/:uuid/components", amw.AuthRequired(createScopes("server", "server:component")))
-	// rg.PUT("/servers/:uuid/components", amw.AuthRequired(updateScopes("server", "server:component")))
+	rg.GET("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:component")), r.serverComponentList)
+	// rg.POST("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:component")))
+	// rg.PUT("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:component")))
 
-	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
-	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
-	rg.GET("/servers/:uuid/versioned-attributes/:namespace", amw.AuthRequired(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesGet)
+	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
+	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
+	rg.GET("/servers/:uuid/versioned-attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesGet)
 
-	rg.GET("/server-component-types", amw.AuthRequired(readScopes("server-component-types")), r.serverComponentTypeList)
-	rg.POST("/server-component-types", amw.AuthRequired(updateScopes("server-component-types")), r.serverComponentTypeCreate)
+	rg.GET("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(readScopes("server-component-types")), r.serverComponentTypeList)
+	rg.POST("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server-component-types")), r.serverComponentTypeCreate)
 }
 
 func createScopes(items ...string) []string {
