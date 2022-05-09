@@ -11,7 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/uuid v1.2.0
 	github.com/gosimple/slug v1.12.0
-	github.com/jmoiron/sqlx v1.3.1
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.5
 	github.com/mitchellh/go-homedir v1.1.0
