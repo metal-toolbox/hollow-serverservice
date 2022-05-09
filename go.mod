@@ -10,7 +10,7 @@ require (
 	github.com/gin-contrib/zap v0.0.2
 	github.com/gin-gonic/gin v1.7.4
 	github.com/google/uuid v1.2.0
-	github.com/gosimple/slug v1.10.0
+	github.com/gosimple/slug v1.12.0
 	github.com/jmoiron/sqlx v1.3.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.3
@@ -52,7 +52,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gosimple/unidecode v1.0.0 // indirect
+	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
