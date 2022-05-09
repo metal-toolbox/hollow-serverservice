@@ -3,7 +3,7 @@ module go.hollow.sh/serverservice
 go 1.17
 
 require (
-	github.com/XSAM/otelsql v0.5.0
+	github.com/XSAM/otelsql v0.14.1
 	github.com/cockroachdb/cockroach-go/v2 v2.2.8
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.3.1
@@ -87,6 +87,7 @@ require (
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	go.opentelemetry.io/contrib v0.22.0 // indirect
+	go.opentelemetry.io/otel/metric v0.28.0 // indirect
 	go.opentelemetry.io/otel/trace v1.7.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
