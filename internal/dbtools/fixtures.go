@@ -58,6 +58,11 @@ var (
 	FixtureServers        models.ServerSlice
 	FixtureDeletedServers models.ServerSlice
 	FixtureAllServers     models.ServerSlice
+
+	// ComponentFirmwareVersion fixtures
+	FixtureDell210700 *models.ComponentFirmwareVersion
+	FixtureDell210501 *models.ComponentFirmwareVersion
+	FixtureSuperMicro *models.ComponentFirmwareVersion
 )
 
 func addFixtures() error {
@@ -85,6 +90,18 @@ func addFixtures() error {
 	}
 
 	if err := setupChuckles(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareDell210700(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareDell210501(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareSuperMicro(ctx, testDB); err != nil {
 		return err
 	}
 
@@ -286,4 +303,61 @@ func setupChuckles(ctx context.Context, db *sqlx.DB) error {
 	}
 
 	return FixtureChuckles.AddServerComponents(ctx, db, true, FixtureChucklesLeftFin)
+}
+
+func setupFirmwareDell210700(ctx context.Context, db *sqlx.DB) error {
+	FixtureDell210700 = &models.ComponentFirmwareVersion{
+		Vendor:      null.StringFrom("Dell"),
+		Model:       null.StringFrom("R615"),
+		Filename:    null.StringFrom("foobar"),
+		Version:     null.StringFrom("21.07.00"),
+		Component:   null.StringFrom("system"),
+		Utility:     null.StringFrom("dsu"),
+		Sha:         null.StringFrom("foobar"),
+		UpstreamURL: null.StringFrom("https://linux.dell.com/repo/hardware/DSU_21.07.00/"),
+	}
+
+	if err := FixtureDell210700.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupFirmwareDell210501(ctx context.Context, db *sqlx.DB) error {
+	FixtureDell210501 = &models.ComponentFirmwareVersion{
+		Vendor:      null.StringFrom("Dell"),
+		Model:       null.StringFrom("R615"),
+		Filename:    null.StringFrom("foobar"),
+		Version:     null.StringFrom("21.05.01"),
+		Component:   null.StringFrom("system"),
+		Utility:     null.StringFrom("dsu"),
+		Sha:         null.StringFrom("foobar"),
+		UpstreamURL: null.StringFrom("https://linux.dell.com/repo/hardware/DSU_21.07.00/"),
+	}
+
+	if err := FixtureDell210501.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
+	FixtureSuperMicro = &models.ComponentFirmwareVersion{
+		Vendor:      null.StringFrom("SuperMicro"),
+		Model:       null.StringFrom("X11DPH-T"),
+		Filename:    null.StringFrom("SMT_X11AST2500_173_11.bin"),
+		Version:     null.StringFrom("1.73.11"),
+		Component:   null.StringFrom("bmc"),
+		Utility:     null.StringFrom("sum"),
+		Sha:         null.StringFrom("83d220484495e79a3c20e16c21a0d751a71519ac7058350d8a38e1f55efb0211"),
+		UpstreamURL: null.StringFrom("http://install.packet.net/firmware/fup/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin"),
+	}
+
+	if err := FixtureSuperMicro.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	return nil
 }

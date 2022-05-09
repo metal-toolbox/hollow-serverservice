@@ -29,22 +29,22 @@ func (r *Router) firmwareList(c *gin.Context) {
 		mods = append(mods, qm.Where("version=?", c.Param("version")))
 	}
 
-	dbFirmwares, err := models.Firmwares(mods...).All(c.Request.Context(), r.DB)
+	dbFirmwares, err := models.ComponentFirmwareVersions(mods...).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	count, err := models.Firmwares(mods...).Count(c.Request.Context(), r.DB)
+	count, err := models.ComponentFirmwareVersions(mods...).Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	firmwares := []Firmware{}
+	firmwares := []ComponentFirmwareVersion{}
 
 	for _, dbF := range dbFirmwares {
-		f := Firmware{}
+		f := ComponentFirmwareVersion{}
 		if err := f.fromDBModel(dbF); err != nil {
 			failedConvertingToVersioned(c, err)
 			return
@@ -67,13 +67,13 @@ func (r *Router) firmwareGet(c *gin.Context) {
 		qm.Where("id=?", c.Param("uuid")),
 	}
 
-	dbFirmware, err := models.Firmwares(mods...).One(c.Request.Context(), r.DB)
+	dbFirmware, err := models.ComponentFirmwareVersions(mods...).One(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	var firmware Firmware
+	var firmware ComponentFirmwareVersion
 	if err = firmware.fromDBModel(dbFirmware); err != nil {
 		failedConvertingToVersioned(c, err)
 		return
@@ -83,7 +83,7 @@ func (r *Router) firmwareGet(c *gin.Context) {
 }
 
 func (r *Router) firmwareCreate(c *gin.Context) {
-	var firmware Firmware
+	var firmware ComponentFirmwareVersion
 	if err := c.ShouldBindJSON(&firmware); err != nil {
 		badRequestResponse(c, "invalid firmware", err)
 		return
@@ -104,7 +104,7 @@ func (r *Router) firmwareCreate(c *gin.Context) {
 }
 
 func (r *Router) firmwareDelete(c *gin.Context) {
-	dbFirmware, err := r.loadFirmwareFromParams(c)
+	dbFirmware, err := r.loadComponentFirmwareVersionFromParams(c)
 	if err != nil {
 		return
 	}
@@ -118,12 +118,12 @@ func (r *Router) firmwareDelete(c *gin.Context) {
 }
 
 func (r *Router) firmwareUpdate(c *gin.Context) {
-	dbFirmware, err := r.loadFirmwareFromParams(c)
+	dbFirmware, err := r.loadComponentFirmwareVersionFromParams(c)
 	if err != nil {
 		return
 	}
 
-	var newValues Firmware
+	var newValues ComponentFirmwareVersion
 	if err := c.ShouldBindJSON(&newValues); err != nil {
 		badRequestResponse(c, "invalid dbFirmware", err)
 		return
@@ -133,7 +133,7 @@ func (r *Router) firmwareUpdate(c *gin.Context) {
 	dbFirmware.Model = null.StringFrom(newValues.Model)
 	dbFirmware.Filename = null.StringFrom(newValues.Filename)
 	dbFirmware.Version = null.StringFrom(newValues.Version)
-	dbFirmware.ComponentID = newValues.ComponentID
+	dbFirmware.Component = null.StringFrom(newValues.Component)
 	dbFirmware.Utility = null.StringFrom(newValues.Utility)
 	dbFirmware.Sha = null.StringFrom(newValues.Sha)
 	dbFirmware.UpstreamURL = null.StringFrom(newValues.UpstreamURL)

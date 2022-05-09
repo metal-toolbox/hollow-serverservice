@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 
-CREATE TABLE firmwares (
+CREATE TABLE component_firmware_version (
   id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
   component STRING NULL,
   vendor STRING NULL,
@@ -10,7 +10,8 @@ CREATE TABLE firmwares (
   version STRING NULL,
   utility STRING NULL,
   sha STRING NULL,
-  upstream_url STRING NULL
+  upstream_url STRING NULL,
+  s3_url STRING NULL
 );
 
 -- +goose StatementEnd
@@ -18,6 +19,6 @@ CREATE TABLE firmwares (
 -- +goose Down
 -- +goose StatementBegin
 
-DROP TABLE firmwares;
+DROP TABLE component_firmware_version;
 
 -- +goose StatementEnd

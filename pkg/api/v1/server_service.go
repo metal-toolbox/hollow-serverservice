@@ -13,6 +13,7 @@ const (
 	serverAttributesEndpoint          = "attributes"
 	serverComponentsEndpoint          = "components"
 	serverVersionedAttributesEndpoint = "versioned-attributes"
+	firmwaresEndpoint                 = "firmwares"
 )
 
 // ClientInterface provides an interface for the expected calls to interact with a server service api
@@ -31,6 +32,11 @@ type ClientInterface interface {
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*ServerResponse, error)
 	GetVersionedAttributes(context.Context, uuid.UUID, string) ([]VersionedAttributes, *ServerResponse, error)
 	ListVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
+	CreateFirmware(context.Context, ComponentFirmwareVersion) (*uuid.UUID, *ServerResponse, error)
+	DeleteFirmware(context.Context, ComponentFirmwareVersion) (*ServerResponse, error)
+	GetFirmware(context.Context, uuid.UUID) (*ComponentFirmwareVersion, *ServerResponse, error)
+	ListFirmware(context.Context, *ComponentFirmwareVersionListParams) ([]ComponentFirmwareVersion, *ServerResponse, error)
+	UpdateFirmware(context.Context, uuid.UUID, ComponentFirmwareVersion) (*ServerResponse, error)
 }
 
 // Create will attempt to create a server in Hollow and return the new server's UUID

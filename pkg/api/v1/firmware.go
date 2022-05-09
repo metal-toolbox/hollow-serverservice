@@ -3,23 +3,24 @@ package serverservice
 import (
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
+
 	"go.hollow.sh/serverservice/internal/models"
 )
 
-// Firmware represents a firmware file
-type Firmware struct {
+// ComponentFirmwareVersion represents a firmware file
+type ComponentFirmwareVersion struct {
 	UUID        uuid.UUID `json:"uuid"`
 	Vendor      string    `json:"vendor"`
 	Model       string    `json:"model"`
 	Filename    string    `json:"filename"`
 	Version     string    `json:"version"`
-	ComponentID string    `json:"componentID"`
+	Component   string    `json:"component"`
 	Utility     string    `json:"utility"`
 	Sha         string    `json:"sha"`
 	UpstreamURL string    `json:"upstreamURL"`
 }
 
-func (f *Firmware) fromDBModel(dbF *models.Firmware) error {
+func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVersion) error {
 	var err error
 
 	f.UUID, err = uuid.Parse(dbF.ID)
@@ -27,7 +28,7 @@ func (f *Firmware) fromDBModel(dbF *models.Firmware) error {
 		return err
 	}
 
-	f.ComponentID = dbF.ComponentID
+	f.Component = dbF.Component.String
 	f.Vendor = dbF.Vendor.String
 	f.Model = dbF.Model.String
 	f.Filename = dbF.Filename.String
@@ -39,9 +40,9 @@ func (f *Firmware) fromDBModel(dbF *models.Firmware) error {
 	return nil
 }
 
-func (f *Firmware) toDBModel() (*models.Firmware, error) {
-	dbF := &models.Firmware{
-		ComponentID: f.ComponentID,
+func (f *ComponentFirmwareVersion) toDBModel() (*models.ComponentFirmwareVersion, error) {
+	dbF := &models.ComponentFirmwareVersion{
+		Component:   null.StringFrom(f.Component),
 		Vendor:      null.StringFrom(f.Vendor),
 		Model:       null.StringFrom(f.Model),
 		Filename:    null.StringFrom(f.Filename),

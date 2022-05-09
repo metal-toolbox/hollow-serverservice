@@ -141,13 +141,13 @@ func (r *Router) loadOrCreateServerFromParams(c *gin.Context) (*models.Server, e
 	return srv, nil
 }
 
-func (r *Router) loadFirmwareFromParams(c *gin.Context) (*models.Firmware, error) {
+func (r *Router) loadComponentFirmwareVersionFromParams(c *gin.Context) (*models.ComponentFirmwareVersion, error) {
 	u, err := r.parseUUID(c)
 	if err != nil {
 		return nil, err
 	}
 
-	firmware, err := models.FindFirmware(c.Request.Context(), r.DB, u.String())
+	firmware, err := models.FindComponentFirmwareVersion(c.Request.Context(), r.DB, u.String())
 	if err != nil {
 		dbErrorResponse(c, err)
 
