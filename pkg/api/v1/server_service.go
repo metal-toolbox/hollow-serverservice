@@ -179,3 +179,54 @@ func (c *Client) ListVersionedAttributes(ctx context.Context, srvUUID uuid.UUID)
 
 	return *val, &r, nil
 }
+
+// CreateFirmware will attempt to create a firmware in Hollow and return the firmware UUID
+func (c *Client) CreateFirmware(ctx context.Context, firmware ComponentFirmwareVersion) (*uuid.UUID, *ServerResponse, error) {
+	resp, err := c.post(ctx, firmwaresEndpoint, firmware)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	u, err := uuid.Parse(resp.Slug)
+	if err != nil {
+		return nil, resp, nil
+	}
+
+	return &u, resp, nil
+}
+
+// DeleteFirmware will attempt to delete firmware and return an error on failure
+func (c *Client) DeleteFirmware(ctx context.Context, firmware ComponentFirmwareVersion) (*ServerResponse, error) {
+	return c.delete(ctx, fmt.Sprintf("%s/%s", firmwaresEndpoint, firmware.UUID))
+}
+
+// GetFirmware will return a firmware by its UUID
+func (c *Client) GetFirmware(ctx context.Context, fwUUID uuid.UUID) (*ComponentFirmwareVersion, *ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s", firmwaresEndpoint, fwUUID)
+	fw := &ComponentFirmwareVersion{}
+	r := ServerResponse{Record: fw}
+
+	if err := c.get(ctx, path, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return fw, &r, nil
+}
+
+// ListFirmware will return all firmwares with optional params to filter the results
+func (c *Client) ListFirmware(ctx context.Context, params *ComponentFirmwareVersionListParams) ([]ComponentFirmwareVersion, *ServerResponse, error) {
+	firmwares := &[]ComponentFirmwareVersion{}
+	r := ServerResponse{Records: firmwares}
+
+	if err := c.list(ctx, firmwaresEndpoint, params, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *firmwares, &r, nil
+}
+
+// UpdateFirmware will to update a firmware with the new values passed in
+func (c *Client) UpdateFirmware(ctx context.Context, fwUUID uuid.UUID, firmware ComponentFirmwareVersion) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s", firmwaresEndpoint, fwUUID)
+	return c.put(ctx, path, firmware)
+}
