@@ -2,6 +2,11 @@ package serverservice
 
 import (
 	"net/url"
+
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"go.hollow.sh/serverservice/internal/models"
 )
 
 // ComponentFirmwareVersionListParams allows you to filter the results
@@ -25,29 +30,28 @@ func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
 	}
 
 	if p.Version != "" {
-		q.Set("Version", p.Version)
+		q.Set("version", p.Version)
 	}
 }
 
-// queryMods converts the list params into sql conditions that can be added to
-// sql queries
-// func (p *FirmwareListParams) queryMods() []qm.QueryMod {
-// 	mods := []qm.QueryMod{}
-//
-// 	if p.Vendor != "" {
-// 		m := models.FirmwareWhere.Vendor.EQ(null.StringFrom(p.Vendor))
-// 		mods = append(mods, m)
-// 	}
-//
-// 	if p.Model != "" {
-// 		m := models.FirmwareWhere.Model.EQ(null.StringFrom(p.Model))
-// 		mods = append(mods, m)
-// 	}
-//
-// 	if p.Version != "" {
-// 		m := models.FirmwareWhere.Version.EQ(null.StringFrom(p.Version))
-// 		mods = append(mods, m)
-// 	}
-//
-// 	return mods
-// }
+// queryMods converts the list params into sql conditions that can be added to sql queries
+func (p *ComponentFirmwareVersionListParams) queryMods() []qm.QueryMod {
+	mods := []qm.QueryMod{}
+
+	if p.Vendor != "" {
+		m := models.ComponentFirmwareVersionWhere.Vendor.EQ(null.StringFrom(p.Vendor))
+		mods = append(mods, m)
+	}
+
+	if p.Model != "" {
+		m := models.ComponentFirmwareVersionWhere.Model.EQ(null.StringFrom(p.Model))
+		mods = append(mods, m)
+	}
+
+	if p.Version != "" {
+		m := models.ComponentFirmwareVersionWhere.Version.EQ(null.StringFrom(p.Version))
+		mods = append(mods, m)
+	}
+
+	return mods
+}

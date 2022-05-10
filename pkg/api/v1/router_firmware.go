@@ -12,22 +12,13 @@ import (
 func (r *Router) firmwareList(c *gin.Context) {
 	pager := parsePagination(c)
 
-	mods := []qm.QueryMod{}
-	if c.Param("uuid") != "" {
-		mods = append(mods, qm.Where("id=?", c.Param("uuid")))
+	var params ComponentFirmwareVersionListParams
+	if err := c.ShouldBindQuery(&params); err != nil {
+		badRequestResponse(c, "invalid filter", err)
+		return
 	}
 
-	if c.Param("vendor") != "" {
-		mods = append(mods, qm.Where("vendor=?", c.Param("vendor")))
-	}
-
-	if c.Param("model") != "" {
-		mods = append(mods, qm.Where("model=?", c.Param("model")))
-	}
-
-	if c.Param("version") != "" {
-		mods = append(mods, qm.Where("version=?", c.Param("version")))
-	}
+	mods := params.queryMods()
 
 	dbFirmwares, err := models.ComponentFirmwareVersions(mods...).All(c.Request.Context(), r.DB)
 	if err != nil {
