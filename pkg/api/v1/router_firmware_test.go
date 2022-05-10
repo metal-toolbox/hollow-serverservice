@@ -94,6 +94,22 @@ func TestIntegrationFirmwareList(t *testing.T) {
 	}
 }
 
+func TestIntegrationFirmwareGet(t *testing.T) {
+	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+		fw, _, err := s.Client.GetFirmware(ctx, uuid.MustParse(dbtools.FixtureDell210700.ID))
+
+		if !expectError {
+			require.NoError(t, err)
+			assert.Equal(t, fw.UUID, uuid.MustParse(dbtools.FixtureDell210700.ID))
+		}
+
+		return err
+	})
+}
+
 func TestIntegrationFirmwareCreate(t *testing.T) {
 	s := serverTest(t)
 
