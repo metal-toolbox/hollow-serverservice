@@ -38,6 +38,60 @@ func TestIntegrationFirmwareList(t *testing.T) {
 		}
 		return err
 	})
+
+	var testCases = []struct {
+		testName      string
+		params        *serverservice.ComponentFirmwareVersionListParams
+		expectedUUIDs []string
+		expectError   bool
+		errorMsg      string
+	}{
+		{
+			"search by vendor",
+			&serverservice.ComponentFirmwareVersionListParams{
+				Vendor: "Dell",
+			},
+			[]string{dbtools.FixtureDell210700.ID, dbtools.FixtureDell210501.ID},
+			false,
+			"",
+		},
+		{
+			"search by model",
+			&serverservice.ComponentFirmwareVersionListParams{
+				Model: "X11DPH-T",
+			},
+			[]string{dbtools.FixtureSuperMicro.ID},
+			false,
+			"",
+		},
+		{
+			"search by version",
+			&serverservice.ComponentFirmwareVersionListParams{
+				Version: "21.05.01",
+			},
+			[]string{dbtools.FixtureDell210501.ID},
+			false,
+			"",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.testName, func(t *testing.T) {
+			r, _, err := s.Client.ListFirmware(context.TODO(), tt.params)
+			if tt.expectError {
+				assert.NoError(t, err)
+				return
+			}
+
+			var actual []string
+
+			for _, srv := range r {
+				actual = append(actual, srv.UUID.String())
+			}
+
+			assert.ElementsMatch(t, tt.expectedUUIDs, actual)
+		})
+	}
 }
 
 func TestIntegrationFirmwareCreate(t *testing.T) {
