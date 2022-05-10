@@ -13,6 +13,33 @@ import (
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
+func TestIntegrationFirmwareList(t *testing.T) {
+	s := serverTest(t)
+
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
+		params := serverservice.ComponentFirmwareVersionListParams{
+			Vendor:  "",
+			Model:   "",
+			Version: "",
+		}
+
+		r, resp, err := s.Client.ListFirmware(ctx, &params)
+		if !expectError {
+			require.NoError(t, err)
+			assert.Len(t, r, 3)
+			assert.EqualValues(t, 3, resp.PageCount)
+			assert.EqualValues(t, 1, resp.TotalPages)
+			assert.EqualValues(t, 3, resp.TotalRecordCount)
+			// We returned everything, so we shouldnt have a next page info
+			assert.Nil(t, resp.Links.Next)
+			assert.Nil(t, resp.Links.Previous)
+		}
+		return err
+	})
+}
+
 func TestIntegrationFirmwareCreate(t *testing.T) {
 	s := serverTest(t)
 
