@@ -74,5 +74,6 @@ func cleanDB() {
 	models.ServerComponents().DeleteAll(ctx, testDB)
 	models.ServerComponentTypes().DeleteAll(ctx, testDB)
 	models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true)
+	models.ComponentFirmwareVersions().DeleteAll(ctx, testDB)
 	testDB.Exec("SET sql_safe_updates = true;")
 }
