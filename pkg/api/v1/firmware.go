@@ -18,6 +18,7 @@ type ComponentFirmwareVersion struct {
 	Utility     string    `json:"utility"`
 	Sha         string    `json:"sha"`
 	UpstreamURL string    `json:"upstreamURL"`
+	S3URL       string    `json:"s3URL"`
 }
 
 func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVersion) error {
@@ -36,6 +37,7 @@ func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVers
 	f.Utility = dbF.Utility.String
 	f.Sha = dbF.Sha.String
 	f.UpstreamURL = dbF.UpstreamURL.String
+	f.S3URL = dbF.S3URL.String
 
 	return nil
 }
@@ -50,6 +52,7 @@ func (f *ComponentFirmwareVersion) toDBModel() (*models.ComponentFirmwareVersion
 		Utility:     null.StringFrom(f.Utility),
 		Sha:         null.StringFrom(f.Sha),
 		UpstreamURL: null.StringFrom(f.UpstreamURL),
+		S3URL:       null.StringFrom(f.S3URL),
 	}
 
 	if f.UUID.String() != uuid.Nil.String() {
