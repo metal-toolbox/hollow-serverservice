@@ -60,8 +60,8 @@ var (
 	FixtureAllServers     models.ServerSlice
 
 	// ComponentFirmwareVersion fixtures
-	FixtureDell210700 *models.ComponentFirmwareVersion
-	FixtureDell210501 *models.ComponentFirmwareVersion
+	FixtureDellR640   *models.ComponentFirmwareVersion
+	FixtureDellR6515  *models.ComponentFirmwareVersion
 	FixtureSuperMicro *models.ComponentFirmwareVersion
 )
 
@@ -93,11 +93,11 @@ func addFixtures() error {
 		return err
 	}
 
-	if err := setupFirmwareDell210700(ctx, testDB); err != nil {
+	if err := setupFirmwareDellR640(ctx, testDB); err != nil {
 		return err
 	}
 
-	if err := setupFirmwareDell210501(ctx, testDB); err != nil {
+	if err := setupFirmwareDellR6515(ctx, testDB); err != nil {
 		return err
 	}
 
@@ -305,38 +305,40 @@ func setupChuckles(ctx context.Context, db *sqlx.DB) error {
 	return FixtureChuckles.AddServerComponents(ctx, db, true, FixtureChucklesLeftFin)
 }
 
-func setupFirmwareDell210700(ctx context.Context, db *sqlx.DB) error {
-	FixtureDell210700 = &models.ComponentFirmwareVersion{
+func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
+	FixtureDellR640 = &models.ComponentFirmwareVersion{
 		Vendor:      null.StringFrom("Dell"),
-		Model:       null.StringFrom("R615"),
-		Filename:    null.StringFrom("foobar"),
-		Version:     null.StringFrom("21.07.00"),
-		Component:   null.StringFrom("system"),
-		Utility:     null.StringFrom("dsu"),
-		Sha:         null.StringFrom("foobar"),
-		UpstreamURL: null.StringFrom("https://linux.dell.com/repo/hardware/DSU_21.07.00/"),
+		Model:       null.StringFrom("R640"),
+		Filename:    null.StringFrom("iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE"),
+		Version:     null.StringFrom("5.10.00.00"),
+		Component:   null.StringFrom("bmc"),
+		Utility:     null.StringFrom("dup"),
+		Sha:         null.StringFrom("98db2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f"),
+		UpstreamURL: null.StringFrom("https://vendor.com/firmwares/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE"),
+		S3URL:       null.StringFrom("https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE"),
 	}
 
-	if err := FixtureDell210700.Insert(ctx, db, boil.Infer()); err != nil {
+	if err := FixtureDellR640.Insert(ctx, db, boil.Infer()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func setupFirmwareDell210501(ctx context.Context, db *sqlx.DB) error {
-	FixtureDell210501 = &models.ComponentFirmwareVersion{
+func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
+	FixtureDellR6515 = &models.ComponentFirmwareVersion{
 		Vendor:      null.StringFrom("Dell"),
-		Model:       null.StringFrom("R615"),
-		Filename:    null.StringFrom("foobar"),
-		Version:     null.StringFrom("21.05.01"),
-		Component:   null.StringFrom("system"),
-		Utility:     null.StringFrom("dsu"),
-		Sha:         null.StringFrom("foobar"),
-		UpstreamURL: null.StringFrom("https://linux.dell.com/repo/hardware/DSU_21.07.00/"),
+		Model:       null.StringFrom("R6515"),
+		Filename:    null.StringFrom("BIOS_C4FT0_WN64_2.6.6.EXE"),
+		Version:     null.StringFrom("2.6.6"),
+		Component:   null.StringFrom("bios"),
+		Utility:     null.StringFrom("dup"),
+		Sha:         null.StringFrom("1ddcb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4"),
+		UpstreamURL: null.StringFrom("https://vendor.com/firmwares/BIOS_C4FT0_WN64_2.6.6.EXE"),
+		S3URL:       null.StringFrom("https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE"),
 	}
 
-	if err := FixtureDell210501.Insert(ctx, db, boil.Infer()); err != nil {
+	if err := FixtureDellR6515.Insert(ctx, db, boil.Infer()); err != nil {
 		return err
 	}
 
@@ -352,7 +354,8 @@ func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
 		Component:   null.StringFrom("bmc"),
 		Utility:     null.StringFrom("sum"),
 		Sha:         null.StringFrom("83d220484495e79a3c20e16c21a0d751a71519ac7058350d8a38e1f55efb0211"),
-		UpstreamURL: null.StringFrom("http://install.packet.net/firmware/fup/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin"),
+		UpstreamURL: null.StringFrom("https://vendor.com/firmwares/SMT_X11AST2500_173_11.bin"),
+		S3URL:       null.StringFrom("https://example-firmware-bucket.s3.amazonaws.com/firmware/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin"),
 	}
 
 	if err := FixtureSuperMicro.Insert(ctx, db, boil.Infer()); err != nil {
