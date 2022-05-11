@@ -128,6 +128,7 @@ func (r *Router) firmwareUpdate(c *gin.Context) {
 	dbFirmware.Utility = null.StringFrom(newValues.Utility)
 	dbFirmware.Sha = null.StringFrom(newValues.Sha)
 	dbFirmware.UpstreamURL = null.StringFrom(newValues.UpstreamURL)
+	dbFirmware.S3URL = null.StringFrom(newValues.S3URL)
 
 	cols := boil.Infer()
 
