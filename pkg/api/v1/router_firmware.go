@@ -26,6 +26,11 @@ func (r *Router) serverComponentFirmwareList(c *gin.Context) {
 		return
 	}
 
+	// add pagination
+	pager.Preload = false
+	pager.OrderBy = models.ComponentFirmwareVersionTableColumns.Vendor + " DESC"
+	mods = append(mods, pager.queryMods()...)
+
 	dbFirmwares, err := models.ComponentFirmwareVersions(mods...).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
