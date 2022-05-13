@@ -25,7 +25,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 			Version: "",
 		}
 
-		r, resp, err := s.Client.ListFirmware(ctx, &params)
+		r, resp, err := s.Client.ListServerComponentFirmware(ctx, &params)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 3)
@@ -77,7 +77,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			r, _, err := s.Client.ListFirmware(context.TODO(), tt.params)
+			r, _, err := s.Client.ListServerComponentFirmware(context.TODO(), tt.params)
 			if tt.expectError {
 				assert.NoError(t, err)
 				return
@@ -99,7 +99,7 @@ func TestIntegrationFirmwareGet(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		fw, _, err := s.Client.GetFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID))
+		fw, _, err := s.Client.GetServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID))
 
 		if !expectError {
 			require.NoError(t, err)
@@ -110,7 +110,7 @@ func TestIntegrationFirmwareGet(t *testing.T) {
 	})
 }
 
-func TestIntegrationFirmwareCreate(t *testing.T) {
+func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
@@ -129,42 +129,42 @@ func TestIntegrationFirmwareCreate(t *testing.T) {
 			S3URL:       "http://example-firmware-bucket.s3.amazonaws.com/firmware/dell/DSU_21.07.00/",
 		}
 
-		id, resp, err := s.Client.CreateFirmware(ctx, testFirmware)
+		id, resp, err := s.Client.CreateServerComponentFirmware(ctx, testFirmware)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, id)
 			assert.Equal(t, testFirmware.UUID.String(), id.String())
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/firmwares/%s", id), resp.Links.Self.Href)
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/server-component-firmwares/%s", id), resp.Links.Self.Href)
 		}
 
 		return err
 	})
 }
 
-func TestIntegrationFirmwareDelete(t *testing.T) {
+func TestIntegrationServerComponentFirmwareDelete(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		_, err := s.Client.DeleteFirmware(ctx, serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640.ID)})
+		_, err := s.Client.DeleteServerComponentFirmware(ctx, serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640.ID)})
 
 		return err
 	})
 }
 
-func TestIntegrationFirmwareUpdate(t *testing.T) {
+func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		resp, err := s.Client.UpdateFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID), serverservice.ComponentFirmwareVersion{Filename: "foobarino"})
+		resp, err := s.Client.UpdateServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID), serverservice.ComponentFirmwareVersion{Filename: "foobarino"})
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/firmwares/%s", dbtools.FixtureDellR640.ID), resp.Links.Self.Href)
-			fw, _, _ := s.Client.GetFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID))
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/server-component-firmwares/%s", dbtools.FixtureDellR640.ID), resp.Links.Self.Href)
+			fw, _, _ := s.Client.GetServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID))
 			assert.Equal(t, "foobarino", fw.Filename)
 		}
 

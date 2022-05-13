@@ -47,11 +47,11 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 	rg.GET("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(readScopes("server-component-types")), r.serverComponentTypeList)
 	rg.POST("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server-component-types")), r.serverComponentTypeCreate)
 
-	rg.GET("/firmwares", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.firmwareList)
-	rg.POST("/firmwares", amw.AuthRequired(), amw.RequiredScopes(createScopes("server")), r.firmwareCreate)
-	rg.GET("/firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.firmwareGet)
-	rg.PUT("/firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server")), r.firmwareUpdate)
-	rg.DELETE("/firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server")), r.firmwareDelete)
+	rg.GET("/server-component-firmwares", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareList)
+	rg.POST("/server-component-firmwares", amw.AuthRequired(), amw.RequiredScopes(createScopes("server")), r.serverComponentFirmwareCreate)
+	rg.GET("/server-component-firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareGet)
+	rg.PUT("/server-component-firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server")), r.serverComponentFirmwareUpdate)
+	rg.DELETE("/server-component-firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server")), r.serverComponentFirmwareDelete)
 }
 
 func createScopes(items ...string) []string {

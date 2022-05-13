@@ -9,7 +9,7 @@ import (
 	"go.hollow.sh/serverservice/internal/models"
 )
 
-func (r *Router) firmwareList(c *gin.Context) {
+func (r *Router) serverComponentFirmwareList(c *gin.Context) {
 	pager := parsePagination(c)
 
 	var params ComponentFirmwareVersionListParams
@@ -20,13 +20,13 @@ func (r *Router) firmwareList(c *gin.Context) {
 
 	mods := params.queryMods()
 
-	dbFirmwares, err := models.ComponentFirmwareVersions(mods...).All(c.Request.Context(), r.DB)
+	count, err := models.ComponentFirmwareVersions(mods...).Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	count, err := models.ComponentFirmwareVersions(mods...).Count(c.Request.Context(), r.DB)
+	dbFirmwares, err := models.ComponentFirmwareVersions(mods...).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -53,7 +53,7 @@ func (r *Router) firmwareList(c *gin.Context) {
 	listResponse(c, firmwares, pd)
 }
 
-func (r *Router) firmwareGet(c *gin.Context) {
+func (r *Router) serverComponentFirmwareGet(c *gin.Context) {
 	mods := []qm.QueryMod{
 		qm.Where("id=?", c.Param("uuid")),
 	}
@@ -73,7 +73,7 @@ func (r *Router) firmwareGet(c *gin.Context) {
 	itemResponse(c, firmware)
 }
 
-func (r *Router) firmwareCreate(c *gin.Context) {
+func (r *Router) serverComponentFirmwareCreate(c *gin.Context) {
 	var firmware ComponentFirmwareVersion
 	if err := c.ShouldBindJSON(&firmware); err != nil {
 		badRequestResponse(c, "invalid firmware", err)
@@ -94,7 +94,7 @@ func (r *Router) firmwareCreate(c *gin.Context) {
 	createdResponse(c, dbFirmware.ID)
 }
 
-func (r *Router) firmwareDelete(c *gin.Context) {
+func (r *Router) serverComponentFirmwareDelete(c *gin.Context) {
 	dbFirmware, err := r.loadComponentFirmwareVersionFromParams(c)
 	if err != nil {
 		return
@@ -108,7 +108,7 @@ func (r *Router) firmwareDelete(c *gin.Context) {
 	deletedResponse(c)
 }
 
-func (r *Router) firmwareUpdate(c *gin.Context) {
+func (r *Router) serverComponentFirmwareUpdate(c *gin.Context) {
 	dbFirmware, err := r.loadComponentFirmwareVersionFromParams(c)
 	if err != nil {
 		return
