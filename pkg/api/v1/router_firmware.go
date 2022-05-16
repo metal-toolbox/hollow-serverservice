@@ -36,7 +36,7 @@ func (r *Router) serverComponentFirmwareList(c *gin.Context) {
 		return
 	}
 
-	firmwares := []ComponentFirmwareVersion{}
+	firmwares := make([]ComponentFirmwareVersion, 0, count)
 
 	for _, dbF := range dbFirmwares {
 		f := ComponentFirmwareVersion{}
