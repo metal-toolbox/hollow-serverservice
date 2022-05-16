@@ -29,7 +29,6 @@ type ComponentFirmwareVersion struct {
 	Model       string `boil:"model" json:"model" toml:"model" yaml:"model"`
 	Filename    string `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
 	Version     string `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Utility     string `boil:"utility" json:"utility" toml:"utility" yaml:"utility"`
 	Checksum    string `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
 	UpstreamURL string `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
 	S3URL       string `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
@@ -45,7 +44,6 @@ var ComponentFirmwareVersionColumns = struct {
 	Model       string
 	Filename    string
 	Version     string
-	Utility     string
 	Checksum    string
 	UpstreamURL string
 	S3URL       string
@@ -56,7 +54,6 @@ var ComponentFirmwareVersionColumns = struct {
 	Model:       "model",
 	Filename:    "filename",
 	Version:     "version",
-	Utility:     "utility",
 	Checksum:    "checksum",
 	UpstreamURL: "upstream_url",
 	S3URL:       "s3_url",
@@ -69,7 +66,6 @@ var ComponentFirmwareVersionTableColumns = struct {
 	Model       string
 	Filename    string
 	Version     string
-	Utility     string
 	Checksum    string
 	UpstreamURL string
 	S3URL       string
@@ -80,7 +76,6 @@ var ComponentFirmwareVersionTableColumns = struct {
 	Model:       "component_firmware_version.model",
 	Filename:    "component_firmware_version.filename",
 	Version:     "component_firmware_version.version",
-	Utility:     "component_firmware_version.utility",
 	Checksum:    "component_firmware_version.checksum",
 	UpstreamURL: "component_firmware_version.upstream_url",
 	S3URL:       "component_firmware_version.s3_url",
@@ -95,7 +90,6 @@ var ComponentFirmwareVersionWhere = struct {
 	Model       whereHelperstring
 	Filename    whereHelperstring
 	Version     whereHelperstring
-	Utility     whereHelperstring
 	Checksum    whereHelperstring
 	UpstreamURL whereHelperstring
 	S3URL       whereHelperstring
@@ -106,7 +100,6 @@ var ComponentFirmwareVersionWhere = struct {
 	Model:       whereHelperstring{field: "\"component_firmware_version\".\"model\""},
 	Filename:    whereHelperstring{field: "\"component_firmware_version\".\"filename\""},
 	Version:     whereHelperstring{field: "\"component_firmware_version\".\"version\""},
-	Utility:     whereHelperstring{field: "\"component_firmware_version\".\"utility\""},
 	Checksum:    whereHelperstring{field: "\"component_firmware_version\".\"checksum\""},
 	UpstreamURL: whereHelperstring{field: "\"component_firmware_version\".\"upstream_url\""},
 	S3URL:       whereHelperstring{field: "\"component_firmware_version\".\"s3_url\""},
@@ -129,8 +122,8 @@ func (*componentFirmwareVersionR) NewStruct() *componentFirmwareVersionR {
 type componentFirmwareVersionL struct{}
 
 var (
-	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "utility", "checksum", "upstream_url", "s3_url"}
-	componentFirmwareVersionColumnsWithoutDefault = []string{"component", "vendor", "model", "filename", "version", "utility", "checksum", "upstream_url", "s3_url"}
+	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "s3_url"}
+	componentFirmwareVersionColumnsWithoutDefault = []string{"component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "s3_url"}
 	componentFirmwareVersionColumnsWithDefault    = []string{"id"}
 	componentFirmwareVersionPrimaryKeyColumns     = []string{"id"}
 )

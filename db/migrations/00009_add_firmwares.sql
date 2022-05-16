@@ -8,7 +8,6 @@ CREATE TABLE component_firmware_version (
   model STRING NOT NULL,
   filename STRING NOT NULL,
   version STRING NOT NULL,
-  utility STRING NOT NULL,
   checksum STRING NOT NULL,
   upstream_url STRING NOT NULL,
   s3_url STRING NOT NULL
