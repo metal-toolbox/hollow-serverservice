@@ -2,7 +2,6 @@ package serverservice
 
 import (
 	"github.com/google/uuid"
-	"github.com/volatiletech/null/v8"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -29,30 +28,30 @@ func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVers
 		return err
 	}
 
-	f.Component = dbF.Component.String
-	f.Vendor = dbF.Vendor.String
-	f.Model = dbF.Model.String
-	f.Filename = dbF.Filename.String
-	f.Version = dbF.Version.String
-	f.Utility = dbF.Utility.String
-	f.Sha = dbF.Sha.String
-	f.UpstreamURL = dbF.UpstreamURL.String
-	f.S3URL = dbF.S3URL.String
+	f.Component = dbF.Component
+	f.Vendor = dbF.Vendor
+	f.Model = dbF.Model
+	f.Filename = dbF.Filename
+	f.Version = dbF.Version
+	f.Utility = dbF.Utility
+	f.Sha = dbF.Sha
+	f.UpstreamURL = dbF.UpstreamURL
+	f.S3URL = dbF.S3URL
 
 	return nil
 }
 
 func (f *ComponentFirmwareVersion) toDBModel() (*models.ComponentFirmwareVersion, error) {
 	dbF := &models.ComponentFirmwareVersion{
-		Component:   null.StringFrom(f.Component),
-		Vendor:      null.StringFrom(f.Vendor),
-		Model:       null.StringFrom(f.Model),
-		Filename:    null.StringFrom(f.Filename),
-		Version:     null.StringFrom(f.Version),
-		Utility:     null.StringFrom(f.Utility),
-		Sha:         null.StringFrom(f.Sha),
-		UpstreamURL: null.StringFrom(f.UpstreamURL),
-		S3URL:       null.StringFrom(f.S3URL),
+		Component:   f.Component,
+		Vendor:      f.Vendor,
+		Model:       f.Model,
+		Filename:    f.Filename,
+		Version:     f.Version,
+		Utility:     f.Utility,
+		Sha:         f.Sha,
+		UpstreamURL: f.UpstreamURL,
+		S3URL:       f.S3URL,
 	}
 
 	if f.UUID.String() != uuid.Nil.String() {

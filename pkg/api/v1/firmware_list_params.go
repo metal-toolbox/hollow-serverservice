@@ -3,7 +3,6 @@ package serverservice
 import (
 	"net/url"
 
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"go.hollow.sh/serverservice/internal/models"
@@ -39,17 +38,17 @@ func (p *ComponentFirmwareVersionListParams) queryMods() []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	if p.Vendor != "" {
-		m := models.ComponentFirmwareVersionWhere.Vendor.EQ(null.StringFrom(p.Vendor))
+		m := models.ComponentFirmwareVersionWhere.Vendor.EQ(p.Vendor)
 		mods = append(mods, m)
 	}
 
 	if p.Model != "" {
-		m := models.ComponentFirmwareVersionWhere.Model.EQ(null.StringFrom(p.Model))
+		m := models.ComponentFirmwareVersionWhere.Model.EQ(p.Model)
 		mods = append(mods, m)
 	}
 
 	if p.Version != "" {
-		m := models.ComponentFirmwareVersionWhere.Version.EQ(null.StringFrom(p.Version))
+		m := models.ComponentFirmwareVersionWhere.Version.EQ(p.Version)
 		mods = append(mods, m)
 	}
 

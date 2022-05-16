@@ -2,7 +2,6 @@ package serverservice
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
@@ -125,15 +124,15 @@ func (r *Router) serverComponentFirmwareUpdate(c *gin.Context) {
 		return
 	}
 
-	dbFirmware.Vendor = null.StringFrom(newValues.Vendor)
-	dbFirmware.Model = null.StringFrom(newValues.Model)
-	dbFirmware.Filename = null.StringFrom(newValues.Filename)
-	dbFirmware.Version = null.StringFrom(newValues.Version)
-	dbFirmware.Component = null.StringFrom(newValues.Component)
-	dbFirmware.Utility = null.StringFrom(newValues.Utility)
-	dbFirmware.Sha = null.StringFrom(newValues.Sha)
-	dbFirmware.UpstreamURL = null.StringFrom(newValues.UpstreamURL)
-	dbFirmware.S3URL = null.StringFrom(newValues.S3URL)
+	dbFirmware.Vendor = newValues.Vendor
+	dbFirmware.Model = newValues.Model
+	dbFirmware.Filename = newValues.Filename
+	dbFirmware.Version = newValues.Version
+	dbFirmware.Component = newValues.Component
+	dbFirmware.Utility = newValues.Utility
+	dbFirmware.Sha = newValues.Sha
+	dbFirmware.UpstreamURL = newValues.UpstreamURL
+	dbFirmware.S3URL = newValues.S3URL
 
 	cols := boil.Infer()
 
