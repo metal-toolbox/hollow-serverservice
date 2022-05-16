@@ -130,7 +130,7 @@ func (r *Router) serverComponentFirmwareUpdate(c *gin.Context) {
 	dbFirmware.Version = newValues.Version
 	dbFirmware.Component = newValues.Component
 	dbFirmware.Utility = newValues.Utility
-	dbFirmware.Sha = newValues.Sha
+	dbFirmware.Checksum = newValues.Checksum
 	dbFirmware.UpstreamURL = newValues.UpstreamURL
 	dbFirmware.S3URL = newValues.S3URL
 

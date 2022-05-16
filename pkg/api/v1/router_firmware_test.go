@@ -124,7 +124,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			Version:     "21.07.00",
 			Component:   "system",
 			Utility:     "dsu",
-			Sha:         "foobar",
+			Checksum:    "foobar",
 			UpstreamURL: "https://vendor.com/firmwares/DSU_21.07.00/",
 			S3URL:       "http://example-firmware-bucket.s3.amazonaws.com/firmware/dell/DSU_21.07.00/",
 		}

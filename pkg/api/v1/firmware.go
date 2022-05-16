@@ -15,7 +15,7 @@ type ComponentFirmwareVersion struct {
 	Version     string    `json:"version"`
 	Component   string    `json:"component"`
 	Utility     string    `json:"utility"`
-	Sha         string    `json:"sha"`
+	Checksum    string    `json:"checksum"`
 	UpstreamURL string    `json:"upstreamURL"`
 	S3URL       string    `json:"s3URL"`
 }
@@ -34,7 +34,7 @@ func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVers
 	f.Filename = dbF.Filename
 	f.Version = dbF.Version
 	f.Utility = dbF.Utility
-	f.Sha = dbF.Sha
+	f.Checksum = dbF.Checksum
 	f.UpstreamURL = dbF.UpstreamURL
 	f.S3URL = dbF.S3URL
 
@@ -49,7 +49,7 @@ func (f *ComponentFirmwareVersion) toDBModel() (*models.ComponentFirmwareVersion
 		Filename:    f.Filename,
 		Version:     f.Version,
 		Utility:     f.Utility,
-		Sha:         f.Sha,
+		Checksum:    f.Checksum,
 		UpstreamURL: f.UpstreamURL,
 		S3URL:       f.S3URL,
 	}
