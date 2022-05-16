@@ -117,15 +117,15 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 		s.Client.SetToken(authToken)
 
 		testFirmware := serverservice.ComponentFirmwareVersion{
-			UUID:        uuid.New(),
-			Vendor:      "Dell",
-			Model:       "R615",
-			Filename:    "foobar",
-			Version:     "21.07.00",
-			Component:   "system",
-			Checksum:    "foobar",
-			UpstreamURL: "https://vendor.com/firmwares/DSU_21.07.00/",
-			S3URL:       "http://example-firmware-bucket.s3.amazonaws.com/firmware/dell/DSU_21.07.00/",
+			UUID:          uuid.New(),
+			Vendor:        "Dell",
+			Model:         "R615",
+			Filename:      "foobar",
+			Version:       "21.07.00",
+			Component:     "system",
+			Checksum:      "foobar",
+			UpstreamURL:   "https://vendor.com/firmwares/DSU_21.07.00/",
+			RepositoryURL: "http://example-firmware-bucket.s3.amazonaws.com/firmware/dell/DSU_21.07.00/",
 		}
 
 		id, resp, err := s.Client.CreateServerComponentFirmware(ctx, testFirmware)

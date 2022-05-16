@@ -131,7 +131,7 @@ func (r *Router) serverComponentFirmwareUpdate(c *gin.Context) {
 	dbFirmware.Component = newValues.Component
 	dbFirmware.Checksum = newValues.Checksum
 	dbFirmware.UpstreamURL = newValues.UpstreamURL
-	dbFirmware.S3URL = newValues.S3URL
+	dbFirmware.RepositoryURL = newValues.RepositoryURL
 
 	cols := boil.Infer()
 

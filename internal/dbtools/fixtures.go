@@ -314,7 +314,7 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 		Component:   "bmc",
 		Checksum:    "98db2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f",
 		UpstreamURL: "https://vendor.com/firmwares/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
-		S3URL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+		RepositoryURL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
 	}
 
 	if err := FixtureDellR640.Insert(ctx, db, boil.Infer()); err != nil {
@@ -333,7 +333,7 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 		Component:   "bios",
 		Checksum:    "1ddcb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4",
 		UpstreamURL: "https://vendor.com/firmwares/BIOS_C4FT0_WN64_2.6.6.EXE",
-		S3URL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE",
+		RepositoryURL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE",
 	}
 
 	if err := FixtureDellR6515.Insert(ctx, db, boil.Infer()); err != nil {
@@ -345,14 +345,14 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 
 func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
 	FixtureSuperMicro = &models.ComponentFirmwareVersion{
-		Vendor:      "SuperMicro",
-		Model:       "X11DPH-T",
-		Filename:    "SMT_X11AST2500_173_11.bin",
-		Version:     "1.73.11",
-		Component:   "bmc",
-		Checksum:    "83d220484495e79a3c20e16c21a0d751a71519ac7058350d8a38e1f55efb0211",
-		UpstreamURL: "https://vendor.com/firmwares/SMT_X11AST2500_173_11.bin",
-		S3URL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin",
+		Vendor:        "SuperMicro",
+		Model:         "X11DPH-T",
+		Filename:      "SMT_X11AST2500_173_11.bin",
+		Version:       "1.73.11",
+		Component:     "bmc",
+		Checksum:      "83d220484495e79a3c20e16c21a0d751a71519ac7058350d8a38e1f55efb0211",
+		UpstreamURL:   "https://vendor.com/firmwares/SMT_X11AST2500_173_11.bin",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin",
 	}
 
 	if err := FixtureSuperMicro.Insert(ctx, db, boil.Infer()); err != nil {
