@@ -568,7 +568,7 @@ func testComponentFirmwareVersionsSelect(t *testing.T) {
 }
 
 var (
-	componentFirmwareVersionDBTypes = map[string]string{`ID`: `uuid`, `Component`: `string`, `Vendor`: `string`, `Model`: `string`, `Filename`: `string`, `Version`: `string`, `Checksum`: `string`, `UpstreamURL`: `string`, `S3URL`: `string`}
+	componentFirmwareVersionDBTypes = map[string]string{`ID`: `uuid`, `Component`: `string`, `Vendor`: `string`, `Model`: `string`, `Filename`: `string`, `Version`: `string`, `Checksum`: `string`, `UpstreamURL`: `string`, `RepositoryURL`: `string`}
 	_                               = bytes.MinRead
 )
 

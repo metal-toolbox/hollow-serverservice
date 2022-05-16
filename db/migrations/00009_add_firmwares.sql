@@ -10,7 +10,7 @@ CREATE TABLE component_firmware_version (
   version STRING NOT NULL,
   checksum STRING NOT NULL,
   upstream_url STRING NOT NULL,
-  s3_url STRING NOT NULL
+  repository_url STRING NOT NULL
 );
 
 -- +goose StatementEnd

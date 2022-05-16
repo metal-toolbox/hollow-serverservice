@@ -23,86 +23,86 @@ import (
 
 // ComponentFirmwareVersion is an object representing the database table.
 type ComponentFirmwareVersion struct {
-	ID          string `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Component   string `boil:"component" json:"component" toml:"component" yaml:"component"`
-	Vendor      string `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
-	Model       string `boil:"model" json:"model" toml:"model" yaml:"model"`
-	Filename    string `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
-	Version     string `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Checksum    string `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
-	UpstreamURL string `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
-	S3URL       string `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
+	ID            string `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Component     string `boil:"component" json:"component" toml:"component" yaml:"component"`
+	Vendor        string `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
+	Model         string `boil:"model" json:"model" toml:"model" yaml:"model"`
+	Filename      string `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
+	Version       string `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Checksum      string `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
+	UpstreamURL   string `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
+	RepositoryURL string `boil:"repository_url" json:"repository_url" toml:"repository_url" yaml:"repository_url"`
 
 	R *componentFirmwareVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L componentFirmwareVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ComponentFirmwareVersionColumns = struct {
-	ID          string
-	Component   string
-	Vendor      string
-	Model       string
-	Filename    string
-	Version     string
-	Checksum    string
-	UpstreamURL string
-	S3URL       string
+	ID            string
+	Component     string
+	Vendor        string
+	Model         string
+	Filename      string
+	Version       string
+	Checksum      string
+	UpstreamURL   string
+	RepositoryURL string
 }{
-	ID:          "id",
-	Component:   "component",
-	Vendor:      "vendor",
-	Model:       "model",
-	Filename:    "filename",
-	Version:     "version",
-	Checksum:    "checksum",
-	UpstreamURL: "upstream_url",
-	S3URL:       "s3_url",
+	ID:            "id",
+	Component:     "component",
+	Vendor:        "vendor",
+	Model:         "model",
+	Filename:      "filename",
+	Version:       "version",
+	Checksum:      "checksum",
+	UpstreamURL:   "upstream_url",
+	RepositoryURL: "repository_url",
 }
 
 var ComponentFirmwareVersionTableColumns = struct {
-	ID          string
-	Component   string
-	Vendor      string
-	Model       string
-	Filename    string
-	Version     string
-	Checksum    string
-	UpstreamURL string
-	S3URL       string
+	ID            string
+	Component     string
+	Vendor        string
+	Model         string
+	Filename      string
+	Version       string
+	Checksum      string
+	UpstreamURL   string
+	RepositoryURL string
 }{
-	ID:          "component_firmware_version.id",
-	Component:   "component_firmware_version.component",
-	Vendor:      "component_firmware_version.vendor",
-	Model:       "component_firmware_version.model",
-	Filename:    "component_firmware_version.filename",
-	Version:     "component_firmware_version.version",
-	Checksum:    "component_firmware_version.checksum",
-	UpstreamURL: "component_firmware_version.upstream_url",
-	S3URL:       "component_firmware_version.s3_url",
+	ID:            "component_firmware_version.id",
+	Component:     "component_firmware_version.component",
+	Vendor:        "component_firmware_version.vendor",
+	Model:         "component_firmware_version.model",
+	Filename:      "component_firmware_version.filename",
+	Version:       "component_firmware_version.version",
+	Checksum:      "component_firmware_version.checksum",
+	UpstreamURL:   "component_firmware_version.upstream_url",
+	RepositoryURL: "component_firmware_version.repository_url",
 }
 
 // Generated where
 
 var ComponentFirmwareVersionWhere = struct {
-	ID          whereHelperstring
-	Component   whereHelperstring
-	Vendor      whereHelperstring
-	Model       whereHelperstring
-	Filename    whereHelperstring
-	Version     whereHelperstring
-	Checksum    whereHelperstring
-	UpstreamURL whereHelperstring
-	S3URL       whereHelperstring
+	ID            whereHelperstring
+	Component     whereHelperstring
+	Vendor        whereHelperstring
+	Model         whereHelperstring
+	Filename      whereHelperstring
+	Version       whereHelperstring
+	Checksum      whereHelperstring
+	UpstreamURL   whereHelperstring
+	RepositoryURL whereHelperstring
 }{
-	ID:          whereHelperstring{field: "\"component_firmware_version\".\"id\""},
-	Component:   whereHelperstring{field: "\"component_firmware_version\".\"component\""},
-	Vendor:      whereHelperstring{field: "\"component_firmware_version\".\"vendor\""},
-	Model:       whereHelperstring{field: "\"component_firmware_version\".\"model\""},
-	Filename:    whereHelperstring{field: "\"component_firmware_version\".\"filename\""},
-	Version:     whereHelperstring{field: "\"component_firmware_version\".\"version\""},
-	Checksum:    whereHelperstring{field: "\"component_firmware_version\".\"checksum\""},
-	UpstreamURL: whereHelperstring{field: "\"component_firmware_version\".\"upstream_url\""},
-	S3URL:       whereHelperstring{field: "\"component_firmware_version\".\"s3_url\""},
+	ID:            whereHelperstring{field: "\"component_firmware_version\".\"id\""},
+	Component:     whereHelperstring{field: "\"component_firmware_version\".\"component\""},
+	Vendor:        whereHelperstring{field: "\"component_firmware_version\".\"vendor\""},
+	Model:         whereHelperstring{field: "\"component_firmware_version\".\"model\""},
+	Filename:      whereHelperstring{field: "\"component_firmware_version\".\"filename\""},
+	Version:       whereHelperstring{field: "\"component_firmware_version\".\"version\""},
+	Checksum:      whereHelperstring{field: "\"component_firmware_version\".\"checksum\""},
+	UpstreamURL:   whereHelperstring{field: "\"component_firmware_version\".\"upstream_url\""},
+	RepositoryURL: whereHelperstring{field: "\"component_firmware_version\".\"repository_url\""},
 }
 
 // ComponentFirmwareVersionRels is where relationship names are stored.
@@ -122,8 +122,8 @@ func (*componentFirmwareVersionR) NewStruct() *componentFirmwareVersionR {
 type componentFirmwareVersionL struct{}
 
 var (
-	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "s3_url"}
-	componentFirmwareVersionColumnsWithoutDefault = []string{"component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "s3_url"}
+	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "repository_url"}
+	componentFirmwareVersionColumnsWithoutDefault = []string{"component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "repository_url"}
 	componentFirmwareVersionColumnsWithDefault    = []string{"id"}
 	componentFirmwareVersionPrimaryKeyColumns     = []string{"id"}
 )
