@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,16 +23,16 @@ import (
 
 // ComponentFirmwareVersion is an object representing the database table.
 type ComponentFirmwareVersion struct {
-	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Component   null.String `boil:"component" json:"component,omitempty" toml:"component" yaml:"component,omitempty"`
-	Vendor      null.String `boil:"vendor" json:"vendor,omitempty" toml:"vendor" yaml:"vendor,omitempty"`
-	Model       null.String `boil:"model" json:"model,omitempty" toml:"model" yaml:"model,omitempty"`
-	Filename    null.String `boil:"filename" json:"filename,omitempty" toml:"filename" yaml:"filename,omitempty"`
-	Version     null.String `boil:"version" json:"version,omitempty" toml:"version" yaml:"version,omitempty"`
-	Utility     null.String `boil:"utility" json:"utility,omitempty" toml:"utility" yaml:"utility,omitempty"`
-	Sha         null.String `boil:"sha" json:"sha,omitempty" toml:"sha" yaml:"sha,omitempty"`
-	UpstreamURL null.String `boil:"upstream_url" json:"upstream_url,omitempty" toml:"upstream_url" yaml:"upstream_url,omitempty"`
-	S3URL       null.String `boil:"s3_url" json:"s3_url,omitempty" toml:"s3_url" yaml:"s3_url,omitempty"`
+	ID          string `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Component   string `boil:"component" json:"component" toml:"component" yaml:"component"`
+	Vendor      string `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
+	Model       string `boil:"model" json:"model" toml:"model" yaml:"model"`
+	Filename    string `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
+	Version     string `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Utility     string `boil:"utility" json:"utility" toml:"utility" yaml:"utility"`
+	Checksum    string `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
+	UpstreamURL string `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
+	S3URL       string `boil:"s3_url" json:"s3_url" toml:"s3_url" yaml:"s3_url"`
 
 	R *componentFirmwareVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L componentFirmwareVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,7 +46,7 @@ var ComponentFirmwareVersionColumns = struct {
 	Filename    string
 	Version     string
 	Utility     string
-	Sha         string
+	Checksum    string
 	UpstreamURL string
 	S3URL       string
 }{
@@ -58,7 +57,7 @@ var ComponentFirmwareVersionColumns = struct {
 	Filename:    "filename",
 	Version:     "version",
 	Utility:     "utility",
-	Sha:         "sha",
+	Checksum:    "checksum",
 	UpstreamURL: "upstream_url",
 	S3URL:       "s3_url",
 }
@@ -71,7 +70,7 @@ var ComponentFirmwareVersionTableColumns = struct {
 	Filename    string
 	Version     string
 	Utility     string
-	Sha         string
+	Checksum    string
 	UpstreamURL string
 	S3URL       string
 }{
@@ -82,7 +81,7 @@ var ComponentFirmwareVersionTableColumns = struct {
 	Filename:    "component_firmware_version.filename",
 	Version:     "component_firmware_version.version",
 	Utility:     "component_firmware_version.utility",
-	Sha:         "component_firmware_version.sha",
+	Checksum:    "component_firmware_version.checksum",
 	UpstreamURL: "component_firmware_version.upstream_url",
 	S3URL:       "component_firmware_version.s3_url",
 }
@@ -91,26 +90,26 @@ var ComponentFirmwareVersionTableColumns = struct {
 
 var ComponentFirmwareVersionWhere = struct {
 	ID          whereHelperstring
-	Component   whereHelpernull_String
-	Vendor      whereHelpernull_String
-	Model       whereHelpernull_String
-	Filename    whereHelpernull_String
-	Version     whereHelpernull_String
-	Utility     whereHelpernull_String
-	Sha         whereHelpernull_String
-	UpstreamURL whereHelpernull_String
-	S3URL       whereHelpernull_String
+	Component   whereHelperstring
+	Vendor      whereHelperstring
+	Model       whereHelperstring
+	Filename    whereHelperstring
+	Version     whereHelperstring
+	Utility     whereHelperstring
+	Checksum    whereHelperstring
+	UpstreamURL whereHelperstring
+	S3URL       whereHelperstring
 }{
 	ID:          whereHelperstring{field: "\"component_firmware_version\".\"id\""},
-	Component:   whereHelpernull_String{field: "\"component_firmware_version\".\"component\""},
-	Vendor:      whereHelpernull_String{field: "\"component_firmware_version\".\"vendor\""},
-	Model:       whereHelpernull_String{field: "\"component_firmware_version\".\"model\""},
-	Filename:    whereHelpernull_String{field: "\"component_firmware_version\".\"filename\""},
-	Version:     whereHelpernull_String{field: "\"component_firmware_version\".\"version\""},
-	Utility:     whereHelpernull_String{field: "\"component_firmware_version\".\"utility\""},
-	Sha:         whereHelpernull_String{field: "\"component_firmware_version\".\"sha\""},
-	UpstreamURL: whereHelpernull_String{field: "\"component_firmware_version\".\"upstream_url\""},
-	S3URL:       whereHelpernull_String{field: "\"component_firmware_version\".\"s3_url\""},
+	Component:   whereHelperstring{field: "\"component_firmware_version\".\"component\""},
+	Vendor:      whereHelperstring{field: "\"component_firmware_version\".\"vendor\""},
+	Model:       whereHelperstring{field: "\"component_firmware_version\".\"model\""},
+	Filename:    whereHelperstring{field: "\"component_firmware_version\".\"filename\""},
+	Version:     whereHelperstring{field: "\"component_firmware_version\".\"version\""},
+	Utility:     whereHelperstring{field: "\"component_firmware_version\".\"utility\""},
+	Checksum:    whereHelperstring{field: "\"component_firmware_version\".\"checksum\""},
+	UpstreamURL: whereHelperstring{field: "\"component_firmware_version\".\"upstream_url\""},
+	S3URL:       whereHelperstring{field: "\"component_firmware_version\".\"s3_url\""},
 }
 
 // ComponentFirmwareVersionRels is where relationship names are stored.
@@ -130,9 +129,9 @@ func (*componentFirmwareVersionR) NewStruct() *componentFirmwareVersionR {
 type componentFirmwareVersionL struct{}
 
 var (
-	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "utility", "sha", "upstream_url", "s3_url"}
-	componentFirmwareVersionColumnsWithoutDefault = []string{}
-	componentFirmwareVersionColumnsWithDefault    = []string{"id", "component", "vendor", "model", "filename", "version", "utility", "sha", "upstream_url", "s3_url"}
+	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "utility", "checksum", "upstream_url", "s3_url"}
+	componentFirmwareVersionColumnsWithoutDefault = []string{"component", "vendor", "model", "filename", "version", "utility", "checksum", "upstream_url", "s3_url"}
+	componentFirmwareVersionColumnsWithDefault    = []string{"id"}
 	componentFirmwareVersionPrimaryKeyColumns     = []string{"id"}
 )
 
