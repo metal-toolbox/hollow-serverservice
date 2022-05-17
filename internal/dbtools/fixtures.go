@@ -307,14 +307,14 @@ func setupChuckles(ctx context.Context, db *sqlx.DB) error {
 
 func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 	FixtureDellR640 = &models.ComponentFirmwareVersion{
-		Vendor:      "Dell",
-		Model:       "R640",
-		Filename:    "iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
-		Version:     "5.10.00.00",
-		Component:   "bmc",
-		Checksum:    "98db2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f",
-		UpstreamURL: "https://vendor.com/firmwares/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
-		RepositoryURL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+		Vendor:        "Dell",
+		Model:         "R640",
+		Filename:      "iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+		Version:       "5.10.00.00",
+		Component:     "bmc",
+		Checksum:      "98db2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f",
+		UpstreamURL:   "https://vendor.com/firmwares/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
 	}
 
 	if err := FixtureDellR640.Insert(ctx, db, boil.Infer()); err != nil {
@@ -326,14 +326,14 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 
 func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 	FixtureDellR6515 = &models.ComponentFirmwareVersion{
-		Vendor:      "Dell",
-		Model:       "R6515",
-		Filename:    "BIOS_C4FT0_WN64_2.6.6.EXE",
-		Version:     "2.6.6",
-		Component:   "bios",
-		Checksum:    "1ddcb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4",
-		UpstreamURL: "https://vendor.com/firmwares/BIOS_C4FT0_WN64_2.6.6.EXE",
-		RepositoryURL:       "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE",
+		Vendor:        "Dell",
+		Model:         "R6515",
+		Filename:      "BIOS_C4FT0_WN64_2.6.6.EXE",
+		Version:       "2.6.6",
+		Component:     "bios",
+		Checksum:      "1ddcb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4",
+		UpstreamURL:   "https://vendor.com/firmwares/BIOS_C4FT0_WN64_2.6.6.EXE",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE",
 	}
 
 	if err := FixtureDellR6515.Insert(ctx, db, boil.Infer()); err != nil {
