@@ -13,7 +13,7 @@ func (r *Router) serverComponentFirmwareList(c *gin.Context) {
 
 	var params ComponentFirmwareVersionListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
-		badRequestResponse(c, "invalid filter", err)
+		badRequestResponse(c, "invalid filter payload: ComponentFirmwareVersionListParams{}", err)
 		return
 	}
 
@@ -80,13 +80,13 @@ func (r *Router) serverComponentFirmwareGet(c *gin.Context) {
 func (r *Router) serverComponentFirmwareCreate(c *gin.Context) {
 	var firmware ComponentFirmwareVersion
 	if err := c.ShouldBindJSON(&firmware); err != nil {
-		badRequestResponse(c, "invalid firmware", err)
+		badRequestResponse(c, "invalid payload: ComponentFirmwareVersion{}", err)
 		return
 	}
 
 	dbFirmware, err := firmware.toDBModel()
 	if err != nil {
-		badRequestResponse(c, "invalid firmware", err)
+		badRequestResponse(c, "invalid db model: ComponentFirmwareVersion", err)
 		return
 	}
 
@@ -120,7 +120,7 @@ func (r *Router) serverComponentFirmwareUpdate(c *gin.Context) {
 
 	var newValues ComponentFirmwareVersion
 	if err := c.ShouldBindJSON(&newValues); err != nil {
-		badRequestResponse(c, "invalid dbFirmware", err)
+		badRequestResponse(c, "invalid payload: ComponentFirmwareVersion{}", err)
 		return
 	}
 
