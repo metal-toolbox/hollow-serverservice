@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,15 +24,17 @@ import (
 
 // ComponentFirmwareVersion is an object representing the database table.
 type ComponentFirmwareVersion struct {
-	ID            string `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Component     string `boil:"component" json:"component" toml:"component" yaml:"component"`
-	Vendor        string `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
-	Model         string `boil:"model" json:"model" toml:"model" yaml:"model"`
-	Filename      string `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
-	Version       string `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Checksum      string `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
-	UpstreamURL   string `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
-	RepositoryURL string `boil:"repository_url" json:"repository_url" toml:"repository_url" yaml:"repository_url"`
+	ID            string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Component     string    `boil:"component" json:"component" toml:"component" yaml:"component"`
+	Vendor        string    `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
+	Model         string    `boil:"model" json:"model" toml:"model" yaml:"model"`
+	Filename      string    `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
+	Version       string    `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Checksum      string    `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
+	UpstreamURL   string    `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
+	RepositoryURL string    `boil:"repository_url" json:"repository_url" toml:"repository_url" yaml:"repository_url"`
+	CreatedAt     null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt     null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *componentFirmwareVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L componentFirmwareVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,6 +50,8 @@ var ComponentFirmwareVersionColumns = struct {
 	Checksum      string
 	UpstreamURL   string
 	RepositoryURL string
+	CreatedAt     string
+	UpdatedAt     string
 }{
 	ID:            "id",
 	Component:     "component",
@@ -57,6 +62,8 @@ var ComponentFirmwareVersionColumns = struct {
 	Checksum:      "checksum",
 	UpstreamURL:   "upstream_url",
 	RepositoryURL: "repository_url",
+	CreatedAt:     "created_at",
+	UpdatedAt:     "updated_at",
 }
 
 var ComponentFirmwareVersionTableColumns = struct {
@@ -69,6 +76,8 @@ var ComponentFirmwareVersionTableColumns = struct {
 	Checksum      string
 	UpstreamURL   string
 	RepositoryURL string
+	CreatedAt     string
+	UpdatedAt     string
 }{
 	ID:            "component_firmware_version.id",
 	Component:     "component_firmware_version.component",
@@ -79,6 +88,8 @@ var ComponentFirmwareVersionTableColumns = struct {
 	Checksum:      "component_firmware_version.checksum",
 	UpstreamURL:   "component_firmware_version.upstream_url",
 	RepositoryURL: "component_firmware_version.repository_url",
+	CreatedAt:     "component_firmware_version.created_at",
+	UpdatedAt:     "component_firmware_version.updated_at",
 }
 
 // Generated where
@@ -93,6 +104,8 @@ var ComponentFirmwareVersionWhere = struct {
 	Checksum      whereHelperstring
 	UpstreamURL   whereHelperstring
 	RepositoryURL whereHelperstring
+	CreatedAt     whereHelpernull_Time
+	UpdatedAt     whereHelpernull_Time
 }{
 	ID:            whereHelperstring{field: "\"component_firmware_version\".\"id\""},
 	Component:     whereHelperstring{field: "\"component_firmware_version\".\"component\""},
@@ -103,6 +116,8 @@ var ComponentFirmwareVersionWhere = struct {
 	Checksum:      whereHelperstring{field: "\"component_firmware_version\".\"checksum\""},
 	UpstreamURL:   whereHelperstring{field: "\"component_firmware_version\".\"upstream_url\""},
 	RepositoryURL: whereHelperstring{field: "\"component_firmware_version\".\"repository_url\""},
+	CreatedAt:     whereHelpernull_Time{field: "\"component_firmware_version\".\"created_at\""},
+	UpdatedAt:     whereHelpernull_Time{field: "\"component_firmware_version\".\"updated_at\""},
 }
 
 // ComponentFirmwareVersionRels is where relationship names are stored.
@@ -122,9 +137,9 @@ func (*componentFirmwareVersionR) NewStruct() *componentFirmwareVersionR {
 type componentFirmwareVersionL struct{}
 
 var (
-	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "repository_url"}
+	componentFirmwareVersionAllColumns            = []string{"id", "component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "repository_url", "created_at", "updated_at"}
 	componentFirmwareVersionColumnsWithoutDefault = []string{"component", "vendor", "model", "filename", "version", "checksum", "upstream_url", "repository_url"}
-	componentFirmwareVersionColumnsWithDefault    = []string{"id"}
+	componentFirmwareVersionColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	componentFirmwareVersionPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -447,6 +462,16 @@ func (o *ComponentFirmwareVersion) Insert(ctx context.Context, exec boil.Context
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.CreatedAt).IsZero() {
+			queries.SetScanner(&o.CreatedAt, currTime)
+		}
+		if queries.MustTime(o.UpdatedAt).IsZero() {
+			queries.SetScanner(&o.UpdatedAt, currTime)
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -522,6 +547,12 @@ func (o *ComponentFirmwareVersion) Insert(ctx context.Context, exec boil.Context
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *ComponentFirmwareVersion) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		queries.SetScanner(&o.UpdatedAt, currTime)
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -651,6 +682,14 @@ func (o ComponentFirmwareVersionSlice) UpdateAll(ctx context.Context, exec boil.
 func (o *ComponentFirmwareVersion) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no component_firmware_version provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.CreatedAt).IsZero() {
+			queries.SetScanner(&o.CreatedAt, currTime)
+		}
+		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
