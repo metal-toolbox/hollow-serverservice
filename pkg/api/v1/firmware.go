@@ -13,7 +13,7 @@ type ComponentFirmwareVersion struct {
 	UUID          uuid.UUID `json:"uuid"`
 	Vendor        string    `json:"vendor" binding:"required,lowercase"`
 	Model         string    `json:"model" binding:"required,lowercase"`
-	Filename      string    `json:"filename" binding:"required,lowercase"`
+	Filename      string    `json:"filename" binding:"required"`
 	Version       string    `json:"version" binding:"required"`
 	Component     string    `json:"component" binding:"required,lowercase"`
 	Checksum      string    `json:"checksum" binding:"required,lowercase"`

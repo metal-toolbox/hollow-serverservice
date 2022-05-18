@@ -143,6 +143,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 	var testCases = []struct {
 		testName         string
 		firmware         *serverservice.ComponentFirmwareVersion
+		expectedError    bool
 		expectedResponse string
 		errorMsg         string
 	}{
@@ -159,6 +160,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 				UpstreamURL:   "https://vendor.com/firmware-file",
 				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
 			},
+			true,
 			"400",
 			"Error:Field validation for 'Model' failed on the 'required' tag",
 		},
@@ -175,17 +177,39 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 				UpstreamURL:   "https://vendor.com/firmware-file",
 				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
 			},
+			true,
 			"400",
 			"Error:Field validation for 'Vendor' failed on the 'lowercase' tag",
+		},
+		{
+			"filename allowed to be mixed case",
+			&serverservice.ComponentFirmwareVersion{
+				UUID:          uuid.New(),
+				Vendor:        "dell",
+				Model:         "r615",
+				Filename:      "fooBAR",
+				Version:       "12345",
+				Component:     "bios",
+				Checksum:      "foobar",
+				UpstreamURL:   "https://vendor.com/firmware-file",
+				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
+			},
+			false,
+			"200",
+			"",
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.CreateServerComponentFirmware(context.TODO(), *tt.firmware)
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), tt.errorMsg)
-			assert.Contains(t, err.Error(), tt.expectedResponse)
+			fwUUID, _, err := s.Client.CreateServerComponentFirmware(context.TODO(), *tt.firmware)
+			if tt.expectedError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+				assert.Contains(t, err.Error(), tt.expectedResponse)
+				return
+			}
+			assert.Equal(t, tt.firmware.UUID.String(), fwUUID.String())
 		})
 	}
 }
