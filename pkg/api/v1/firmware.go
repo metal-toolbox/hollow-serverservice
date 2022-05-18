@@ -1,6 +1,8 @@
 package serverservice
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 
 	"go.hollow.sh/serverservice/internal/models"
@@ -17,6 +19,8 @@ type ComponentFirmwareVersion struct {
 	Checksum      string    `json:"checksum" binding:"required,lowercase"`
 	UpstreamURL   string    `json:"upstreamURL" binding:"required"`
 	RepositoryURL string    `json:"repositoryURL" binding:"required"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVersion) error {
@@ -35,6 +39,8 @@ func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVers
 	f.Checksum = dbF.Checksum
 	f.UpstreamURL = dbF.UpstreamURL
 	f.RepositoryURL = dbF.RepositoryURL
+	f.CreatedAt = dbF.CreatedAt.Time
+	f.UpdatedAt = dbF.UpdatedAt.Time
 
 	return nil
 }
