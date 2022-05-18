@@ -118,8 +118,8 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 
 		testFirmware := serverservice.ComponentFirmwareVersion{
 			UUID:          uuid.New(),
-			Vendor:        "Dell",
-			Model:         "R615",
+			Vendor:        "dell",
+			Model:         "r615",
 			Filename:      "foobar",
 			Version:       "21.07.00",
 			Component:     "system",
@@ -139,6 +139,55 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 
 		return err
 	})
+
+	var testCases = []struct {
+		testName         string
+		firmware         *serverservice.ComponentFirmwareVersion
+		expectedResponse string
+		errorMsg         string
+	}{
+		{
+			"empty required parameters",
+			&serverservice.ComponentFirmwareVersion{
+				UUID:          uuid.New(),
+				Vendor:        "dell",
+				Model:         "",
+				Filename:      "foobar",
+				Version:       "12345",
+				Component:     "bios",
+				Checksum:      "foobar",
+				UpstreamURL:   "https://vendor.com/firmware-file",
+				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
+			},
+			"400",
+			"Error:Field validation for 'Model' failed on the 'required' tag",
+		},
+		{
+			"required lowercase parameters",
+			&serverservice.ComponentFirmwareVersion{
+				UUID:          uuid.New(),
+				Vendor:        "DELL",
+				Model:         "r615",
+				Filename:      "foobar",
+				Version:       "12345",
+				Component:     "bios",
+				Checksum:      "foobar",
+				UpstreamURL:   "https://vendor.com/firmware-file",
+				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
+			},
+			"400",
+			"Error:Field validation for 'Vendor' failed on the 'lowercase' tag",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.testName, func(t *testing.T) {
+			_, _, err := s.Client.CreateServerComponentFirmware(context.TODO(), *tt.firmware)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tt.errorMsg)
+			assert.Contains(t, err.Error(), tt.expectedResponse)
+		})
+	}
 }
 
 func TestIntegrationServerComponentFirmwareDelete(t *testing.T) {
@@ -158,7 +207,19 @@ func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		resp, err := s.Client.UpdateServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID), serverservice.ComponentFirmwareVersion{Filename: "foobarino"})
+		fw := serverservice.ComponentFirmwareVersion{
+			UUID:          uuid.MustParse(dbtools.FixtureDellR640.ID),
+			Vendor:        "dell",
+			Model:         "r615",
+			Filename:      "foobarino",
+			Version:       "21.07.00",
+			Component:     "bios",
+			Checksum:      "foobar",
+			UpstreamURL:   "https://vendor.com/firmware-file",
+			RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r615/bios/filename.ext",
+		}
+
+		resp, err := s.Client.UpdateServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID), fw)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)

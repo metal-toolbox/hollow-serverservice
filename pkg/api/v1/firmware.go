@@ -9,14 +9,14 @@ import (
 // ComponentFirmwareVersion represents a firmware file
 type ComponentFirmwareVersion struct {
 	UUID          uuid.UUID `json:"uuid"`
-	Vendor        string    `json:"vendor"`
-	Model         string    `json:"model"`
-	Filename      string    `json:"filename"`
-	Version       string    `json:"version"`
-	Component     string    `json:"component"`
-	Checksum      string    `json:"checksum"`
-	UpstreamURL   string    `json:"upstreamURL"`
-	RepositoryURL string    `json:"repositoryURL"`
+	Vendor        string    `json:"vendor" binding:"required,lowercase"`
+	Model         string    `json:"model" binding:"required,lowercase"`
+	Filename      string    `json:"filename" binding:"required,lowercase"`
+	Version       string    `json:"version" binding:"required"`
+	Component     string    `json:"component" binding:"required,lowercase"`
+	Checksum      string    `json:"checksum" binding:"required,lowercase"`
+	UpstreamURL   string    `json:"upstreamURL" binding:"required"`
+	RepositoryURL string    `json:"repositoryURL" binding:"required"`
 }
 
 func (f *ComponentFirmwareVersion) fromDBModel(dbF *models.ComponentFirmwareVersion) error {
