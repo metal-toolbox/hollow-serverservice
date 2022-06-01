@@ -11,6 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.hollow.sh/toolbox/ginjwt"
+	"go.hollow.sh/toolbox/version"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
@@ -85,6 +86,9 @@ func (s *Server) setup() *gin.Engine {
 		r.Use(otelgin.Middleware(hostname, otelgin.WithTracerProvider(tp)))
 	}
 
+	// Version endpoint returns build information
+	r.GET("/version", s.version)
+
 	// Health endpoints
 	r.GET("/healthz", s.livenessCheck)
 	r.GET("/healthz/liveness", s.livenessCheck)
@@ -148,4 +152,9 @@ func (s *Server) readinessCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "UP",
 	})
+}
+
+// version returns the serverservice build information.
+func (s *Server) version(c *gin.Context) {
+	c.JSON(http.StatusOK, version.String())
 }

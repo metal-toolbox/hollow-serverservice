@@ -15,7 +15,13 @@ RUN go mod tidy
 
 # Build the binary.
 # -mod=readonly ensures immutable go.mod and go.sum in container builds.
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o serverservice
+RUN export LDFLAG_LOCATION="go.hollow.sh/toolbox/version" && \
+    CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o serverservice \
+	-ldflags \
+            "-X ${LDFLAG_LOCATION}.appName=serverservice \
+             -X ${LDFLAG_LOCATION}.commit=$(git rev-parse --short HEAD) \
+             -X ${LDFLAG_LOCATION}.version=$(git describe --tags 2>/dev/null) \
+             -X ${LDFLAG_LOCATION}.date=$(date -u '+%H:%M:%S-%Y-%m-%d')"
 
 # Use the official Alpine image for a lean production container.
 # https://hub.docker.com/_/alpine
