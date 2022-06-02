@@ -20,19 +20,16 @@ type ServerComponentListParams struct {
 	Pagination                   *PaginationParams
 }
 
-func (p *ServerComponentListParams) empty() bool {
-	switch {
-	case p.Name != "",
-		p.Vendor != "",
-		p.Model != "",
-		p.Serial != "",
-		p.ServerComponentType != "",
-		len(p.AttributeListParams) != 0,
-		len(p.VersionedAttributeListParams) != 0:
-		return false
-	default:
-		return true
+// setQuery implements the queryParams interface
+func (p *ServerComponentListParams) setQuery(q url.Values) {
+	if p == nil {
+		return
 	}
+
+	encodeAttributesListParams(p.AttributeListParams, "attr", q)
+	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
+	encodeServerComponentListParams([]ServerComponentListParams{*p}, q)
+	p.Pagination.setQuery(q)
 }
 
 // queryMods converts the list params into sql conditions that can be added to
