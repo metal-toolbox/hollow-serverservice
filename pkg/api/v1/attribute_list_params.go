@@ -35,10 +35,10 @@ func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Val
 	for _, ap := range alp {
 		value := ap.Namespace
 
-		if len(ap.Keys) != 0 {
+		if len(ap.Keys) != 0 && value != "" {
 			value = fmt.Sprintf("%s~%s", value, strings.Join(ap.Keys, "."))
 
-			if ap.Operator != "" {
+			if ap.Operator != "" && ap.Value != "" {
 				value = fmt.Sprintf("%s~%s~%s", value, ap.Operator, ap.Value)
 			}
 		}
