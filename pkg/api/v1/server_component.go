@@ -10,18 +10,23 @@ import (
 
 // ServerComponent represents a component of a server. These can be things like
 // processors, NICs, hard drives, etc.
+//
+// Note: when setting validator struct tags, ensure no extra spaces are present between
+//       comma separated values or validation will fail with a not so useful 500 error.
 type ServerComponent struct {
-	UUID              uuid.UUID    `json:"uuid"`
-	ServerUUID        uuid.UUID    `json:"server_uuid"`
-	Name              string       `json:"name"`
-	Vendor            string       `json:"vendor"`
-	Model             string       `json:"model"`
-	Serial            string       `json:"serial"`
-	Attributes        []Attributes `json:"attributes"`
-	ComponentTypeID   string       `json:"component_type_id"`
-	ComponentTypeName string       `json:"component_type_name"`
-	CreatedAt         time.Time    `json:"created_at"`
-	UpdatedAt         time.Time    `json:"updated_at"`
+	UUID                uuid.UUID             `json:"uuid"`
+	ServerUUID          uuid.UUID             `json:"server_uuid" binding:"required"`
+	Name                string                `json:"name" binding:"required"`
+	Vendor              string                `json:"vendor" binding:"required,lowercase"`
+	Model               string                `json:"model" binding:"required,lowercase"`
+	Serial              string                `json:"serial" binding:"required,lowercase"`
+	Attributes          []Attributes          `json:"attributes"`
+	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
+	ComponentTypeID     string                `json:"component_type_id" binding:"required"`
+	ComponentTypeName   string                `json:"component_type_name" binding:"required"`
+	ComponentTypeSlug   string                `json:"component_type_slug"`
+	CreatedAt           time.Time             `json:"created_at"`
+	UpdatedAt           time.Time             `json:"updated_at"`
 }
 
 // ServerComponentSlice is a slice of ServerComponent objects
