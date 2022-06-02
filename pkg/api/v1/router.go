@@ -36,9 +36,10 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
 	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
 
-	rg.GET("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:component")), r.serverComponentList)
-	// rg.POST("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:component")))
-	// rg.PUT("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:component")))
+	rg.GET("/servers/components", amw.AuthRequired(), amw.RequiredScopes(readScopes("server:component")), r.serverComponentList)
+	rg.POST("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:component")), r.serverComponentsCreate)
+	rg.GET("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:component")), r.serverComponentGet)
+	rg.PUT("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:component")), r.serverComponentUpdate)
 
 	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
 	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
