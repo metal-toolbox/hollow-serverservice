@@ -155,6 +155,7 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 	createdResponse(c, "")
 }
 
+// serverComponentUpdate updates existing server component attributes
 func (r *Router) serverComponentUpdate(c *gin.Context) {
 	// load server based on the UUID parameter
 	server, err := r.loadServerFromParams(c)
@@ -202,7 +203,7 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 			dbVersionedAttributes.ServerID = null.StringFrom(server.ID)
 			dbVersionedAttributes.ServerComponentID = null.StringFrom(srvComponent.UUID.String())
 
-			err = dbSrvComponent.AddVersionedAttributes(c.Request.Context(), tx, false, dbVersionedAttributes)
+			err = dbSrvComponent.AddVersionedAttributes(c.Request.Context(), tx, true, dbVersionedAttributes)
 			if err != nil {
 				dbErrorResponse(c, err)
 				return
@@ -215,5 +216,5 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 		return
 	}
 
-	createdResponse(c, "ok")
+	updatedResponse(c, "")
 }
