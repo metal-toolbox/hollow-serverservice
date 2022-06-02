@@ -31,6 +31,7 @@ type ClientInterface interface {
 	GetComponents(context.Context, uuid.UUID, *PaginationParams) ([]ServerComponent, *ServerResponse, error)
 	ListComponents(context.Context, *ServerComponentListParams) ([]ServerComponent, *ServerResponse, error)
 	CreateComponents(context.Context, uuid.UUID, ServerComponentSlice) (*ServerResponse, error)
+	UpdateComponents(context.Context, uuid.UUID, ServerComponentSlice) (*ServerResponse, error)
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*ServerResponse, error)
 	GetVersionedAttributes(context.Context, uuid.UUID, string) ([]VersionedAttributes, *ServerResponse, error)
 	ListVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
@@ -166,6 +167,12 @@ func (c *Client) ListComponents(ctx context.Context, params *ServerComponentList
 func (c *Client) CreateComponents(ctx context.Context, srvUUID uuid.UUID, components ServerComponentSlice) (*ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
 	return c.post(ctx, path, components)
+}
+
+// UpdateComponents will update given components for a given server
+func (c *Client) UpdateComponents(ctx context.Context, srvUUID uuid.UUID, components ServerComponentSlice) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
+	return c.put(ctx, path, components)
 }
 
 // CreateVersionedAttributes will create a new versioned attribute for a given server
