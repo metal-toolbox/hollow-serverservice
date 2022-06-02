@@ -119,6 +119,14 @@ func parseQueryServerComponentsListParams(c *gin.Context) ([]ServerComponentList
 
 		queryMap := c.QueryMap(keyPrefix)
 
+		aListParams := parseQueryAttributesListParams(c, keyPrefix+"_attr")
+		vaListParams := parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
+
+		// no parameters were passed in, break out of loop
+		if len(queryMap) == 0 && len(aListParams) == 0 && len(vaListParams) == 0 {
+			break
+		}
+
 		p := ServerComponentListParams{
 			Name:                queryMap["name"],
 			Vendor:              queryMap["vendor"],
@@ -127,12 +135,12 @@ func parseQueryServerComponentsListParams(c *gin.Context) ([]ServerComponentList
 			ServerComponentType: queryMap["type"],
 		}
 
-		p.AttributeListParams = parseQueryAttributesListParams(c, keyPrefix+"_attr")
-		p.VersionedAttributeListParams = parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
+		if len(aListParams) > 0 {
+			p.AttributeListParams = aListParams
+		}
 
-		if p.empty() {
-			// if no attributes are set then one wasn't passed in. Break out of the loop
-			break
+		if len(vaListParams) > 0 {
+			p.VersionedAttributeListParams = vaListParams
 		}
 
 		sclp = append(sclp, p)
