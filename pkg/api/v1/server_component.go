@@ -66,8 +66,9 @@ func (c *ServerComponent) fromDBModel(dbC *models.ServerComponent) error {
 	c.UpdatedAt = dbC.UpdatedAt.Time
 
 	if dbC.R != nil && dbC.R.ServerComponentType != nil {
-		c.ComponentTypeID = dbC.R.ServerComponentType.Slug
+		c.ComponentTypeID = dbC.R.ServerComponentType.ID
 		c.ComponentTypeName = dbC.R.ServerComponentType.Name
+		c.ComponentTypeSlug = dbC.R.ServerComponentType.Slug
 	}
 
 	attrs, err := convertFromDBAttributes(dbC.R.Attributes)
