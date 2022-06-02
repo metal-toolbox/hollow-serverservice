@@ -28,3 +28,39 @@ func (t *ServerComponentType) toDBModel() (*models.ServerComponentType, error) {
 
 	return dbT, nil
 }
+
+// ServerComponentTypeSlice is a slice of the ServerComponentType
+type ServerComponentTypeSlice []*ServerComponentType
+
+// ByID returns the ServerComponentType matched by its ID field value
+func (ts ServerComponentTypeSlice) ByID(id string) *ServerComponentType {
+	for _, componentType := range ts {
+		if componentType.ID == id {
+			return componentType
+		}
+	}
+
+	return nil
+}
+
+// ByName returns the ServerComponentType matched by its Name field value
+func (ts ServerComponentTypeSlice) ByName(name string) *ServerComponentType {
+	for _, componentType := range ts {
+		if componentType.Name == name {
+			return componentType
+		}
+	}
+
+	return nil
+}
+
+// BySlug returns the ServerComponentType matched by its Slug field value
+func (ts ServerComponentTypeSlice) BySlug(slug string) *ServerComponentType {
+	for _, componentType := range ts {
+		if componentType.Slug == slug {
+			return componentType
+		}
+	}
+
+	return nil
+}
