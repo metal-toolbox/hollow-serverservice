@@ -85,6 +85,33 @@ func (p *PaginationParams) serverQueryMods() []qm.QueryMod {
 	return mods
 }
 
+// serverComponentQueryMods converts the server component list params into sql conditions that can be added to sql queries
+func (p *PaginationParams) serverComponentsQueryMods() []qm.QueryMod {
+	if p == nil {
+		p = &PaginationParams{}
+	}
+
+	mods := []qm.QueryMod{}
+
+	mods = append(mods, qm.Limit(p.limitUsed()))
+
+	if p.Page != 0 {
+		mods = append(mods, qm.Offset(p.offset()))
+	}
+
+	mods = append(mods, qm.OrderBy(models.ServerComponentTableColumns.CreatedAt+" DESC"))
+
+	preload := []qm.QueryMod{
+		qm.Load("Attributes"),
+		qm.Load("VersionedAttributes", qm.Where("(server_component_id, namespace, created_at) IN (select server_component_id, namespace, max(created_at) from versioned_attributes group by server_component_id, namespace)")),
+		qm.Load("Attributes"),
+		qm.Load("ServerComponentType"),
+	}
+	mods = append(mods, preload...)
+
+	return mods
+}
+
 func (p *PaginationParams) setQuery(q url.Values) {
 	if p == nil {
 		return
