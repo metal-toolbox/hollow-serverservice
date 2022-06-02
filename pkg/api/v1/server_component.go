@@ -24,6 +24,9 @@ type ServerComponent struct {
 	UpdatedAt         time.Time    `json:"updated_at"`
 }
 
+// ServerComponentSlice is a slice of ServerComponent objects
+type ServerComponentSlice []ServerComponent
+
 func convertDBServerComponents(dbComponents models.ServerComponentSlice) ([]ServerComponent, error) {
 	components := []ServerComponent{}
 	if dbComponents == nil {

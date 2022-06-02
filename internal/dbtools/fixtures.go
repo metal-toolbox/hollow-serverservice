@@ -60,9 +60,10 @@ var (
 	FixtureAllServers     models.ServerSlice
 
 	// ComponentFirmwareVersion fixtures
-	FixtureDellR640   *models.ComponentFirmwareVersion
-	FixtureDellR6515  *models.ComponentFirmwareVersion
-	FixtureSuperMicro *models.ComponentFirmwareVersion
+	FixtureDellR640         *models.ComponentFirmwareVersion
+	FixtureDellR6515        *models.ComponentFirmwareVersion
+	FixtureSuperMicro       *models.ComponentFirmwareVersion
+	FixtureServerComponents models.ServerComponentSlice
 )
 
 func addFixtures() error {
@@ -108,6 +109,8 @@ func addFixtures() error {
 	// excluding Chuckles here since that server is deleted
 	FixtureServers = models.ServerSlice{FixtureNemo, FixtureDory, FixtureMarlin}
 	FixtureDeletedServers = models.ServerSlice{FixtureChuckles}
+
+	FixtureServerComponents = models.ServerComponentSlice{FixtureDoryLeftFin, FixtureDoryRightFin}
 
 	//nolint:gocritic
 	FixtureAllServers = append(FixtureServers, FixtureDeletedServers...)
