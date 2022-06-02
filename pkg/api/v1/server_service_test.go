@@ -155,7 +155,7 @@ func TestServerServiceListComponents(t *testing.T) {
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.ListComponents(ctx, uuid.UUID{}, nil)
+		res, _, err := c.ListComponents(ctx, &hollow.ServerComponentListParams{Name: "unit-test", Serial: "1234"})
 		if !expectError {
 			assert.ElementsMatch(t, sc, res)
 		}
