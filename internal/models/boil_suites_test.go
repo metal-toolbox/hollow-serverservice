@@ -13,6 +13,7 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Attributes", testAttributes)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersions)
 	t.Run("ServerComponentTypes", testServerComponentTypes)
 	t.Run("ServerComponents", testServerComponents)
 	t.Run("Servers", testServers)
@@ -33,6 +34,7 @@ func TestSliceSoftDeleteAll(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	t.Run("Attributes", testAttributesDelete)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsDelete)
 	t.Run("ServerComponentTypes", testServerComponentTypesDelete)
 	t.Run("ServerComponents", testServerComponentsDelete)
 	t.Run("Servers", testServersDelete)
@@ -41,6 +43,7 @@ func TestDelete(t *testing.T) {
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Attributes", testAttributesQueryDeleteAll)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsQueryDeleteAll)
 	t.Run("ServerComponentTypes", testServerComponentTypesQueryDeleteAll)
 	t.Run("ServerComponents", testServerComponentsQueryDeleteAll)
 	t.Run("Servers", testServersQueryDeleteAll)
@@ -49,6 +52,7 @@ func TestQueryDeleteAll(t *testing.T) {
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Attributes", testAttributesSliceDeleteAll)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSliceDeleteAll)
 	t.Run("ServerComponentTypes", testServerComponentTypesSliceDeleteAll)
 	t.Run("ServerComponents", testServerComponentsSliceDeleteAll)
 	t.Run("Servers", testServersSliceDeleteAll)
@@ -57,6 +61,7 @@ func TestSliceDeleteAll(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	t.Run("Attributes", testAttributesExists)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsExists)
 	t.Run("ServerComponentTypes", testServerComponentTypesExists)
 	t.Run("ServerComponents", testServerComponentsExists)
 	t.Run("Servers", testServersExists)
@@ -65,6 +70,7 @@ func TestExists(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	t.Run("Attributes", testAttributesFind)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsFind)
 	t.Run("ServerComponentTypes", testServerComponentTypesFind)
 	t.Run("ServerComponents", testServerComponentsFind)
 	t.Run("Servers", testServersFind)
@@ -73,6 +79,7 @@ func TestFind(t *testing.T) {
 
 func TestBind(t *testing.T) {
 	t.Run("Attributes", testAttributesBind)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsBind)
 	t.Run("ServerComponentTypes", testServerComponentTypesBind)
 	t.Run("ServerComponents", testServerComponentsBind)
 	t.Run("Servers", testServersBind)
@@ -81,6 +88,7 @@ func TestBind(t *testing.T) {
 
 func TestOne(t *testing.T) {
 	t.Run("Attributes", testAttributesOne)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsOne)
 	t.Run("ServerComponentTypes", testServerComponentTypesOne)
 	t.Run("ServerComponents", testServerComponentsOne)
 	t.Run("Servers", testServersOne)
@@ -89,6 +97,7 @@ func TestOne(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	t.Run("Attributes", testAttributesAll)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsAll)
 	t.Run("ServerComponentTypes", testServerComponentTypesAll)
 	t.Run("ServerComponents", testServerComponentsAll)
 	t.Run("Servers", testServersAll)
@@ -97,6 +106,7 @@ func TestAll(t *testing.T) {
 
 func TestCount(t *testing.T) {
 	t.Run("Attributes", testAttributesCount)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsCount)
 	t.Run("ServerComponentTypes", testServerComponentTypesCount)
 	t.Run("ServerComponents", testServerComponentsCount)
 	t.Run("Servers", testServersCount)
@@ -105,6 +115,7 @@ func TestCount(t *testing.T) {
 
 func TestHooks(t *testing.T) {
 	t.Run("Attributes", testAttributesHooks)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsHooks)
 	t.Run("ServerComponentTypes", testServerComponentTypesHooks)
 	t.Run("ServerComponents", testServerComponentsHooks)
 	t.Run("Servers", testServersHooks)
@@ -114,6 +125,8 @@ func TestHooks(t *testing.T) {
 func TestInsert(t *testing.T) {
 	t.Run("Attributes", testAttributesInsert)
 	t.Run("Attributes", testAttributesInsertWhitelist)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsInsert)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsInsertWhitelist)
 	t.Run("ServerComponentTypes", testServerComponentTypesInsert)
 	t.Run("ServerComponentTypes", testServerComponentTypesInsertWhitelist)
 	t.Run("ServerComponents", testServerComponentsInsert)
@@ -209,6 +222,7 @@ func TestToManyRemove(t *testing.T) {
 
 func TestReload(t *testing.T) {
 	t.Run("Attributes", testAttributesReload)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsReload)
 	t.Run("ServerComponentTypes", testServerComponentTypesReload)
 	t.Run("ServerComponents", testServerComponentsReload)
 	t.Run("Servers", testServersReload)
@@ -217,6 +231,7 @@ func TestReload(t *testing.T) {
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Attributes", testAttributesReloadAll)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsReloadAll)
 	t.Run("ServerComponentTypes", testServerComponentTypesReloadAll)
 	t.Run("ServerComponents", testServerComponentsReloadAll)
 	t.Run("Servers", testServersReloadAll)
@@ -225,6 +240,7 @@ func TestReloadAll(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	t.Run("Attributes", testAttributesSelect)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSelect)
 	t.Run("ServerComponentTypes", testServerComponentTypesSelect)
 	t.Run("ServerComponents", testServerComponentsSelect)
 	t.Run("Servers", testServersSelect)
@@ -233,6 +249,7 @@ func TestSelect(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	t.Run("Attributes", testAttributesUpdate)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsUpdate)
 	t.Run("ServerComponentTypes", testServerComponentTypesUpdate)
 	t.Run("ServerComponents", testServerComponentsUpdate)
 	t.Run("Servers", testServersUpdate)
@@ -241,6 +258,7 @@ func TestUpdate(t *testing.T) {
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Attributes", testAttributesSliceUpdateAll)
+	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSliceUpdateAll)
 	t.Run("ServerComponentTypes", testServerComponentTypesSliceUpdateAll)
 	t.Run("ServerComponents", testServerComponentsSliceUpdateAll)
 	t.Run("Servers", testServersSliceUpdateAll)

@@ -4,15 +4,17 @@
 package models
 
 var TableNames = struct {
-	Attributes           string
-	ServerComponentTypes string
-	ServerComponents     string
-	Servers              string
-	VersionedAttributes  string
+	Attributes               string
+	ComponentFirmwareVersion string
+	ServerComponentTypes     string
+	ServerComponents         string
+	Servers                  string
+	VersionedAttributes      string
 }{
-	Attributes:           "attributes",
-	ServerComponentTypes: "server_component_types",
-	ServerComponents:     "server_components",
-	Servers:              "servers",
-	VersionedAttributes:  "versioned_attributes",
+	Attributes:               "attributes",
+	ComponentFirmwareVersion: "component_firmware_version",
+	ServerComponentTypes:     "server_component_types",
+	ServerComponents:         "server_components",
+	Servers:                  "servers",
+	VersionedAttributes:      "versioned_attributes",
 }

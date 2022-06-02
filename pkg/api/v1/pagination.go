@@ -6,8 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-
-	"go.hollow.sh/serverservice/internal/models"
 )
 
 var (
@@ -19,9 +17,11 @@ var (
 
 // PaginationParams allow you to paginate the results
 type PaginationParams struct {
-	Limit  int    `json:"limit,omitempty"`
-	Page   int    `json:"page,omitempty"`
-	Cursor string `json:"cursor,omitempty"`
+	Limit   int    `json:"limit,omitempty"`
+	Page    int    `json:"page,omitempty"`
+	Cursor  string `json:"cursor,omitempty"`
+	Preload bool   `json:"preload,omitempty"`
+	OrderBy string `json:"orderby,omitempty"`
 }
 
 type paginationData struct {
@@ -69,15 +69,19 @@ func (p *PaginationParams) queryMods() []qm.QueryMod {
 	}
 
 	// match the old functionality for now...will handle order and load as params later
-	mods = append(mods, qm.OrderBy(models.ServerTableColumns.CreatedAt+" DESC"))
-
-	preload := []qm.QueryMod{
-		qm.Load("Attributes"),
-		qm.Load("VersionedAttributes", qm.Where("(server_id, namespace, created_at) IN (select server_id, namespace, max(created_at) from versioned_attributes group by server_id, namespace)")),
-		qm.Load("ServerComponents.Attributes"),
-		qm.Load("ServerComponents.ServerComponentType"),
+	if p.OrderBy != "" {
+		mods = append(mods, qm.OrderBy(p.OrderBy))
 	}
-	mods = append(mods, preload...)
+
+	if p.Preload {
+		preload := []qm.QueryMod{
+			qm.Load("Attributes"),
+			qm.Load("VersionedAttributes", qm.Where("(server_id, namespace, created_at) IN (select server_id, namespace, max(created_at) from versioned_attributes group by server_id, namespace)")),
+			qm.Load("ServerComponents.Attributes"),
+			qm.Load("ServerComponents.ServerComponentType"),
+		}
+		mods = append(mods, preload...)
+	}
 
 	return mods
 }

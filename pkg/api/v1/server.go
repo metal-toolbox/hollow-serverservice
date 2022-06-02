@@ -33,6 +33,8 @@ func (r *Router) getServers(c *gin.Context, params ServerListParams) (models.Ser
 	}
 
 	// add pagination
+	params.PaginationParams.Preload = true
+	params.PaginationParams.OrderBy = models.ServerTableColumns.CreatedAt + " DESC"
 	mods = append(mods, params.PaginationParams.queryMods()...)
 
 	s, err := models.Servers(mods...).All(c.Request.Context(), r.DB)

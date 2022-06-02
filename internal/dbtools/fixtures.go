@@ -58,6 +58,11 @@ var (
 	FixtureServers        models.ServerSlice
 	FixtureDeletedServers models.ServerSlice
 	FixtureAllServers     models.ServerSlice
+
+	// ComponentFirmwareVersion fixtures
+	FixtureDellR640   *models.ComponentFirmwareVersion
+	FixtureDellR6515  *models.ComponentFirmwareVersion
+	FixtureSuperMicro *models.ComponentFirmwareVersion
 )
 
 func addFixtures() error {
@@ -85,6 +90,18 @@ func addFixtures() error {
 	}
 
 	if err := setupChuckles(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareDellR640(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareDellR6515(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareSuperMicro(ctx, testDB); err != nil {
 		return err
 	}
 
@@ -286,4 +303,61 @@ func setupChuckles(ctx context.Context, db *sqlx.DB) error {
 	}
 
 	return FixtureChuckles.AddServerComponents(ctx, db, true, FixtureChucklesLeftFin)
+}
+
+func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
+	FixtureDellR640 = &models.ComponentFirmwareVersion{
+		Vendor:        "Dell",
+		Model:         "R640",
+		Filename:      "iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+		Version:       "5.10.00.00",
+		Component:     "bmc",
+		Checksum:      "98db2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f",
+		UpstreamURL:   "https://vendor.com/firmwares/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
+	}
+
+	if err := FixtureDellR640.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
+	FixtureDellR6515 = &models.ComponentFirmwareVersion{
+		Vendor:        "Dell",
+		Model:         "R6515",
+		Filename:      "BIOS_C4FT0_WN64_2.6.6.EXE",
+		Version:       "2.6.6",
+		Component:     "bios",
+		Checksum:      "1ddcb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4",
+		UpstreamURL:   "https://vendor.com/firmwares/BIOS_C4FT0_WN64_2.6.6.EXE",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE",
+	}
+
+	if err := FixtureDellR6515.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
+	FixtureSuperMicro = &models.ComponentFirmwareVersion{
+		Vendor:        "SuperMicro",
+		Model:         "X11DPH-T",
+		Filename:      "SMT_X11AST2500_173_11.bin",
+		Version:       "1.73.11",
+		Component:     "bmc",
+		Checksum:      "83d220484495e79a3c20e16c21a0d751a71519ac7058350d8a38e1f55efb0211",
+		UpstreamURL:   "https://vendor.com/firmwares/SMT_X11AST2500_173_11.bin",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin",
+	}
+
+	if err := FixtureSuperMicro.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	return nil
 }

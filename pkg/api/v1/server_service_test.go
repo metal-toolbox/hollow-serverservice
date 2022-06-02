@@ -210,3 +210,89 @@ func TestServerServiceListVersionedAttributess(t *testing.T) {
 		return err
 	})
 }
+
+func TestServerServiceCreateServerComponentFirmware(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		firmware := hollow.ComponentFirmwareVersion{
+			UUID:    uuid.New(),
+			Vendor:  "Dell",
+			Model:   "R615",
+			Version: "21.07.00",
+		}
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"00000000-0000-0000-0000-000000001234"}`))
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, _, err := c.CreateServerComponentFirmware(ctx, firmware)
+		if !expectError {
+			assert.Equal(t, "00000000-0000-0000-0000-000000001234", res.String())
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceServerComponentFirmwareDelete(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		jsonResponse := json.RawMessage([]byte(`{"message": "resource deleted"}`))
+		c := mockClient(string(jsonResponse), respCode)
+		_, err := c.DeleteServerComponentFirmware(ctx, hollow.ComponentFirmwareVersion{UUID: uuid.New()})
+
+		return err
+	})
+}
+func TestServerServiceServerComponentFirmwareGet(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		firmware := hollow.ComponentFirmwareVersion{
+			UUID:    uuid.New(),
+			Vendor:  "Dell",
+			Model:   "R615",
+			Version: "21.07.00",
+		}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: firmware})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, _, err := c.GetServerComponentFirmware(ctx, firmware.UUID)
+		if !expectError {
+			assert.Equal(t, firmware.UUID, res.UUID)
+			assert.Equal(t, firmware.Vendor, res.Vendor)
+			assert.Equal(t, firmware.Model, res.Model)
+			assert.Equal(t, firmware.Version, res.Version)
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceServerComponentFirmwareList(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		firmware := []hollow.ComponentFirmwareVersion{{
+			UUID:    uuid.New(),
+			Vendor:  "Dell",
+			Model:   "R615",
+			Version: "21.07.00",
+		}}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: firmware})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, _, err := c.ListServerComponentFirmware(ctx, nil)
+		if !expectError {
+			assert.ElementsMatch(t, firmware, res)
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceServerComponentFirmwareUpdate(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource updated"})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		_, err = c.UpdateServerComponentFirmware(ctx, uuid.UUID{}, hollow.ComponentFirmwareVersion{UUID: uuid.New()})
+
+		return err
+	})
+}
