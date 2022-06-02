@@ -28,7 +28,9 @@ type ClientInterface interface {
 	GetAttributes(context.Context, uuid.UUID, string) (*Attributes, *ServerResponse, error)
 	ListAttributes(context.Context, uuid.UUID, *PaginationParams) ([]Attributes, *ServerResponse, error)
 	UpdateAttributes(ctx context.Context, u uuid.UUID, ns string, data json.RawMessage) (*ServerResponse, error)
-	ListComponents(context.Context, uuid.UUID, *PaginationParams) ([]ServerComponent, *ServerResponse, error)
+	GetComponents(context.Context, uuid.UUID, *PaginationParams) ([]ServerComponent, *ServerResponse, error)
+	ListComponents(context.Context, *ServerComponentListParams) ([]ServerComponent, *ServerResponse, error)
+	CreateComponents(context.Context, uuid.UUID, ServerComponentSlice) (*ServerResponse, error)
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*ServerResponse, error)
 	GetVersionedAttributes(context.Context, uuid.UUID, string) ([]VersionedAttributes, *ServerResponse, error)
 	ListVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
@@ -134,9 +136,9 @@ func (c *Client) UpdateAttributes(ctx context.Context, srvUUID uuid.UUID, ns str
 	return c.put(ctx, path, Attributes{Data: data})
 }
 
-// ListComponents will get all the components for a given server
-func (c *Client) ListComponents(ctx context.Context, srvUUID uuid.UUID, params *PaginationParams) ([]ServerComponent, *ServerResponse, error) {
-	sc := &[]ServerComponent{}
+// GetComponents will get all the components for a given server
+func (c *Client) GetComponents(ctx context.Context, srvUUID uuid.UUID, params *PaginationParams) (ServerComponentSlice, *ServerResponse, error) {
+	sc := &ServerComponentSlice{}
 	r := ServerResponse{Records: sc}
 
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
@@ -145,6 +147,25 @@ func (c *Client) ListComponents(ctx context.Context, srvUUID uuid.UUID, params *
 	}
 
 	return *sc, &r, nil
+}
+
+// ListComponents will get all the components matching the given parameters
+func (c *Client) ListComponents(ctx context.Context, params *ServerComponentListParams) (ServerComponentSlice, *ServerResponse, error) {
+	sc := &ServerComponentSlice{}
+	r := ServerResponse{Records: sc}
+
+	path := fmt.Sprintf("%s/%s", serversEndpoint, serverComponentsEndpoint)
+	if err := c.list(ctx, path, params, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *sc, &r, nil
+}
+
+// CreateComponents will create given components for a given server
+func (c *Client) CreateComponents(ctx context.Context, srvUUID uuid.UUID, components ServerComponentSlice) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
+	return c.post(ctx, path, components)
 }
 
 // CreateVersionedAttributes will create a new versioned attribute for a given server
