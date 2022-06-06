@@ -8,7 +8,7 @@ require (
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/zap v0.0.2
-	github.com/gin-gonic/gin v1.8.0
+	github.com/gin-gonic/gin v1.8.1
 	github.com/google/uuid v1.3.0
 	github.com/gosimple/slug v1.12.0
 	github.com/jmoiron/sqlx v1.3.5
