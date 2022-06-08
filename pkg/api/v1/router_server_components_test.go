@@ -95,6 +95,42 @@ func TestIntegrationServerListComponents(t *testing.T) {
 			},
 			"",
 		},
+		{
+			"pagination Limit",
+			&serverservice.ServerComponentListParams{
+				Pagination: &serverservice.PaginationParams{
+					Limit: 1,
+				},
+				Model: "Belly",
+			},
+			serverservice.ServerComponentSlice{
+				{
+					Model:             "Belly",
+					Serial:            "Up",
+					ComponentTypeName: "Fins",
+					ComponentTypeSlug: "fins",
+				},
+			},
+			"",
+		},
+		{
+			"pagination Limit, Offset",
+			&serverservice.ServerComponentListParams{
+				Pagination: &serverservice.PaginationParams{
+					Limit: 1,
+					Page:  2,
+				},
+			},
+			serverservice.ServerComponentSlice{
+				{
+					Name:              "Normal Fin",
+					Serial:            "Right",
+					ComponentTypeName: "Fins",
+					ComponentTypeSlug: "fins",
+				},
+			},
+			"",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -115,7 +151,6 @@ func TestIntegrationServerListComponents(t *testing.T) {
 			}
 
 			assert.Equal(t, tc.expected, got)
-			assert.Equal(t, int64(len(got)), res.TotalRecordCount)
 		})
 	}
 }
