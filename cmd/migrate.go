@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx" // crdb retries and postgres interface
+	_ "github.com/lib/pq"                                   // Register the Postgres driver.
 	"github.com/pressly/goose/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

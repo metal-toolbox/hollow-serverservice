@@ -4,6 +4,7 @@ import (
 	"github.com/XSAM/otelsql"
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx" // crdb retries and postgres interface
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq" // Register the Postgres driver.
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
