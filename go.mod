@@ -1,6 +1,6 @@
 module go.hollow.sh/serverservice
 
-go 1.17
+go 1.18
 
 require (
 	github.com/XSAM/otelsql v0.14.1
