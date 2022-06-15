@@ -46,6 +46,11 @@ func (r *ServerResponse) HasNextPage() bool {
 	return r.Records != nil && r.Links.Next != nil
 }
 
+// notFoundResponse writes a 404 response with the given message
+func notFoundResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusNotFound, &ServerResponse{Message: message})
+}
+
 func badRequestResponse(c *gin.Context, message string, err error) {
 	c.JSON(http.StatusBadRequest, &ServerResponse{Message: message, Error: err.Error()})
 }

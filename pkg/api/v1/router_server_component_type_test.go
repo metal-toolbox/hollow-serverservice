@@ -43,7 +43,7 @@ func TestIntegrationListServerComponentTypes(t *testing.T) {
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 1)
-			assert.Equal(t, dbtools.FixtureFinType.Slug, r[0].ID)
+			assert.Equal(t, dbtools.FixtureFinType.Slug, r[0].Slug)
 			assert.Equal(t, dbtools.FixtureFinType.Name, r[0].Name)
 			assert.NotNil(t, resp)
 			assert.NotNil(t, resp.Links.Self)

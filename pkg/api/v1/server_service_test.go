@@ -148,16 +148,62 @@ func TestServerServiceUpdateAttributes(t *testing.T) {
 	})
 }
 
-func TestServerServiceListComponents(t *testing.T) {
+func TestServerServiceComponentsGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		sc := []hollow.ServerComponent{{Name: "unit-test", Serial: "1234"}}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: sc})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.ListComponents(ctx, uuid.UUID{}, nil)
+		res, _, err := c.GetComponents(ctx, uuid.UUID{}, nil)
 		if !expectError {
 			assert.ElementsMatch(t, sc, res)
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceComponentsList(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		sc := []hollow.ServerComponent{{Name: "unit-test", Serial: "1234"}}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: sc})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, _, err := c.ListComponents(ctx, &hollow.ServerComponentListParams{Name: "unit-test", Serial: "1234"})
+		if !expectError {
+			assert.ElementsMatch(t, sc, res)
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceComponentsCreate(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource created"})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.CreateComponents(ctx, uuid.New(), hollow.ServerComponentSlice{{Name: "unit-test"}})
+		if !expectError {
+			assert.Contains(t, res.Message, "resource created")
+		}
+
+		return err
+	})
+}
+
+func TestServerServiceComponentsUpdate(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource updated"})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.UpdateComponents(ctx, uuid.New(), hollow.ServerComponentSlice{{Name: "unit-test"}})
+		if !expectError {
+			assert.Contains(t, res.Message, "resource updated")
 		}
 
 		return err

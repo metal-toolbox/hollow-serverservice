@@ -20,19 +20,16 @@ type ServerComponentListParams struct {
 	Pagination                   *PaginationParams
 }
 
-func (p *ServerComponentListParams) empty() bool {
-	switch {
-	case p.Name != "",
-		p.Vendor != "",
-		p.Model != "",
-		p.Serial != "",
-		p.ServerComponentType != "",
-		len(p.AttributeListParams) != 0,
-		len(p.VersionedAttributeListParams) != 0:
-		return false
-	default:
-		return true
+// setQuery implements the queryParams interface
+func (p *ServerComponentListParams) setQuery(q url.Values) {
+	if p == nil {
+		return
 	}
+
+	encodeAttributesListParams(p.AttributeListParams, "attr", q)
+	encodeAttributesListParams(p.VersionedAttributeListParams, "ver_attr", q)
+	encodeServerComponentListParams([]ServerComponentListParams{*p}, q)
+	p.Pagination.setQuery(q)
 }
 
 // queryMods converts the list params into sql conditions that can be added to
@@ -119,6 +116,14 @@ func parseQueryServerComponentsListParams(c *gin.Context) ([]ServerComponentList
 
 		queryMap := c.QueryMap(keyPrefix)
 
+		aListParams := parseQueryAttributesListParams(c, keyPrefix+"_attr")
+		vaListParams := parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
+
+		// no parameters were passed in, break out of loop
+		if len(queryMap) == 0 && len(aListParams) == 0 && len(vaListParams) == 0 {
+			break
+		}
+
 		p := ServerComponentListParams{
 			Name:                queryMap["name"],
 			Vendor:              queryMap["vendor"],
@@ -127,12 +132,12 @@ func parseQueryServerComponentsListParams(c *gin.Context) ([]ServerComponentList
 			ServerComponentType: queryMap["type"],
 		}
 
-		p.AttributeListParams = parseQueryAttributesListParams(c, keyPrefix+"_attr")
-		p.VersionedAttributeListParams = parseQueryAttributesListParams(c, keyPrefix+"_ver_attr")
+		if len(aListParams) > 0 {
+			p.AttributeListParams = aListParams
+		}
 
-		if p.empty() {
-			// if no attributes are set then one wasn't passed in. Break out of the loop
-			break
+		if len(vaListParams) > 0 {
+			p.VersionedAttributeListParams = vaListParams
 		}
 
 		sclp = append(sclp, p)

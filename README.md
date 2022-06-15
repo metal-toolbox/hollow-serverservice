@@ -41,4 +41,16 @@ Add a new migration file under `db/migrations/` with the schema change
 make docker-up
 make test-database
 sqlboiler crdb --add-soft-deletes
+
+### Run individual integration tests
+
+Export the DB URI required for integration tests.
+
+```
+export SERVERSERVICE_DB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test"
+```
+
+Run test.
+```
+go test -timeout 30s -tags testtools -run ^TestIntegrationServerListComponents$ go.hollow.sh/serverservice/pkg/api/v1 -v
 ```

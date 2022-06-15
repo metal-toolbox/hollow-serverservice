@@ -14,8 +14,8 @@ func (c *Client) CreateServerComponentType(ctx context.Context, t ServerComponen
 }
 
 // ListServerComponentTypes will return the server component types with optional params
-func (c *Client) ListServerComponentTypes(ctx context.Context, params *ServerComponentTypeListParams) ([]ServerComponentType, *ServerResponse, error) {
-	cts := &[]ServerComponentType{}
+func (c *Client) ListServerComponentTypes(ctx context.Context, params *ServerComponentTypeListParams) (ServerComponentTypeSlice, *ServerResponse, error) {
+	cts := &ServerComponentTypeSlice{}
 	resp := ServerResponse{Records: cts}
 
 	if err := c.list(ctx, serverComponentTypeEndpoint, params, &resp); err != nil {
