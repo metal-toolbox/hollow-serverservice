@@ -34,7 +34,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
-require go.hollow.sh/toolbox v0.1.4
+require go.hollow.sh/toolbox v0.1.5
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
