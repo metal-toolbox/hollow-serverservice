@@ -30,10 +30,10 @@ ALTER TABLE versioned_attributes ADD CONSTRAINT check_server_id CHECK (
   ) = 1
 );
 
-ALTER TABLE versioned_attributes DROP CONSTRAINT check_server_id_server_component_id;
+ALTER TABLE versioned_attributes DROP CONSTRAINT IF EXISTS check_server_id_server_component_id;
 
-DROP INDEX versioned_attributes@idx_server_component_data;
-DROP INDEX versioned_attributes@idx_server_component_namespace;
-DROP INDEX versioned_attributes@idx_server_component_id;
+DROP INDEX IF EXISTS versioned_attributes@idx_server_component_data;
+DROP INDEX IF EXISTS versioned_attributes@idx_server_component_namespace;
+DROP INDEX IF EXISTS versioned_attributes@idx_server_component_id;
 
 -- +goose StatementEnd
