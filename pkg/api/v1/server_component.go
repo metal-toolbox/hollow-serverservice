@@ -20,9 +20,9 @@ type ServerComponent struct {
 	UUID                uuid.UUID             `json:"uuid"`
 	ServerUUID          uuid.UUID             `json:"server_uuid" binding:"required"`
 	Name                string                `json:"name" binding:"required"`
-	Vendor              string                `json:"vendor" binding:"required,lowercase"`
-	Model               string                `json:"model" binding:"required,lowercase"`
-	Serial              string                `json:"serial" binding:"required,lowercase"`
+	Vendor              string                `json:"vendor"`
+	Model               string                `json:"model"`
+	Serial              string                `json:"serial"`
 	Attributes          []Attributes          `json:"attributes"`
 	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
 	ComponentTypeID     string                `json:"component_type_id" binding:"required"`
