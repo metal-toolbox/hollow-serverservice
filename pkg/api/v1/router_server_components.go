@@ -154,7 +154,6 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 		// insert versioned attributes
 		for _, versionedAttributes := range srvComponent.VersionedAttributes {
 			dbVersionedAttributes := versionedAttributes.toDBModel()
-			dbVersionedAttributes.ServerID = null.StringFrom(server.ID)
 			dbVersionedAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
 
 			err = dbSrvComponent.AddVersionedAttributes(c.Request.Context(), tx, true, dbVersionedAttributes)
@@ -172,7 +171,6 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 				return
 			}
 
-			dbAttributes.ServerID = null.StringFrom(server.ID)
 			dbAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
 
 			err = dbSrvComponent.AddAttributes(c.Request.Context(), tx, true, dbAttributes)
