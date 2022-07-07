@@ -58,12 +58,7 @@ func (r *Router) serverComponentGet(c *gin.Context) {
 	// - include Attributes, VersionedAttributes and ServerComponentyType relations
 	mods := []qm.QueryMod{
 		qm.Load("Attributes"),
-		qm.Load("VersionedAttributes",
-			qm.Where(
-				`(namespace, created_at) IN (SELECT namespace, MAX(created_at) FROM versioned_attributes WHERE server_id=? GROUP BY namespace, server_component_id)`,
-				srv.ID,
-			),
-		),
+		qm.Load("VersionedAttributes"),
 		qm.Load("ServerComponentType"),
 	}
 
