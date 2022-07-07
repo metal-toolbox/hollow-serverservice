@@ -22,12 +22,12 @@ type ServerComponent struct {
 	Name                string                `json:"name" binding:"required"`
 	Vendor              string                `json:"vendor"`
 	Model               string                `json:"model"`
-	Serial              string                `json:"serial"`
+	Serial              string                `json:"serial" binding:"required"`
 	Attributes          []Attributes          `json:"attributes"`
 	VersionedAttributes []VersionedAttributes `json:"versioned_attributes"`
 	ComponentTypeID     string                `json:"component_type_id" binding:"required"`
 	ComponentTypeName   string                `json:"component_type_name" binding:"required"`
-	ComponentTypeSlug   string                `json:"component_type_slug"`
+	ComponentTypeSlug   string                `json:"component_type_slug" binding:"required"`
 	CreatedAt           time.Time             `json:"created_at"`
 	UpdatedAt           time.Time             `json:"updated_at"`
 }
