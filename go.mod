@@ -6,7 +6,7 @@ require (
 	github.com/XSAM/otelsql v0.14.1
 	github.com/cockroachdb/cockroach-go/v2 v2.2.13
 	github.com/friendsofgo/errors v0.9.2
-	github.com/gin-contrib/cors v1.3.1
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/zap v0.0.2
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/uuid v1.3.0
