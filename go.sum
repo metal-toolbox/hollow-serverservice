@@ -536,6 +536,8 @@ github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndr
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
 github.com/pressly/goose/v3 v3.5.3 h1:lIQIIXVbdO2RuQtJBS1e7MZjKEk0demVWt6i0YPiOrg=
 github.com/pressly/goose/v3 v3.5.3/go.mod h1:IL4NNMdXx9O6hHpGbNB5l1hkVe/Avoz4gBDE5g7rQNg=
+github.com/pressly/goose/v3 v3.6.1 h1:DB7/eKhn98vWOz90OSXqMf4OwuKCdQ6GbvxhtjO4Uak=
+github.com/pressly/goose/v3 v3.6.1/go.mod h1:fpaav/TpxygOn1+OAdzwswN2NbvadBOktQpiDOxewvY=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_golang v0.9.3/go.mod h1:/TN21ttK/J9q6uSwhBd54HahCDft0ttaMvbicHlPoso=
 github.com/prometheus/client_golang v1.0.0/go.mod h1:db9x61etRT2tGnBNRi70OPL5FsnadC4Ky3P0J6CfImo=
