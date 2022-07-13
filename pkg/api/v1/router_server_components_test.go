@@ -93,6 +93,7 @@ func TestIntegrationServerListComponents(t *testing.T) {
 				{
 					Model:             "Normal Fin",
 					Serial:            "Left",
+					Name:              "Normal Fin",
 					ComponentTypeName: "Fins",
 					ComponentTypeSlug: "fins",
 					VersionedAttributes: []serverservice.VersionedAttributes{
@@ -304,11 +305,44 @@ func TestIntegrationServerGetComponents(t *testing.T) {
 func TestIntegrationServerCreateComponents(t *testing.T) {
 	s := serverTest(t)
 
+	// fixture objects
+	var servers []serverservice.Server
+
+	var componentTypeSlice serverservice.ServerComponentTypeSlice
+
 	// run default client tests
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.CreateComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
+		var sc serverservice.ServerComponentSlice
+
+		if !expectError {
+			var err error
+			// 2. retrieve list of servers, expect the test db is populated with one or more test servers
+			servers, _, err = s.Client.List(context.Background(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			componentTypeSlice, _, err = s.Client.ListServerComponentTypes(context.Background(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			sc = serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin A",
+					Model:             "Normal Fin",
+					Serial:            "Left Upper",
+				},
+			}
+		}
+
+		_, err := s.Client.CreateComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), sc)
 		if !expectError {
 			require.NoError(t, err)
 		}
@@ -316,61 +350,9 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 		return err
 	})
 
-	// init fixture data
-	//
-	// 1. retrieve list of component types, expect the test db is populated with the 'Fins' component type information
-	componentTypeSlice, _, err := s.Client.ListServerComponentTypes(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Len(t, componentTypeSlice, 1)
-
-	// 2. retrieve list of servers, expect the test db is populated with one or more test servers
-	servers, _, err := s.Client.List(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	// make sure all fixtures are available
 	assert.GreaterOrEqual(t, len(servers), 1)
-
-	// 3. declare fixture
-	fixture := serverservice.ServerComponentSlice{
-		{
-			UUID:              uuid.New(),
-			ServerUUID:        servers[0].UUID,
-			Name:              "My Lucky Fin",
-			Vendor:            "barracuda",
-			Model:             "a lucky fin",
-			Serial:            "right",
-			ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
-			ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
-			ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
-			VersionedAttributes: []serverservice.VersionedAttributes{
-				{
-					Namespace: dbtools.FixtureNamespaceVersioned,
-					Data:      json.RawMessage(`{"version":"1.0"}`),
-				},
-			},
-		},
-		{
-			UUID:              uuid.New(),
-			ServerUUID:        servers[0].UUID,
-			Name:              "My Lucky Fin 2",
-			Vendor:            "barracuda",
-			Model:             "a lucky fin",
-			Serial:            "left",
-			ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
-			ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
-			ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
-			VersionedAttributes: []serverservice.VersionedAttributes{
-				{
-					Namespace: dbtools.FixtureNamespaceVersioned,
-					Data:      json.RawMessage(`{"version":"2.0"}`),
-				},
-			},
-		},
-	}
+	assert.GreaterOrEqual(t, len(componentTypeSlice), 1)
 
 	var testCases = []struct {
 		testName    string
@@ -387,11 +369,86 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 			"hollow client received a server error - response code: 404, message: resource not found",
 		},
 		{
-			"create and query by model",
+			"create component and list by Name works",
 			servers[0].UUID,
-			fixture,
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower",
+				},
+			},
 			"resource created",
 			"",
+		},
+		{
+			"create component which violates unique constraint on ServerID, ComponentTypeID, Serial should return error",
+			servers[0].UUID,
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower",
+				},
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower",
+				},
+			},
+			"",
+			"duplicate key value violates unique constraint",
+		},
+		{
+			"create component with unknown server UUID returns error",
+			uuid.New(),
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        uuid.New(),
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower 2",
+				},
+			},
+			"",
+			"resource not found",
+		},
+		{
+			"create component validates field constraints",
+			servers[0].UUID,
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:      servers[0].UUID,
+					ComponentTypeID: "lala",
+					Name:            "Fin B",
+					Model:           "Normal Fin",
+					Serial:          "Left Lower 2",
+				},
+			},
+			"",
+			"error in server component payload",
+		},
+		{
+			"create component with empty slice returns error",
+			servers[0].UUID,
+			serverservice.ServerComponentSlice{},
+			"",
+			"error in server component payload",
 		},
 	}
 
@@ -400,6 +457,7 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 			// create
 			res, err := s.Client.CreateComponents(context.TODO(), tt.serverUUID, tt.components)
 			if tt.errorMsg != "" {
+				assert.NotNil(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 				return
 			}

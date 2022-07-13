@@ -3,9 +3,16 @@ package serverservice
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+
+	"go.hollow.sh/serverservice/internal/models"
+)
+
+var (
+	errSrvComponentPayload = errors.New("error in server component payload")
 )
 
 // serverComponentList returns a response with the list of components that matched the params.
@@ -95,14 +102,30 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 
 	// check server exists
 	if server == nil {
-		notFoundResponse(c, "no such server")
+		notFoundResponse(c, "server resource referenced by UUID does not exist: "+server.ID)
 		return
 	}
 
-	// components payload
+	//	// components payload
 	var serverComponents ServerComponentSlice
 	if err := c.ShouldBindJSON(&serverComponents); err != nil {
-		badRequestResponse(c, "invalid payload: ServerComponentSlice", err)
+		badRequestResponse(
+			c,
+			"",
+			errors.Wrap(
+				errSrvComponentPayload, "failed to unmarshal JSON as ServerComponentSlice: "+err.Error()),
+		)
+
+		return
+	}
+
+	if len(serverComponents) == 0 {
+		badRequestResponse(
+			c,
+			"",
+			errors.Wrap(errSrvComponentPayload, "ServerComponentSlice is empty"),
+		)
+
 		return
 	}
 
@@ -157,7 +180,7 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 			}
 		}
 
-		// insert versioned attributes
+		// insert attributes
 		for _, attributes := range srvComponent.Attributes {
 			dbAttributes, err := attributes.toDBModel()
 			if err != nil {
