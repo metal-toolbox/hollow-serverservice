@@ -100,6 +100,16 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
+	exists, err := models.ServerExists(c.Request.Context(), r.DB, srv.UUID.String())
+	if err != nil {
+		badRequestResponse(c, "check server resource exists error", err)
+		return
+	}
+
+	if exists {
+		resourceExistsResponse(c, "server with given UUID exists: "+srv.UUID.String())
+	}
+
 	if err := dbSRV.Insert(c.Request.Context(), r.DB, boil.Infer()); err != nil {
 		dbErrorResponse(c, err)
 		return
