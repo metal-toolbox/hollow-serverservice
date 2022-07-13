@@ -216,14 +216,30 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 
 	// check server exists
 	if server == nil {
-		notFoundResponse(c, "no such server")
+		notFoundResponse(c, "server resource referenced by UUID does not exist: "+server.ID)
 		return
 	}
 
 	// components payload
 	var serverComponents ServerComponentSlice
 	if err := c.ShouldBindJSON(&serverComponents); err != nil {
-		badRequestResponse(c, "invalid payload: ServerComponentSlice", err)
+		badRequestResponse(
+			c,
+			"",
+			errors.Wrap(
+				errSrvComponentPayload, err.Error()),
+		)
+
+		return
+	}
+
+	if len(serverComponents) == 0 {
+		badRequestResponse(
+			c,
+			"",
+			errors.Wrap(errSrvComponentPayload, "ServerComponentSlice is empty"),
+		)
+
 		return
 	}
 
@@ -239,10 +255,42 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 	defer tx.Rollback()
 
 	for _, srvComponent := range serverComponents {
+		// convert object to db model type and keep the received component UUID
 		dbSrvComponent := srvComponent.toDBModel(server.ID)
 
+		// check component ID is non nil
+		if dbSrvComponent.ID == "" || dbSrvComponent.ID == uuid.Nil.String() {
+			badRequestResponse(
+				c,
+				"component update requires a non-nil UUID",
+				errSrvComponentPayload,
+			)
+
+			return
+		}
+
+		// check server component exists
+		exists, err := models.ServerComponentExists(c.Request.Context(), tx, srvComponent.UUID.String())
+		if err != nil {
+			badRequestResponse(c, "check component resource exists error", err)
+			return
+		}
+
+		if !exists {
+			badRequestResponse(
+				c,
+				"",
+				errors.Wrap(
+					errSrvComponentPayload, "component resource referenced by UUID does not exist: "+
+						srvComponent.UUID.String(),
+				),
+			)
+
+			return
+		}
+
 		// update component
-		_, err := dbSrvComponent.Update(c.Request.Context(), r.DB, boil.Infer())
+		_, err = dbSrvComponent.Update(c.Request.Context(), tx, boil.Infer())
 		if err != nil {
 			dbErrorResponse(c, err)
 			return
@@ -251,10 +299,26 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 		// update component versioned attributes
 		for _, versionedAttributes := range srvComponent.VersionedAttributes {
 			dbVersionedAttributes := versionedAttributes.toDBModel()
-			dbVersionedAttributes.ServerID = null.StringFrom(server.ID)
-			dbVersionedAttributes.ServerComponentID = null.StringFrom(srvComponent.UUID.String())
+			dbVersionedAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
 
 			err = dbSrvComponent.AddVersionedAttributes(c.Request.Context(), tx, true, dbVersionedAttributes)
+			if err != nil {
+				dbErrorResponse(c, err)
+				return
+			}
+		}
+
+		// update component  attributes
+		for _, attributes := range srvComponent.Attributes {
+			dbAttributes, err := attributes.toDBModel()
+			if err != nil {
+				dbErrorResponse(c, err)
+				return
+			}
+
+			dbAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
+
+			err = dbSrvComponent.AddAttributes(c.Request.Context(), tx, true, dbAttributes)
 			if err != nil {
 				dbErrorResponse(c, err)
 				return
