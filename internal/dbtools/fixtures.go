@@ -167,6 +167,7 @@ func setupNemo(ctx context.Context, db *sqlx.DB, t *testing.T) error {
 
 	FixtureNemoLeftFin = &models.ServerComponent{
 		ServerComponentTypeID: FixtureFinType.ID,
+		Name:                  null.StringFrom("Normal Fin"),
 		Model:                 null.StringFrom("Normal Fin"),
 		Serial:                null.StringFrom("Left"),
 	}
@@ -245,6 +246,7 @@ func setupDory(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureDoryLeftFin = &models.ServerComponent{
 		ServerComponentTypeID: FixtureFinType.ID,
+		Name:                  null.StringFrom("Normal Fin"),
 		Model:                 null.StringFrom("Normal Fin"),
 		Serial:                null.StringFrom("Left"),
 	}
@@ -284,6 +286,7 @@ func setupMarlin(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureMarlinLeftFin = &models.ServerComponent{
 		ServerComponentTypeID: FixtureFinType.ID,
+		Name:                  null.StringFrom("Normal Fin"),
 		Model:                 null.StringFrom("Normal Fin"),
 		Serial:                null.StringFrom("Left"),
 	}
