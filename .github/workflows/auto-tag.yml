@@ -1,0 +1,24 @@
+name: Auto tag
+
+# Automatically push a tag at 12:15 (UTC) on day-of-month 2
+
+on:
+  schedule:
+    - cron: '15 12 2 * *'
+
+jobs:
+  auto-tag:
+    name: Automatic Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.39.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
+          WITH_V: true
