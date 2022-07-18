@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/XSAM/otelsql v0.15.0
-	github.com/cockroachdb/cockroach-go/v2 v2.2.14
+	github.com/cockroachdb/cockroach-go/v2 v2.2.15
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/zap v0.0.2
