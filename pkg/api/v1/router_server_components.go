@@ -54,11 +54,10 @@ func (r *Router) serverComponentGet(c *gin.Context) {
 
 	pager := parsePagination(c)
 
-	// list component by server_id
 	// - include Attributes, VersionedAttributes and ServerComponentyType relations
 	mods := []qm.QueryMod{
 		qm.Load("Attributes"),
-		qm.Load("VersionedAttributes"),
+		qm.Load("VersionedAttributes", qm.Where("(namespace, created_at, server_component_id) IN (select namespace, max(created_at), server_component_id from versioned_attributes group by namespace, server_component_id)")),
 		qm.Load("ServerComponentType"),
 	}
 
