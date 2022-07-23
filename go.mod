@@ -34,7 +34,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
-require go.hollow.sh/toolbox v0.1.5
+require go.hollow.sh/toolbox v0.3.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -88,7 +88,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167 // indirect
-	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df // indirect
