@@ -7,6 +7,6 @@ CREATE INDEX idx_deleted_at ON servers (deleted_at) where deleted_at is null;
 
 -- +goose Down
 -- +goose StatementBegin
-ALTER TABLE servers DROP COLUMN deleted_at;
-DROP INDEX idx_deleted_at;
+ALTER TABLE servers DROP COLUMN IF EXISTS deleted_at;
+DROP INDEX IF EXISTS idx_deleted_at;
 -- +goose StatementEnd

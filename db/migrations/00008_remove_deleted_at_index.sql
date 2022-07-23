@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-DROP INDEX idx_deleted_at;
+DROP INDEX IF EXISTS idx_deleted_at;
 
 -- +goose StatementEnd
 

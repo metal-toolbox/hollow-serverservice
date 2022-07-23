@@ -31,6 +31,16 @@ func zeroTimeValues(sc *serverservice.ServerComponent) {
 	}
 }
 
+func componentByNameVendorModelSerial(name, vendor, model, serial string, sc serverservice.ServerComponentSlice) *serverservice.ServerComponent {
+	for _, c := range sc {
+		if c.Name == name && c.Vendor == vendor && c.Model == model && c.Serial == serial {
+			return &c
+		}
+	}
+
+	return nil
+}
+
 func TestIntegrationServerListComponents(t *testing.T) {
 	s := serverTest(t)
 
@@ -170,23 +180,123 @@ func TestIntegrationServerGetComponents(t *testing.T) {
 		return err
 	})
 
+	// init fixture data
+
+	// 1. get list of servers
+	servers, _, err := s.Client.List(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// expect atleast 1 server for test to proceed
+	assert.GreaterOrEqual(t, len(servers), 1)
+
+	// 2. get component type slice
+	componentTypeSlice, _, err := s.Client.ListServerComponentTypes(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// expect atleast 1 component type to proceed
+	assert.Len(t, componentTypeSlice, 1)
+
+	// fixture to create a server components
+	csFixtureCreate := serverservice.ServerComponentSlice{
+		{
+			ServerUUID:        servers[0].UUID,
+			Name:              "My Lucky Fin",
+			Vendor:            "barracuda",
+			Model:             "a lucky fin",
+			Serial:            "right",
+			ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
+			ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
+			ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
+			VersionedAttributes: []serverservice.VersionedAttributes{
+				{
+					Namespace: dbtools.FixtureNamespaceVersioned,
+					Data:      json.RawMessage(`{"version":"1.0"}`),
+				},
+				{
+					Namespace: dbtools.FixtureNamespaceVersioned,
+					Data:      json.RawMessage(`{"version":"2.0"}`),
+				},
+			},
+		},
+	}
+
+	// create server component
+	_, err = s.Client.CreateComponents(context.TODO(), servers[0].UUID, csFixtureCreate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	var testCases = []struct {
-		testName string
-		srvUUID  uuid.UUID
-		errorMsg string
+		testName        string
+		srvUUID         uuid.UUID
+		expectedCount   int
+		expectedInSlice serverservice.ServerComponent
+		errorMsg        string
 	}{
 		{
 			"returns not found on missing server uuid",
 			uuid.New(),
+			0,
+			serverservice.ServerComponent{},
 			"response code: 404",
+		},
+		{
+			"component Versioned Attributes is returned as expected",
+			servers[0].UUID,
+			3,
+			serverservice.ServerComponent{
+				ServerUUID:        servers[0].UUID,
+				Name:              "My Lucky Fin",
+				Vendor:            "barracuda",
+				Model:             "a lucky fin",
+				Serial:            "right",
+				ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
+				ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
+				ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
+				VersionedAttributes: []serverservice.VersionedAttributes{
+					{
+						Namespace: dbtools.FixtureNamespaceVersioned,
+						Data:      json.RawMessage(`{"version":"2.0"}`),
+					},
+				},
+			},
+			"",
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			_, _, err := s.Client.GetComponents(context.TODO(), tt.srvUUID, nil)
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), tt.errorMsg)
+			got, _, err := s.Client.GetComponents(context.TODO(), tt.srvUUID, nil)
+			if tt.errorMsg != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+				return
+			}
+
+			assert.Nil(t, err)
+
+			assert.Equal(t, tt.expectedCount, len(got))
+			gotc := componentByNameVendorModelSerial(
+				tt.expectedInSlice.Name,
+				tt.expectedInSlice.Vendor,
+				tt.expectedInSlice.Model,
+				tt.expectedInSlice.Serial,
+				got,
+			)
+
+			if gotc == nil {
+				t.Fatal("expected component, got nil")
+			}
+
+			// zero variable values before comparison
+			gotc.UUID = uuid.Nil
+			zeroTimeValues(gotc)
+
+			assert.Equal(t, tt.expectedInSlice, *gotc)
 		})
 	}
 }
