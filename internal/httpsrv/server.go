@@ -15,17 +15,19 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
+	"gocloud.dev/secrets"
 
 	v1api "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
 // Server implements the HTTP Server
 type Server struct {
-	Logger     *zap.Logger
-	Listen     string
-	Debug      bool
-	DB         *sqlx.DB
-	AuthConfig ginjwt.AuthConfig
+	Logger        *zap.Logger
+	Listen        string
+	Debug         bool
+	DB            *sqlx.DB
+	AuthConfig    ginjwt.AuthConfig
+	SecretsKeeper *secrets.Keeper
 }
 
 var (
@@ -58,7 +60,11 @@ func (s *Server) setup() *gin.Engine {
 
 	p := ginprometheus.NewPrometheus("gin")
 
-	v1Rtr := v1api.Router{DB: s.DB, AuthMW: authMW}
+	v1Rtr := v1api.Router{
+		DB:            s.DB,
+		AuthMW:        authMW,
+		SecretsKeeper: s.SecretsKeeper,
+	}
 
 	// Remove any params from the URL string to keep the number of labels down
 	p.ReqCntURLLabelMappingFn = func(c *gin.Context) string {

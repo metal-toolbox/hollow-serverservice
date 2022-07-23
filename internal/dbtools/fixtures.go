@@ -5,6 +5,7 @@ package dbtools
 
 import (
 	"context"
+	"testing"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -35,6 +36,7 @@ var (
 	FixtureNemoVersionedNew     *models.VersionedAttribute
 	FixtureNemoVersionedOld     *models.VersionedAttribute
 	FixtureNemoVersionedV2      *models.VersionedAttribute
+	FixtureNemoBMCSecret        *models.ServerSecret
 
 	FixtureDory          *models.Server
 	FixtureDoryMetadata  *models.Attribute
@@ -66,7 +68,7 @@ var (
 	FixtureServerComponents models.ServerComponentSlice
 )
 
-func addFixtures() error {
+func addFixtures(t *testing.T) error {
 	ctx := context.TODO()
 
 	FixtureFinType = &models.ServerComponentType{
@@ -78,7 +80,7 @@ func addFixtures() error {
 		return err
 	}
 
-	if err := setupNemo(ctx, testDB); err != nil {
+	if err := setupNemo(ctx, testDB, t); err != nil {
 		return err
 	}
 
@@ -118,13 +120,34 @@ func addFixtures() error {
 	return nil
 }
 
-func setupNemo(ctx context.Context, db *sqlx.DB) error {
+func setupNemo(ctx context.Context, db *sqlx.DB, t *testing.T) error {
 	FixtureNemo = &models.Server{
 		Name:         null.StringFrom("Nemo"),
 		FacilityCode: null.StringFrom("Sydney"),
 	}
 
 	if err := FixtureNemo.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	bmc, err := models.ServerSecretTypes(models.ServerSecretTypeWhere.Slug.EQ("bmc")).One(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	keeper := TestSecretKeeper(t)
+
+	value, err := Encrypt(ctx, keeper, "super-secret-bmc-password")
+	if err != nil {
+		return err
+	}
+
+	FixtureNemoBMCSecret = &models.ServerSecret{
+		ServerSecretTypeID: bmc.ID,
+		Value:              value,
+	}
+
+	if err := FixtureNemo.AddServerSecrets(ctx, db, true, FixtureNemoBMCSecret); err != nil {
 		return err
 	}
 

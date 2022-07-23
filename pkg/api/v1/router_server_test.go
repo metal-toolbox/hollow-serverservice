@@ -502,7 +502,7 @@ func TestIntegrationServerList(t *testing.T) {
 
 func TestIntegrationServerListPagination(t *testing.T) {
 	s := serverTest(t)
-	s.Client.SetToken(validToken([]string{"read", "write"}))
+	s.Client.SetToken(validToken(adminScopes))
 
 	p := &serverservice.ServerListParams{PaginationParams: &serverservice.PaginationParams{Limit: 2, Page: 1}}
 	r, resp, err := s.Client.List(context.TODO(), p)
@@ -545,7 +545,7 @@ func TestIntegrationServerListPagination(t *testing.T) {
 
 func TestIntegrationServerGetPreload(t *testing.T) {
 	s := serverTest(t)
-	s.Client.SetToken(validToken([]string{"read", "write"}))
+	s.Client.SetToken(validToken(adminScopes))
 
 	r, _, err := s.Client.Get(context.TODO(), uuid.MustParse(dbtools.FixtureNemo.ID))
 
@@ -576,7 +576,7 @@ func TestIntegrationServerGetDeleted(t *testing.T) {
 
 func TestIntegrationServerListPreload(t *testing.T) {
 	s := serverTest(t)
-	s.Client.SetToken(validToken([]string{"read", "write"}))
+	s.Client.SetToken(validToken(adminScopes))
 
 	// should only return nemo
 	r, _, err := s.Client.List(context.TODO(), &serverservice.ServerListParams{FacilityCode: "Sydney"})
@@ -729,7 +729,7 @@ func TestIntegrationServerServiceCreateVersionedAttributes(t *testing.T) {
 
 func TestIntegrationServerServiceCreateVersionedAttributesIncrementCounter(t *testing.T) {
 	s := serverTest(t)
-	s.Client.SetToken(validToken([]string{"read", "write"}))
+	s.Client.SetToken(validToken(adminScopes))
 
 	u := uuid.New()
 	ctx := context.TODO()

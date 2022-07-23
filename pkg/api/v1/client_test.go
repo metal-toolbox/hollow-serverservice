@@ -2,6 +2,7 @@ package serverservice_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -9,6 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+)
+
+var (
+	adminScopes = []string{"read", "write", "read:server:secrets", "write:server:secrets"}
 )
 
 func TestNewClientWithToken(t *testing.T) {
@@ -121,7 +126,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 		{
 			"happy path",
 			ctx,
-			validToken([]string{"read", "write"}),
+			validToken(adminScopes),
 			http.StatusOK,
 			false,
 			"",
@@ -146,7 +151,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 		{
 			"fake timeout",
 			timeCtx,
-			validToken([]string{"read", "write"}),
+			validToken(adminScopes),
 			http.StatusOK,
 			true,
 			"context deadline exceeded",
@@ -154,7 +159,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 	}
 
 	for _, tt := range testCases {
-		t.Run(tt.testName, func(t *testing.T) {
+		t.Run(fmt.Sprintf("real client - %s", tt.testName), func(t *testing.T) {
 			err := f(tt.ctx, tt.authToken, tt.responseCode, tt.expectError)
 			if tt.expectError {
 				assert.Error(t, err)

@@ -14,6 +14,10 @@ import (
 	_ "github.com/lib/pq" // Register the Postgres driver.
 	"github.com/stretchr/testify/require"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"gocloud.dev/secrets"
+
+	// import gocdk secret drivers
+	_ "gocloud.dev/secrets/localsecrets"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -21,8 +25,9 @@ import (
 // TestDBURI is the URI for the test database
 var TestDBURI = os.Getenv("SERVERSERVICE_DB_URI")
 var testDB *sqlx.DB
+var testKeeper *secrets.Keeper
 
-func testDatastore() error {
+func testDatastore(t *testing.T) error {
 	// don't setup the datastore if we already have one
 	if testDB != nil {
 		return nil
@@ -42,7 +47,22 @@ func testDatastore() error {
 
 	cleanDB()
 
-	return addFixtures()
+	return addFixtures(t)
+}
+
+// TestSecretKeeper will return the secret keeper we are using for this test run. This allows
+// use to use the same one for the entire test run so the secrets are able to be decrypted.
+func TestSecretKeeper(t *testing.T) *secrets.Keeper {
+	if testKeeper != nil {
+		return testKeeper
+	}
+
+	keeper, err := secrets.OpenKeeper(context.TODO(), "base64key://")
+	require.NoError(t, err)
+
+	testKeeper = keeper
+
+	return keeper
 }
 
 // DatabaseTest allows you to run tests that interact with the database
@@ -55,11 +75,11 @@ func DatabaseTest(t *testing.T) *sqlx.DB {
 
 	t.Cleanup(func() {
 		cleanDB()
-		err := addFixtures()
+		err := addFixtures(t)
 		require.NoError(t, err, "Unexpected error setting up fixture data")
 	})
 
-	err := testDatastore()
+	err := testDatastore(t)
 	require.NoError(t, err, "Unexpected error getting connection to test datastore")
 
 	return testDB
@@ -74,7 +94,10 @@ func cleanDB() {
 	models.VersionedAttributes().DeleteAll(ctx, testDB)
 	models.ServerComponents().DeleteAll(ctx, testDB)
 	models.ServerComponentTypes().DeleteAll(ctx, testDB)
+	models.ServerSecrets().DeleteAll(ctx, testDB)
 	models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true)
 	models.ComponentFirmwareVersions().DeleteAll(ctx, testDB)
+	// don't delete the builtin ServerSecretTypes. Those are expected to exist for the application to work
+	models.ServerSecretTypes(models.ServerSecretTypeWhere.Builtin.EQ(false)).DeleteAll(ctx, testDB)
 	testDB.Exec("SET sql_safe_updates = true;")
 }

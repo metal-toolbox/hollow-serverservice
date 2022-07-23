@@ -14,6 +14,8 @@ const (
 	serverComponentsEndpoint          = "components"
 	serverVersionedAttributesEndpoint = "versioned-attributes"
 	serverComponentFirmwaresEndpoint  = "server-component-firmwares"
+	serverSecretsEndpoint             = "secrets"
+	serverSecretTypeEndpoint          = "server-secret-types"
 )
 
 // ClientInterface provides an interface for the expected calls to interact with a server service api
@@ -40,6 +42,10 @@ type ClientInterface interface {
 	GetServerComponentFirmware(context.Context, uuid.UUID) (*ComponentFirmwareVersion, *ServerResponse, error)
 	ListServerComponentFirmware(context.Context, *ComponentFirmwareVersionListParams) ([]ComponentFirmwareVersion, *ServerResponse, error)
 	UpdateServerComponentFirmware(context.Context, uuid.UUID, ComponentFirmwareVersion) (*ServerResponse, error)
+	GetSecret(context.Context, uuid.UUID, string) (*ServerSecret, *ServerResponse, error)
+	SetSecret(context.Context, uuid.UUID, string, string) (*ServerResponse, error)
+	DeleteSecret(context.Context, uuid.UUID, string) (*ServerResponse, error)
+	ListServerSecretTypes(context.Context) (*ServerResponse, error)
 }
 
 // Create will attempt to create a server in Hollow and return the new server's UUID
@@ -257,4 +263,49 @@ func (c *Client) ListServerComponentFirmware(ctx context.Context, params *Compon
 func (c *Client) UpdateServerComponentFirmware(ctx context.Context, fwUUID uuid.UUID, firmware ComponentFirmwareVersion) (*ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s", serverComponentFirmwaresEndpoint, fwUUID)
 	return c.put(ctx, path, firmware)
+}
+
+// GetSecret will return the secret for the secret type for the given server UUID
+func (c *Client) GetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerSecret, *ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+	secret := &ServerSecret{}
+	r := ServerResponse{Record: secret}
+
+	if err := c.get(ctx, path, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return secret, &r, nil
+}
+
+// SetSecret will set the secret for a given server UUID and secret type.
+func (c *Client) SetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string, value string) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+	secret := &serverSecretValue{Value: value}
+
+	return c.put(ctx, path, secret)
+}
+
+// DeleteSecret will remove the secret for a given server UUID and secret type.
+func (c *Client) DeleteSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+
+	return c.delete(ctx, path)
+}
+
+// ListServerSecretTypes will return all server secret types
+func (c *Client) ListServerSecretTypes(ctx context.Context, params *PaginationParams) ([]ServerSecretType, *ServerResponse, error) {
+	types := &[]ServerSecretType{}
+	r := ServerResponse{Records: types}
+
+	if err := c.list(ctx, serverSecretTypeEndpoint, params, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *types, &r, nil
+}
+
+// CreateServerSecretType will create a new server secret type
+func (c *Client) CreateServerSecretType(ctx context.Context, sType *ServerSecretType) (*ServerResponse, error) {
+	return c.post(ctx, serverSecretTypeEndpoint, sType)
 }
