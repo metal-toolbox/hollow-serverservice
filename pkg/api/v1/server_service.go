@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path"
 
 	"github.com/google/uuid"
 )
@@ -267,11 +268,11 @@ func (c *Client) UpdateServerComponentFirmware(ctx context.Context, fwUUID uuid.
 
 // GetSecret will return the secret for the secret type for the given server UUID
 func (c *Client) GetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerSecret, *ServerResponse, error) {
-	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+	p := path.Join(serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
 	secret := &ServerSecret{}
 	r := ServerResponse{Record: secret}
 
-	if err := c.get(ctx, path, &r); err != nil {
+	if err := c.get(ctx, p, &r); err != nil {
 		return nil, nil, err
 	}
 
@@ -280,17 +281,17 @@ func (c *Client) GetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug st
 
 // SetSecret will set the secret for a given server UUID and secret type.
 func (c *Client) SetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string, value string) (*ServerResponse, error) {
-	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+	p := path.Join(serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
 	secret := &serverSecretValue{Value: value}
 
-	return c.put(ctx, path, secret)
+	return c.put(ctx, p, secret)
 }
 
 // DeleteSecret will remove the secret for a given server UUID and secret type.
 func (c *Client) DeleteSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerResponse, error) {
-	path := fmt.Sprintf("%s/%s/%s/%s", serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+	p := path.Join(serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
 
-	return c.delete(ctx, path)
+	return c.delete(ctx, p)
 }
 
 // ListServerSecretTypes will return all server secret types

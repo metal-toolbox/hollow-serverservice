@@ -38,17 +38,18 @@ func (r *Router) serverSecretGet(c *gin.Context) {
 		return
 	}
 
+	sID, err := uuid.Parse(dbS.ServerID)
+	if err != nil {
+		failedConvertingToVersioned(c, err)
+		return
+	}
+
 	secret := &ServerSecret{
+		ServerID:   sID,
 		SecretType: dbS.R.ServerSecretType.Slug,
 		Value:      decryptedValue,
 		CreatedAt:  dbS.CreatedAt,
 		UpdatedAt:  dbS.UpdatedAt,
-	}
-
-	secret.ServerID, err = uuid.Parse(dbS.ServerID)
-	if err != nil {
-		failedConvertingToVersioned(c, err)
-		return
 	}
 
 	itemResponse(c, secret)
