@@ -10,49 +10,99 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.hollow.sh/toolbox/ginjwt"
+	"gocloud.dev/secrets"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
 
 // Router provides a router for the v1 API
 type Router struct {
-	AuthMW *ginjwt.Middleware
-	DB     *sqlx.DB
+	AuthMW        *ginjwt.Middleware
+	DB            *sqlx.DB
+	SecretsKeeper *secrets.Keeper
 }
 
 // Routes will add the routes for this API version to a router group
 func (r *Router) Routes(rg *gin.RouterGroup) {
 	amw := r.AuthMW
 
-	rg.GET("/servers", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverList)
-	rg.POST("/servers", amw.AuthRequired(), amw.RequiredScopes(createScopes("server")), r.serverCreate)
-	rg.GET("/servers/:uuid", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverGet)
-	rg.PUT("/servers/:uuid", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server")), r.serverUpdate)
-	rg.DELETE("/servers/:uuid", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server")), r.serverDelete)
+	// require all calls to have auth
+	rg.Use(amw.AuthRequired())
 
-	rg.GET("/servers/:uuid/attributes", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:attributes")), r.serverAttributesList)
-	rg.POST("/servers/:uuid/attributes", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:attributes")), r.serverAttributesCreate)
-	rg.GET("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:attributes")), r.serverAttributesGet)
-	rg.PUT("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
-	rg.DELETE("/servers/:uuid/attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
+	// /servers
+	srvs := rg.Group("/servers")
+	{
+		srvs.GET("", amw.RequiredScopes(readScopes("server")), r.serverList)
+		srvs.POST("", amw.RequiredScopes(createScopes("server")), r.serverCreate)
 
-	rg.GET("/servers/components", amw.AuthRequired(), amw.RequiredScopes(readScopes("server:component")), r.serverComponentList)
-	rg.POST("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:component")), r.serverComponentsCreate)
-	rg.GET("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:component")), r.serverComponentGet)
-	rg.PUT("/servers/:uuid/components", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server", "server:component")), r.serverComponentUpdate)
+		srvs.GET("/components", amw.RequiredScopes(readScopes("server:component")), r.serverComponentList)
 
-	rg.GET("/servers/:uuid/versioned-attributes", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
-	rg.POST("/servers/:uuid/versioned-attributes", amw.AuthRequired(), amw.RequiredScopes(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
-	rg.GET("/servers/:uuid/versioned-attributes/:namespace", amw.AuthRequired(), amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesGet)
+		// /servers/:uuid
+		srv := srvs.Group("/:uuid")
+		{
+			srv.GET("", amw.RequiredScopes(readScopes("server")), r.serverGet)
+			srv.PUT("", amw.RequiredScopes(updateScopes("server")), r.serverUpdate)
+			srv.DELETE("", amw.RequiredScopes(deleteScopes("server")), r.serverDelete)
 
-	rg.GET("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(readScopes("server-component-types")), r.serverComponentTypeList)
-	rg.POST("/server-component-types", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server-component-types")), r.serverComponentTypeCreate)
+			// /servers/:uuid/attributes
+			srvAttrs := srv.Group("/attributes")
+			{
+				srvAttrs.GET("", amw.RequiredScopes(readScopes("server", "server:attributes")), r.serverAttributesList)
+				srvAttrs.POST("", amw.RequiredScopes(createScopes("server", "server:attributes")), r.serverAttributesCreate)
+				srvAttrs.GET("/:namespace", amw.RequiredScopes(readScopes("server", "server:attributes")), r.serverAttributesGet)
+				srvAttrs.PUT("/:namespace", amw.RequiredScopes(updateScopes("server", "server:attributes")), r.serverAttributesUpdate)
+				srvAttrs.DELETE("/:namespace", amw.RequiredScopes(deleteScopes("server", "server:attributes")), r.serverAttributesDelete)
+			}
 
-	rg.GET("/server-component-firmwares", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareList)
-	rg.POST("/server-component-firmwares", amw.AuthRequired(), amw.RequiredScopes(createScopes("server")), r.serverComponentFirmwareCreate)
-	rg.GET("/server-component-firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareGet)
-	rg.PUT("/server-component-firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(updateScopes("server")), r.serverComponentFirmwareUpdate)
-	rg.DELETE("/server-component-firmwares/:uuid", amw.AuthRequired(), amw.RequiredScopes(deleteScopes("server")), r.serverComponentFirmwareDelete)
+			// /servers/:uuid/components
+			srvComponents := srv.Group("/components")
+			{
+				srvComponents.POST("", amw.RequiredScopes(createScopes("server", "server:component")), r.serverComponentsCreate)
+				srvComponents.GET("", amw.RequiredScopes(readScopes("server", "server:component")), r.serverComponentGet)
+				srvComponents.PUT("", amw.RequiredScopes(updateScopes("server", "server:component")), r.serverComponentUpdate)
+			}
+
+			// /servers/:uuid/secrets/:slug
+			svrSecret := srv.Group("secrets/:slug")
+			{
+				svrSecret.GET("", amw.RequiredScopes([]string{"read:server:secrets"}), r.serverSecretGet)
+				svrSecret.PUT("", amw.RequiredScopes([]string{"write:server:secrets"}), r.serverSecretUpsert)
+				svrSecret.DELETE("", amw.RequiredScopes([]string{"write:server:secrets"}), r.serverSecretDelete)
+			}
+
+			// /servers/:uuid/versioned-attributes
+			srvVerAttrs := srv.Group("/versioned-attributes")
+			{
+				srvVerAttrs.GET("", amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesList)
+				srvVerAttrs.POST("", amw.RequiredScopes(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
+				srvVerAttrs.GET("/:namespace", amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesGet)
+			}
+		}
+	}
+
+	// /server-component-types
+	srvCmpntType := rg.Group("/server-component-types")
+	{
+		srvCmpntType.GET("", amw.RequiredScopes(readScopes("server-component-types")), r.serverComponentTypeList)
+		srvCmpntType.POST("", amw.RequiredScopes(updateScopes("server-component-types")), r.serverComponentTypeCreate)
+	}
+
+	// /server-component-firmwares
+	srvCmpntFw := rg.Group("/server-component-firmwares")
+	{
+		srvCmpntFw.GET("", amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareList)
+		srvCmpntFw.POST("", amw.RequiredScopes(createScopes("server")), r.serverComponentFirmwareCreate)
+		srvCmpntFw.GET("/:uuid", amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareGet)
+		srvCmpntFw.PUT("/:uuid", amw.RequiredScopes(updateScopes("server")), r.serverComponentFirmwareUpdate)
+		srvCmpntFw.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server")), r.serverComponentFirmwareDelete)
+	}
+
+	// /server-secret-types
+	srvSecretTypes := rg.Group("/server-secret-types")
+	{
+		srvSecretTypes.GET("", amw.RequiredScopes(readScopes("server-secret-types")), r.serverSecretTypesList)
+		srvSecretTypes.POST("", amw.RequiredScopes(createScopes("server-secret-types")), r.serverSecretTypesCreate)
+	}
 }
 
 func createScopes(items ...string) []string {

@@ -55,6 +55,28 @@ func parsePagination(c *gin.Context) PaginationParams {
 	}
 }
 
+// queryMods converts the list params into sql conditions that can be added to sql queries
+func (p *PaginationParams) queryMods() []qm.QueryMod {
+	if p == nil {
+		p = &PaginationParams{}
+	}
+
+	mods := []qm.QueryMod{}
+
+	mods = append(mods, qm.Limit(p.limitUsed()))
+
+	if p.Page != 0 {
+		mods = append(mods, qm.Offset(p.offset()))
+	}
+
+	// match the old functionality for now...will handle order and load as params later
+	if p.OrderBy != "" {
+		mods = append(mods, qm.OrderBy(p.OrderBy))
+	}
+
+	return mods
+}
+
 // serverQueryMods queryMods converts the list params into sql conditions that can be added to sql queries
 func (p *PaginationParams) serverQueryMods() []qm.QueryMod {
 	if p == nil {

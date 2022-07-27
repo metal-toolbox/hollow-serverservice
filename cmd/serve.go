@@ -1,11 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.hollow.sh/toolbox/ginjwt"
+	"gocloud.dev/secrets"
+
+	// import gocdk secret drivers
+	_ "gocloud.dev/secrets/localsecrets"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
 	"go.hollow.sh/serverservice/internal/httpsrv"
@@ -21,7 +26,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "starts the hollow server",
 	Run: func(cmd *cobra.Command, args []string) {
-		serve()
+		serve(cmd.Context())
 	},
 }
 
@@ -58,22 +63,31 @@ func init() {
 	viperBindFlag("db.connections.max_idle", serveCmd.Flags().Lookup("db-conns-max-idle"))
 	serveCmd.Flags().Duration("db-conns-max-lifetime", 5*60*time.Second, "max database connections lifetime in seconds")
 	viperBindFlag("db.connections.max_lifetime", serveCmd.Flags().Lookup("db-conns-max-lifetime"))
+	serveCmd.Flags().String("db-encryption-driver", "", "encryption driver uri; 32 byte base64 encoded string, (example: base64key://your-encoded-secret-key)")
+	viperBindFlag("db.encryption-driver", serveCmd.Flags().Lookup("db-encryption-driver"))
 }
 
-func serve() {
+func serve(ctx context.Context) {
 	db := initTracingAndDB()
 
 	dbtools.RegisterHooks()
+
+	keeper, err := secrets.OpenKeeper(ctx, viper.GetString("db.encryption-driver"))
+	if err != nil {
+		logger.Fatalw("failed to open secrets keeper", "error", err)
+	}
+	defer keeper.Close()
 
 	logger.Infow("starting server",
 		"address", viper.GetString("listen"),
 	)
 
 	hs := &httpsrv.Server{
-		Logger: logger.Desugar(),
-		Listen: viper.GetString("listen"),
-		Debug:  viper.GetBool("logging.debug"),
-		DB:     db,
+		Logger:        logger.Desugar(),
+		Listen:        viper.GetString("listen"),
+		Debug:         viper.GetBool("logging.debug"),
+		DB:            db,
+		SecretsKeeper: keeper,
 		AuthConfig: ginjwt.AuthConfig{
 			Enabled:       viper.GetBool("oidc.enabled"),
 			Audience:      viper.GetString("oidc.audience"),

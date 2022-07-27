@@ -40,6 +40,7 @@ func serverTest(t *testing.T) *integrationServer {
 			JWKSURI:    jwksURI,
 			RolesClaim: "userPerms",
 		},
+		SecretsKeeper: dbtools.TestSecretKeeper(t),
 	}
 	s := hs.NewServer()
 
