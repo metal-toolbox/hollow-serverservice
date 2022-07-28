@@ -55,11 +55,6 @@ func badRequestResponse(c *gin.Context, message string, err error) {
 	c.JSON(http.StatusBadRequest, &ServerResponse{Message: message, Error: err.Error()})
 }
 
-// resourceExistsResponse is returned when a resource being created is currently present.
-func resourceExistsResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusConflict, &ServerResponse{Message: message})
-}
-
 func createdResponse(c *gin.Context, slug string) {
 	uri := fmt.Sprintf("%s/%s", uriWithoutQueryParams(c), slug)
 	r := &ServerResponse{
