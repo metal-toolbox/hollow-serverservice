@@ -93,6 +93,7 @@ func TestIntegrationServerListComponents(t *testing.T) {
 				{
 					Model:             "Normal Fin",
 					Serial:            "Left",
+					Name:              "Normal Fin",
 					ComponentTypeName: "Fins",
 					ComponentTypeSlug: "fins",
 					VersionedAttributes: []serverservice.VersionedAttributes{
@@ -304,11 +305,44 @@ func TestIntegrationServerGetComponents(t *testing.T) {
 func TestIntegrationServerCreateComponents(t *testing.T) {
 	s := serverTest(t)
 
+	// fixture objects
+	var servers []serverservice.Server
+
+	var componentTypeSlice serverservice.ServerComponentTypeSlice
+
 	// run default client tests
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.CreateComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
+		var sc serverservice.ServerComponentSlice
+
+		if !expectError {
+			var err error
+			// 2. retrieve list of servers, expect the test db is populated with one or more test servers
+			servers, _, err = s.Client.List(context.Background(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			componentTypeSlice, _, err = s.Client.ListServerComponentTypes(context.Background(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			sc = serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin A",
+					Model:             "Normal Fin",
+					Serial:            "Left Upper",
+				},
+			}
+		}
+
+		_, err := s.Client.CreateComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), sc)
 		if !expectError {
 			require.NoError(t, err)
 		}
@@ -316,61 +350,9 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 		return err
 	})
 
-	// init fixture data
-	//
-	// 1. retrieve list of component types, expect the test db is populated with the 'Fins' component type information
-	componentTypeSlice, _, err := s.Client.ListServerComponentTypes(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Len(t, componentTypeSlice, 1)
-
-	// 2. retrieve list of servers, expect the test db is populated with one or more test servers
-	servers, _, err := s.Client.List(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	// make sure all fixtures are available
 	assert.GreaterOrEqual(t, len(servers), 1)
-
-	// 3. declare fixture
-	fixture := serverservice.ServerComponentSlice{
-		{
-			UUID:              uuid.New(),
-			ServerUUID:        servers[0].UUID,
-			Name:              "My Lucky Fin",
-			Vendor:            "barracuda",
-			Model:             "a lucky fin",
-			Serial:            "right",
-			ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
-			ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
-			ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
-			VersionedAttributes: []serverservice.VersionedAttributes{
-				{
-					Namespace: dbtools.FixtureNamespaceVersioned,
-					Data:      json.RawMessage(`{"version":"1.0"}`),
-				},
-			},
-		},
-		{
-			UUID:              uuid.New(),
-			ServerUUID:        servers[0].UUID,
-			Name:              "My Lucky Fin 2",
-			Vendor:            "barracuda",
-			Model:             "a lucky fin",
-			Serial:            "left",
-			ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
-			ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
-			ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
-			VersionedAttributes: []serverservice.VersionedAttributes{
-				{
-					Namespace: dbtools.FixtureNamespaceVersioned,
-					Data:      json.RawMessage(`{"version":"2.0"}`),
-				},
-			},
-		},
-	}
+	assert.GreaterOrEqual(t, len(componentTypeSlice), 1)
 
 	var testCases = []struct {
 		testName    string
@@ -387,11 +369,86 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 			"hollow client received a server error - response code: 404, message: resource not found",
 		},
 		{
-			"create and query by model",
+			"create component and list by Name works",
 			servers[0].UUID,
-			fixture,
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower",
+				},
+			},
 			"resource created",
 			"",
+		},
+		{
+			"create component which violates unique constraint on ServerID, ComponentTypeID, Serial should return error",
+			servers[0].UUID,
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower",
+				},
+				{
+					ServerUUID:        servers[0].UUID,
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower",
+				},
+			},
+			"",
+			"duplicate key value violates unique constraint",
+		},
+		{
+			"create component with unknown server UUID returns error",
+			uuid.New(),
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:        uuid.New(),
+					ComponentTypeID:   componentTypeSlice[0].ID,
+					ComponentTypeName: componentTypeSlice[0].Name,
+					ComponentTypeSlug: componentTypeSlice[0].Slug,
+					Name:              "Fin B",
+					Model:             "Normal Fin",
+					Serial:            "Left Lower 2",
+				},
+			},
+			"",
+			"resource not found",
+		},
+		{
+			"create component validates field constraints",
+			servers[0].UUID,
+			serverservice.ServerComponentSlice{
+				{
+					ServerUUID:      servers[0].UUID,
+					ComponentTypeID: "lala",
+					Name:            "Fin B",
+					Model:           "Normal Fin",
+					Serial:          "Left Lower 2",
+				},
+			},
+			"",
+			"error in server component payload",
+		},
+		{
+			"create component with empty slice returns error",
+			servers[0].UUID,
+			serverservice.ServerComponentSlice{},
+			"",
+			"error in server component payload",
 		},
 	}
 
@@ -400,6 +457,7 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 			// create
 			res, err := s.Client.CreateComponents(context.TODO(), tt.serverUUID, tt.components)
 			if tt.errorMsg != "" {
+				assert.NotNil(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 				return
 			}
@@ -408,32 +466,50 @@ func TestIntegrationServerCreateComponents(t *testing.T) {
 			assert.NotNil(t, res)
 			assert.Contains(t, res.Message, tt.responseMsg)
 
-			// list
-			params := &serverservice.ServerComponentListParams{Model: "a lucky fin"}
+			params := &serverservice.ServerComponentListParams{Name: tt.components[0].Name}
 			got, _, err := s.Client.ListComponents(context.TODO(), params)
 			if err != nil {
 				t.Error(err)
 			}
 
-			// zero timestamp, uuid values for object comparison
+			// zero timestamp values for object comparison
 			for i := 0; i < len(got); i++ {
 				zeroTimeValues(&got[i])
+
+				got[i].UUID = uuid.Nil
 			}
 
-			// compare object in fixture with object from store
-			assert.ElementsMatch(t, fixture, got)
+			assert.Equal(t, tt.components, got)
 		})
 	}
 }
 
 func TestIntegrationServerUpdateComponents(t *testing.T) {
 	s := serverTest(t)
+	// fixture objects
+	var servers []serverservice.Server
 
 	// run default client tests
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		_, err := s.Client.UpdateComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), nil)
+		var sc serverservice.ServerComponentSlice
+
+		if !expectError {
+			var err error
+
+			// 2. retrieve list of servers, expect the test db is populated with one or more test servers
+			servers, _, err = s.Client.List(context.Background(), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// update serial attribute for update to work
+			sc = serverservice.ServerComponentSlice{servers[0].Components[0]}
+			sc[0].Serial = "lala"
+		}
+
+		_, err := s.Client.UpdateComponents(ctx, uuid.MustParse(dbtools.FixtureNemo.ID), sc)
 		if !expectError {
 			require.NoError(t, err)
 		}
@@ -441,116 +517,203 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		return err
 	})
 
-	// init fixture data
-	//
-	// 1. retrieve list of component types, expect the test db is populated with the 'Fins' component type information
-	componentTypeSlice, _, err := s.Client.ListServerComponentTypes(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
+	componentSliceFixture := func() []serverservice.ServerComponent {
+		s := serverservice.ServerComponentSlice{}
+
+		for _, c := range servers[0].Components {
+			c := c
+			s = append(s, c)
+		}
+
+		return s
 	}
 
-	assert.Len(t, componentTypeSlice, 1)
-
-	// 2. retrieve list of servers, expect the test db is populated with one or more test servers
-	servers, _, err := s.Client.List(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.GreaterOrEqual(t, len(servers), 1)
-
-	// 3. declare fixture
-	fixture := serverservice.ServerComponentSlice{
-		{
-			UUID:              uuid.New(),
-			ServerUUID:        servers[0].UUID,
-			Name:              "My Lucky Fin",
-			Vendor:            "barracuda",
-			Model:             "a lucky fin",
-			Serial:            "right",
-			ComponentTypeID:   componentTypeSlice.ByName("Fins").ID,
-			ComponentTypeName: componentTypeSlice.ByName("Fins").Name,
-			ComponentTypeSlug: componentTypeSlice.ByName("Fins").Slug,
-			VersionedAttributes: []serverservice.VersionedAttributes{
-				{
-					Namespace: dbtools.FixtureNamespaceVersioned,
-					Data:      json.RawMessage(`{"version":"1.0"}`),
-				},
-			},
-		},
+	// change are changes to be applied to the fixture object included in each test case
+	type change struct {
+		versionedAttributes json.RawMessage
+		attributes          json.RawMessage
+		// unsetFlags purges component attributes on the first component in the components slice
+		// included in the test case.
+		// bool value index:
+		// 0 - unsetUUID
+		// 1 - unset componentSerial
+		// 2 - unset componentServer ID
+		// 3 - unset component type UUID
+		unsetFlags []bool
 	}
 
 	var testCases = []struct {
-		testName                   string
-		serverUUID                 uuid.UUID
-		components                 serverservice.ServerComponentSlice
-		updatedName                string
-		updatedVersionedAttributes json.RawMessage
-		responseMsg                string
-		errorMsg                   string
+		testName    string
+		serverUUID  uuid.UUID
+		components  serverservice.ServerComponentSlice
+		change      change
+		responseMsg string
+		errorMsg    string
 	}{
 		{
-			"unknown server query returns 404",
+			"component update for unknown server return error",
 			uuid.New(),
 			nil,
+			change{},
 			"",
-			nil,
-			"",
-			"hollow client received a server error - response code: 404, message: resource not found",
+			"resource not found",
 		},
 		{
-			"create, update and query by model",
+			"component update with empty component slice returns error",
 			servers[0].UUID,
-			fixture,
-			"renamed",
-			json.RawMessage(`{"version":"1.1"}`),
-			"resource updated",
+			nil,
+			change{},
+			"",
+			"ServerComponentSlice is empty",
+		},
+		{
+			"component update validation for non-nil UUID returns error",
+			servers[0].UUID,
+			componentSliceFixture(),
+			// unset component uuid
+			change{unsetFlags: []bool{true, false, false, false}},
+			"",
+			"component update requires a non-nil UUID",
+		},
+		{
+			"component update validation for empty serial returns error",
+			servers[0].UUID,
+			componentSliceFixture(),
+			// unset component serial
+			change{unsetFlags: []bool{false, true, false, false}},
+			"",
+			"Field validation for 'Serial' failed on the 'required' tag",
+		},
+		{
+			"component update validation for empty server ID returns error",
+			servers[0].UUID,
+			componentSliceFixture(),
+			// unset component server ID
+			change{unsetFlags: []bool{false, false, true, false}},
+			"",
+			"Field validation for 'ServerUUID' failed on the 'required' tag",
+		},
+		{
+			"component update validation for empty component type ID returns error",
+			servers[0].UUID,
+			componentSliceFixture(),
+			// unset component type UUID
+			change{unsetFlags: []bool{false, false, false, true}},
+			"",
+			"Field validation for 'ComponentTypeID' failed on the 'required' tag",
+		},
+		{
+			"component update on versioned attributes",
+			servers[0].UUID,
+			componentSliceFixture(),
+			// unset component type UUID
+			change{versionedAttributes: []byte(`{"version":"1.12345"}`)},
+			"",
+			"",
+		},
+		{
+			"component update on attributes",
+			servers[0].UUID,
+			componentSliceFixture(),
+			// unset component type UUID
+			change{attributes: []byte(`{"status":"OK"}`)},
+			"",
 			"",
 		},
 	}
+	// TODO:
+	// - create component
+	// - update component
+	// - check value updated
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			// create
-			res, err := s.Client.CreateComponents(context.TODO(), tt.serverUUID, tt.components)
+			// check flags to unset components attributes
+			if len(tt.change.unsetFlags) == 4 {
+				if tt.change.unsetFlags[0] {
+					tt.components[0].UUID = uuid.Nil
+				}
+
+				if tt.change.unsetFlags[1] {
+					tt.components[0].Serial = ""
+				}
+
+				if tt.change.unsetFlags[2] {
+					tt.components[0].ServerUUID = uuid.Nil
+				}
+
+				if tt.change.unsetFlags[3] {
+					tt.components[0].ComponentTypeID = ""
+				}
+			}
+
+			var listParams *serverservice.ServerComponentListParams
+
+			// test case updates versioned attributes
+			if len(tt.change.versionedAttributes) > 0 {
+				tt.components[0].VersionedAttributes = []serverservice.VersionedAttributes{
+					{
+						Namespace: "hollow.metadata",
+						Data:      tt.change.versionedAttributes,
+					},
+				}
+
+				tt.components[0].Model = "testUpdatedVA"
+
+				listParams = &serverservice.ServerComponentListParams{
+					Name:   "Normal Fin",
+					Serial: "Right",
+					Model:  "testUpdatedVA",
+				}
+			}
+
+			// test case updates attributes
+			if len(tt.change.attributes) > 0 {
+				tt.components[0].Attributes = []serverservice.Attributes{
+					{
+						Namespace: "hollow.attributes",
+						Data:      tt.change.attributes,
+					},
+				}
+
+				tt.components[0].Model = "testUpdatedA"
+
+				listParams = &serverservice.ServerComponentListParams{
+					Name:   "Normal Fin",
+					Serial: "Right",
+					Model:  "testUpdatedA",
+				}
+			}
+
+			//	update component
+			_, err := s.Client.UpdateComponents(context.TODO(), tt.serverUUID, tt.components)
+			// assert any expected errors
 			if tt.errorMsg != "" {
+				assert.NotNil(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 				return
 			}
 
+			// asert no errors
 			assert.Nil(t, err)
-			assert.NotNil(t, res)
-			assert.Contains(t, res.Message, "resource created")
 
-			fixture[0].Name = tt.updatedName
-			fixture[0].VersionedAttributes[0].Data = tt.updatedVersionedAttributes
-
-			// update
-			res, err = s.Client.UpdateComponents(context.TODO(), tt.serverUUID, tt.components)
-			if tt.errorMsg != "" {
-				assert.Contains(t, err.Error(), tt.errorMsg)
-				return
-			}
-
-			assert.Contains(t, res.Message, tt.responseMsg)
-
-			// list
-			params := &serverservice.ServerComponentListParams{Model: "a lucky fin"}
-			got, _, err := s.Client.ListComponents(context.TODO(), params)
+			// list component updated
+			got, _, err := s.Client.ListComponents(context.TODO(), listParams)
 			if err != nil {
 				t.Error(err)
 			}
 
-			assert.Equal(t, tt.updatedName, got[0].Name)
-			assert.Equal(t, tt.updatedVersionedAttributes, got[0].VersionedAttributes[0].Data)
-
-			// zero timestamp, uuid values for object comparison
-			for i := 0; i < len(got); i++ {
-				zeroTimeValues(&got[i])
+			// assert versioned attributes change
+			if len(tt.change.versionedAttributes) > 0 {
+				assert.Len(t, got, 1)
+				assert.Equal(t, tt.change.versionedAttributes, got[0].VersionedAttributes[0].Data)
 			}
 
-			// compare object in fixture with object from store
-			assert.ElementsMatch(t, fixture, got)
+			// assert attributes change
+			if len(tt.change.attributes) > 0 {
+				assert.Len(t, got, 1)
+				assert.Equal(t, tt.change.attributes, got[0].Attributes[0].Data)
+			}
 		})
 	}
 }
