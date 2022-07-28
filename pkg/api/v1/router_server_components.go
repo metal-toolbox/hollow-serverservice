@@ -106,7 +106,7 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 		return
 	}
 
-	//	// components payload
+	// components payload
 	var serverComponents ServerComponentSlice
 	if err := c.ShouldBindJSON(&serverComponents); err != nil {
 		badRequestResponse(
