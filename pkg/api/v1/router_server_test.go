@@ -623,7 +623,7 @@ func TestIntegrationServerCreate(t *testing.T) {
 				UUID:         uuid.MustParse(dbtools.FixtureNemo.ID),
 				FacilityCode: "int-test",
 			},
-			"server with given UUID exists",
+			"duplicate key",
 		},
 	}
 
