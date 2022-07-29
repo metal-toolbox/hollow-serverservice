@@ -517,16 +517,40 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		return err
 	})
 
-	componentSliceFixture := func() []serverservice.ServerComponent {
-		s := serverservice.ServerComponentSlice{}
+	// fixtures given to test cases below
+	var componentFixture []serverservice.ServerComponent
 
-		for _, c := range servers[0].Components {
+	var serverFixture serverservice.Server
+
+	// The component fixture targeted in test cases below
+	fixtureComponentName := "My Lucky Fin"
+	fixtureComponentVendor := "Barracuda"
+	fixtureComponentSerial := "Right"
+
+	// identify component and server fixture for test
+	for _, server := range servers {
+		server := server
+		for _, c := range server.Components {
 			c := c
-			s = append(s, c)
+			if c.Name == fixtureComponentName && c.Vendor == fixtureComponentVendor && c.Serial == fixtureComponentSerial {
+				componentFixture = append(componentFixture, c)
+				serverFixture = server
+			}
 		}
-
-		return s
 	}
+
+	// helper method to return fixture copy
+	componentFixtureCopy := func() []serverservice.ServerComponent {
+		var c []serverservice.ServerComponent
+
+		c = append(c, componentFixture...)
+
+		return c
+	}
+
+	// expect test fixture to be present
+	assert.NotEmpty(t, componentFixture[0].UUID)
+	assert.NotEmpty(t, serverFixture.UUID)
 
 	// change are changes to be applied to the fixture object included in each test case
 	type change struct {
@@ -560,7 +584,7 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		},
 		{
 			"component update with empty component slice returns error",
-			servers[0].UUID,
+			serverFixture.UUID,
 			nil,
 			change{},
 			"",
@@ -568,8 +592,8 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		},
 		{
 			"component update validation for non-nil UUID returns error",
-			servers[0].UUID,
-			componentSliceFixture(),
+			serverFixture.UUID,
+			componentFixtureCopy(),
 			// unset component uuid
 			change{unsetFlags: []bool{true, false, false, false}},
 			"",
@@ -577,8 +601,8 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		},
 		{
 			"component update validation for empty serial returns error",
-			servers[0].UUID,
-			componentSliceFixture(),
+			serverFixture.UUID,
+			componentFixtureCopy(),
 			// unset component serial
 			change{unsetFlags: []bool{false, true, false, false}},
 			"",
@@ -586,8 +610,8 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		},
 		{
 			"component update validation for empty server ID returns error",
-			servers[0].UUID,
-			componentSliceFixture(),
+			serverFixture.UUID,
+			componentFixtureCopy(),
 			// unset component server ID
 			change{unsetFlags: []bool{false, false, true, false}},
 			"",
@@ -595,8 +619,8 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		},
 		{
 			"component update validation for empty component type ID returns error",
-			servers[0].UUID,
-			componentSliceFixture(),
+			serverFixture.UUID,
+			componentFixtureCopy(),
 			// unset component type UUID
 			change{unsetFlags: []bool{false, false, false, true}},
 			"",
@@ -604,27 +628,21 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		},
 		{
 			"component update on versioned attributes",
-			servers[0].UUID,
-			componentSliceFixture(),
-			// unset component type UUID
-			change{versionedAttributes: []byte(`{"version":"1.12345"}`)},
+			serverFixture.UUID,
+			componentFixtureCopy(),
+			change{versionedAttributes: []byte(`{"version":"2.12345"}`)},
 			"",
 			"",
 		},
 		{
 			"component update on attributes",
-			servers[0].UUID,
-			componentSliceFixture(),
-			// unset component type UUID
+			serverFixture.UUID,
+			componentFixtureCopy(),
 			change{attributes: []byte(`{"status":"OK"}`)},
 			"",
 			"",
 		},
 	}
-	// TODO:
-	// - create component
-	// - update component
-	// - check value updated
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
@@ -658,10 +676,14 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 					},
 				}
 
-				tt.components[0].Model = "testUpdatedVA"
+				model := "testUpdatedVersionedAttributes" + time.Now().String()
+				tt.components[0].Model = model
 
 				listParams = &serverservice.ServerComponentListParams{
-					Model: "testUpdatedVA",
+					Name:   fixtureComponentName,
+					Serial: fixtureComponentSerial,
+					Vendor: fixtureComponentVendor,
+					Model:  model,
 				}
 			}
 
@@ -674,10 +696,14 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 					},
 				}
 
-				tt.components[0].Model = "testUpdatedA"
+				model := "testUpdatedAttributes" + time.Now().String()
+				tt.components[0].Model = model
 
 				listParams = &serverservice.ServerComponentListParams{
-					Model: "testUpdatedA",
+					Name:   fixtureComponentName,
+					Serial: fixtureComponentSerial,
+					Vendor: fixtureComponentVendor,
+					Model:  model,
 				}
 			}
 
