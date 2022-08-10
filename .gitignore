@@ -10,3 +10,4 @@
 cosign.key
 .vscode/
 .devcontainer/
+cockroach-data/

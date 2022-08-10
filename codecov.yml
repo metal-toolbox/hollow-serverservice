@@ -1,5 +1,7 @@
 # Allow the PRs code coverage to be 30% below the main branch, but only allow the overall project to drop by 10%
 ---
+ignore:
+  - internal/models
 coverage:
   status:
     patch:
