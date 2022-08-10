@@ -36,7 +36,7 @@ require (
 
 require (
 	go.hollow.sh/toolbox v0.3.0
-	gocloud.dev v0.25.0
+	gocloud.dev v0.26.0
 )
 
 require (
