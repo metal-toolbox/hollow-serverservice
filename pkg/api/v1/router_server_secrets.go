@@ -13,28 +13,28 @@ import (
 	"go.hollow.sh/serverservice/internal/models"
 )
 
-func (r *Router) serverSecretGet(c *gin.Context) {
+func (r *Router) serverCredentialGet(c *gin.Context) {
 	mods := []qm.QueryMod{
-		models.ServerSecretWhere.ServerID.EQ(c.Param("uuid")),
+		models.ServerCredentialWhere.ServerID.EQ(c.Param("uuid")),
 		qm.InnerJoin(fmt.Sprintf("%s as t on t.%s = %s.%s",
-			models.TableNames.ServerSecretTypes,
-			models.ServerSecretTypeColumns.ID,
-			models.TableNames.ServerSecrets,
-			models.ServerSecretColumns.ServerSecretTypeID,
+			models.TableNames.ServerCredentialTypes,
+			models.ServerCredentialTypeColumns.ID,
+			models.TableNames.ServerCredentials,
+			models.ServerCredentialColumns.ServerCredentialTypeID,
 		)),
-		qm.Where(fmt.Sprintf("t.%s=?", models.ServerSecretTypeColumns.Slug), c.Param("slug")),
-		qm.Load(models.ServerSecretRels.ServerSecretType),
+		qm.Where(fmt.Sprintf("t.%s=?", models.ServerCredentialTypeColumns.Slug), c.Param("slug")),
+		qm.Load(models.ServerCredentialRels.ServerCredentialType),
 	}
 
-	dbS, err := models.ServerSecrets(mods...).One(c.Request.Context(), r.DB)
+	dbS, err := models.ServerCredentials(mods...).One(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	decryptedValue, err := dbtools.Decrypt(c.Request.Context(), r.SecretsKeeper, dbS.Value)
+	decryptedValue, err := dbtools.Decrypt(c.Request.Context(), r.SecretsKeeper, dbS.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "error decrypting secret value", Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "error decrypting value", Error: err.Error()})
 		return
 	}
 
@@ -44,10 +44,11 @@ func (r *Router) serverSecretGet(c *gin.Context) {
 		return
 	}
 
-	secret := &ServerSecret{
+	secret := &ServerCredential{
 		ServerID:   sID,
-		SecretType: dbS.R.ServerSecretType.Slug,
-		Value:      decryptedValue,
+		SecretType: dbS.R.ServerCredentialType.Slug,
+		Username:   dbS.Username,
+		Password:   decryptedValue,
 		CreatedAt:  dbS.CreatedAt,
 		UpdatedAt:  dbS.UpdatedAt,
 	}
@@ -55,19 +56,19 @@ func (r *Router) serverSecretGet(c *gin.Context) {
 	itemResponse(c, secret)
 }
 
-func (r *Router) serverSecretDelete(c *gin.Context) {
+func (r *Router) serverCredentialDelete(c *gin.Context) {
 	mods := []qm.QueryMod{
-		models.ServerSecretWhere.ServerID.EQ(c.Param("uuid")),
+		models.ServerCredentialWhere.ServerID.EQ(c.Param("uuid")),
 		qm.InnerJoin(fmt.Sprintf("%s as t on t.%s = %s.%s",
-			models.TableNames.ServerSecretTypes,
-			models.ServerSecretTypeColumns.ID,
-			models.TableNames.ServerSecrets,
-			models.ServerSecretColumns.ServerSecretTypeID,
+			models.TableNames.ServerCredentialTypes,
+			models.ServerCredentialTypeColumns.ID,
+			models.TableNames.ServerCredentials,
+			models.ServerCredentialColumns.ServerCredentialTypeID,
 		)),
-		qm.Where(fmt.Sprintf("t.%s=?", models.ServerSecretTypeColumns.Slug), c.Param("slug")),
+		qm.Where(fmt.Sprintf("t.%s=?", models.ServerCredentialTypeColumns.Slug), c.Param("slug")),
 	}
 
-	dbS, err := models.ServerSecrets(mods...).One(c.Request.Context(), r.DB)
+	dbS, err := models.ServerCredentials(mods...).One(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -81,7 +82,7 @@ func (r *Router) serverSecretDelete(c *gin.Context) {
 	deletedResponse(c)
 }
 
-func (r *Router) serverSecretUpsert(c *gin.Context) {
+func (r *Router) serverCredentialUpsert(c *gin.Context) {
 	srvUUID, err := r.parseUUID(c)
 	if err != nil {
 		return
@@ -100,28 +101,29 @@ func (r *Router) serverSecretUpsert(c *gin.Context) {
 		return
 	}
 
-	secretType, err := models.ServerSecretTypes(models.ServerSecretTypeWhere.Slug.EQ(secretSlug)).One(c.Request.Context(), r.DB)
+	secretType, err := models.ServerCredentialTypes(models.ServerCredentialTypeWhere.Slug.EQ(secretSlug)).One(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	var newValue serverSecretValue
+	var newValue serverCredentialValues
 	if err := c.ShouldBindJSON(&newValue); err != nil {
 		badRequestResponse(c, "invalid server secret value", err)
 		return
 	}
 
-	encryptedValue, err := dbtools.Encrypt(c.Request.Context(), r.SecretsKeeper, newValue.Value)
+	encryptedValue, err := dbtools.Encrypt(c.Request.Context(), r.SecretsKeeper, newValue.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &ServerResponse{Message: "error encrypting secret value", Error: err.Error()})
 		return
 	}
 
-	secret := models.ServerSecret{
-		ServerSecretTypeID: secretType.ID,
-		ServerID:           srvUUID.String(),
-		Value:              encryptedValue,
+	secret := models.ServerCredential{
+		ServerCredentialTypeID: secretType.ID,
+		ServerID:               srvUUID.String(),
+		Password:               encryptedValue,
+		Username:               newValue.Username,
 	}
 
 	err = secret.Upsert(
@@ -129,16 +131,17 @@ func (r *Router) serverSecretUpsert(c *gin.Context) {
 		r.DB,
 		true,
 		// search for records by server id and type id to see if we need to update or insert
-		[]string{models.ServerSecretColumns.ServerID, models.ServerSecretColumns.ServerSecretTypeID},
+		[]string{models.ServerCredentialColumns.ServerID, models.ServerCredentialColumns.ServerCredentialTypeID},
 		// For updates only set the new value and updated at
-		boil.Whitelist(models.ServerSecretColumns.Value, models.ServerSecretColumns.UpdatedAt),
+		boil.Whitelist(models.ServerCredentialColumns.Password, models.ServerCredentialColumns.UpdatedAt),
 		// For inserts set server id, type id and value
 		boil.Whitelist(
-			models.ServerSecretColumns.ServerID,
-			models.ServerSecretColumns.ServerSecretTypeID,
-			models.ServerSecretColumns.Value,
-			models.ServerSecretColumns.CreatedAt,
-			models.ServerSecretColumns.UpdatedAt,
+			models.ServerCredentialColumns.ServerID,
+			models.ServerCredentialColumns.ServerCredentialTypeID,
+			models.ServerCredentialColumns.Username,
+			models.ServerCredentialColumns.Password,
+			models.ServerCredentialColumns.CreatedAt,
+			models.ServerCredentialColumns.UpdatedAt,
 		),
 	)
 	if err != nil {

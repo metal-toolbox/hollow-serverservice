@@ -41,18 +41,19 @@ func NewClientWithToken(authToken, url string, doerClient Doer) (*Client, error)
 // This client will not set the authorization header for you automatically and is left to be handled by the Doer that is provided.
 //
 // Example:
-// 	ctx := context.TODO()
-// 	provider, _ := oidc.NewProvider(ctx, "https://OIDC_ISSUER.COM")
 //
-// 	oauthConfig := clientcredentials.Config{
-// 		ClientID:       "CLIENT_ID",
-// 		ClientSecret:   "CLIENT_SECRET",
-// 		TokenURL:       provider.Endpoint().TokenURL,
-// 		Scopes:         []string{"SCOPE", "SCOPE2"},
-// 		EndpointParams: url.Values{"audience": []string{"HOLLOW_AUDIENCE_VALUE"}},
-// 	}
+//	ctx := context.TODO()
+//	provider, _ := oidc.NewProvider(ctx, "https://OIDC_ISSUER.COM")
 //
-// 	c, _ := serverservice.NewClient("HOLLOW_URI", oauthConfig.Client(ctx))
+//	oauthConfig := clientcredentials.Config{
+//		ClientID:       "CLIENT_ID",
+//		ClientSecret:   "CLIENT_SECRET",
+//		TokenURL:       provider.Endpoint().TokenURL,
+//		Scopes:         []string{"SCOPE", "SCOPE2"},
+//		EndpointParams: url.Values{"audience": []string{"HOLLOW_AUDIENCE_VALUE"}},
+//	}
+//
+//	c, _ := serverservice.NewClient("HOLLOW_URI", oauthConfig.Client(ctx))
 func NewClient(url string, doerClient Doer) (*Client, error) {
 	if url == "" {
 		return nil, newClientError("failed to initialize: no hollow api url provided")

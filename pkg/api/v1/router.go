@@ -62,12 +62,12 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 				srvComponents.PUT("", amw.RequiredScopes(updateScopes("server", "server:component")), r.serverComponentUpdate)
 			}
 
-			// /servers/:uuid/secrets/:slug
-			svrSecret := srv.Group("secrets/:slug")
+			// /servers/:uuid/credentials/:slug
+			svrCreds := srv.Group("credentials/:slug")
 			{
-				svrSecret.GET("", amw.RequiredScopes([]string{"read:server:secrets"}), r.serverSecretGet)
-				svrSecret.PUT("", amw.RequiredScopes([]string{"write:server:secrets"}), r.serverSecretUpsert)
-				svrSecret.DELETE("", amw.RequiredScopes([]string{"write:server:secrets"}), r.serverSecretDelete)
+				svrCreds.GET("", amw.RequiredScopes([]string{"read:server:credentials"}), r.serverCredentialGet)
+				svrCreds.PUT("", amw.RequiredScopes([]string{"write:server:credentials"}), r.serverCredentialUpsert)
+				svrCreds.DELETE("", amw.RequiredScopes([]string{"write:server:credentials"}), r.serverCredentialDelete)
 			}
 
 			// /servers/:uuid/versioned-attributes
@@ -97,11 +97,11 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 		srvCmpntFw.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server")), r.serverComponentFirmwareDelete)
 	}
 
-	// /server-secret-types
-	srvSecretTypes := rg.Group("/server-secret-types")
+	// /server-credential-types
+	srvCredentialTypes := rg.Group("/server-credential-types")
 	{
-		srvSecretTypes.GET("", amw.RequiredScopes(readScopes("server-secret-types")), r.serverSecretTypesList)
-		srvSecretTypes.POST("", amw.RequiredScopes(createScopes("server-secret-types")), r.serverSecretTypesCreate)
+		srvCredentialTypes.GET("", amw.RequiredScopes(readScopes("server-credential-types")), r.serverCredentialTypesList)
+		srvCredentialTypes.POST("", amw.RequiredScopes(createScopes("server-credential-types")), r.serverCredentialTypesCreate)
 	}
 }
 

@@ -36,7 +36,7 @@ var (
 	FixtureNemoVersionedNew     *models.VersionedAttribute
 	FixtureNemoVersionedOld     *models.VersionedAttribute
 	FixtureNemoVersionedV2      *models.VersionedAttribute
-	FixtureNemoBMCSecret        *models.ServerSecret
+	FixtureNemoBMCSecret        *models.ServerCredential
 
 	FixtureDory          *models.Server
 	FixtureDoryMetadata  *models.Attribute
@@ -130,7 +130,7 @@ func setupNemo(ctx context.Context, db *sqlx.DB, t *testing.T) error {
 		return err
 	}
 
-	bmc, err := models.ServerSecretTypes(models.ServerSecretTypeWhere.Slug.EQ("bmc")).One(ctx, db)
+	bmc, err := models.ServerCredentialTypes(models.ServerCredentialTypeWhere.Slug.EQ("bmc")).One(ctx, db)
 	if err != nil {
 		return err
 	}
@@ -142,12 +142,12 @@ func setupNemo(ctx context.Context, db *sqlx.DB, t *testing.T) error {
 		return err
 	}
 
-	FixtureNemoBMCSecret = &models.ServerSecret{
-		ServerSecretTypeID: bmc.ID,
-		Value:              value,
+	FixtureNemoBMCSecret = &models.ServerCredential{
+		ServerCredentialTypeID: bmc.ID,
+		Password:               value,
 	}
 
-	if err := FixtureNemo.AddServerSecrets(ctx, db, true, FixtureNemoBMCSecret); err != nil {
+	if err := FixtureNemo.AddServerCredentials(ctx, db, true, FixtureNemoBMCSecret); err != nil {
 		return err
 	}
 

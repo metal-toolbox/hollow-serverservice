@@ -7,25 +7,25 @@ import (
 	"go.hollow.sh/serverservice/internal/models"
 )
 
-func (r *Router) serverSecretTypesList(c *gin.Context) {
+func (r *Router) serverCredentialTypesList(c *gin.Context) {
 	pager := parsePagination(c)
 
-	dbTypes, err := models.ServerSecretTypes(pager.queryMods()...).All(c.Request.Context(), r.DB)
+	dbTypes, err := models.ServerCredentialTypes(pager.queryMods()...).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	count, err := models.ServerSecretTypes().Count(c.Request.Context(), r.DB)
+	count, err := models.ServerCredentialTypes().Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
 
-	types := []ServerSecretType{}
+	types := []ServerCredentialType{}
 
 	for _, dbType := range dbTypes {
-		t := ServerSecretType{}
+		t := ServerCredentialType{}
 		t.fromDBModel(dbType)
 
 		types = append(types, t)
@@ -40,8 +40,8 @@ func (r *Router) serverSecretTypesList(c *gin.Context) {
 	listResponse(c, types, pd)
 }
 
-func (r *Router) serverSecretTypesCreate(c *gin.Context) {
-	var sType models.ServerSecretType
+func (r *Router) serverCredentialTypesCreate(c *gin.Context) {
+	var sType models.ServerCredentialType
 	if err := c.ShouldBindJSON(&sType); err != nil {
 		badRequestResponse(c, "invalid server secret type", err)
 		return
@@ -52,7 +52,7 @@ func (r *Router) serverSecretTypesCreate(c *gin.Context) {
 	if err := sType.Insert(
 		c.Request.Context(),
 		r.DB,
-		boil.Blacklist(models.ServerSecretTypeColumns.ID),
+		boil.Blacklist(models.ServerCredentialTypeColumns.ID),
 	); err != nil {
 		dbErrorResponse(c, err)
 		return

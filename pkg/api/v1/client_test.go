@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	adminScopes = []string{"read", "write", "read:server:secrets", "write:server:secrets"}
+	adminScopes = []string{"read", "write", "read:server:credentials", "write:server:credentials"}
 )
 
 func TestNewClientWithToken(t *testing.T) {

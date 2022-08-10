@@ -10,8 +10,8 @@ func TestUpsert(t *testing.T) {
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsUpsert)
 	t.Run("ServerComponentTypes", testServerComponentTypesUpsert)
 	t.Run("ServerComponents", testServerComponentsUpsert)
-	t.Run("ServerSecretTypes", testServerSecretTypesUpsert)
-	t.Run("ServerSecrets", testServerSecretsUpsert)
+	t.Run("ServerCredentialTypes", testServerCredentialTypesUpsert)
+	t.Run("ServerCredentials", testServerCredentialsUpsert)
 	t.Run("Servers", testServersUpsert)
 	t.Run("VersionedAttributes", testVersionedAttributesUpsert)
 }

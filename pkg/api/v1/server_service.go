@@ -15,8 +15,8 @@ const (
 	serverComponentsEndpoint          = "components"
 	serverVersionedAttributesEndpoint = "versioned-attributes"
 	serverComponentFirmwaresEndpoint  = "server-component-firmwares"
-	serverSecretsEndpoint             = "secrets"
-	serverSecretTypeEndpoint          = "server-secret-types"
+	serverCredentialsEndpoint         = "credentials"
+	serverCredentialTypeEndpoint      = "server-credential-types"
 )
 
 // ClientInterface provides an interface for the expected calls to interact with a server service api
@@ -43,10 +43,10 @@ type ClientInterface interface {
 	GetServerComponentFirmware(context.Context, uuid.UUID) (*ComponentFirmwareVersion, *ServerResponse, error)
 	ListServerComponentFirmware(context.Context, *ComponentFirmwareVersionListParams) ([]ComponentFirmwareVersion, *ServerResponse, error)
 	UpdateServerComponentFirmware(context.Context, uuid.UUID, ComponentFirmwareVersion) (*ServerResponse, error)
-	GetSecret(context.Context, uuid.UUID, string) (*ServerSecret, *ServerResponse, error)
-	SetSecret(context.Context, uuid.UUID, string, string) (*ServerResponse, error)
-	DeleteSecret(context.Context, uuid.UUID, string) (*ServerResponse, error)
-	ListServerSecretTypes(context.Context) (*ServerResponse, error)
+	GetCredential(context.Context, uuid.UUID, string) (*ServerCredential, *ServerResponse, error)
+	SetCredential(context.Context, uuid.UUID, string, string) (*ServerResponse, error)
+	DeleteCredential(context.Context, uuid.UUID, string) (*ServerResponse, error)
+	ListServerCredentialTypes(context.Context) (*ServerResponse, error)
 }
 
 // Create will attempt to create a server in Hollow and return the new server's UUID
@@ -266,10 +266,10 @@ func (c *Client) UpdateServerComponentFirmware(ctx context.Context, fwUUID uuid.
 	return c.put(ctx, path, firmware)
 }
 
-// GetSecret will return the secret for the secret type for the given server UUID
-func (c *Client) GetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerSecret, *ServerResponse, error) {
-	p := path.Join(serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
-	secret := &ServerSecret{}
+// GetCredential will return the secret for the secret type for the given server UUID
+func (c *Client) GetCredential(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerCredential, *ServerResponse, error) {
+	p := path.Join(serversEndpoint, srvUUID.String(), serverCredentialsEndpoint, secretSlug)
+	secret := &ServerCredential{}
 	r := ServerResponse{Record: secret}
 
 	if err := c.get(ctx, p, &r); err != nil {
@@ -279,34 +279,37 @@ func (c *Client) GetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug st
 	return secret, &r, nil
 }
 
-// SetSecret will set the secret for a given server UUID and secret type.
-func (c *Client) SetSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string, value string) (*ServerResponse, error) {
-	p := path.Join(serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
-	secret := &serverSecretValue{Value: value}
+// SetCredential will set the secret for a given server UUID and secret type.
+func (c *Client) SetCredential(ctx context.Context, srvUUID uuid.UUID, secretSlug, username, password string) (*ServerResponse, error) {
+	p := path.Join(serversEndpoint, srvUUID.String(), serverCredentialsEndpoint, secretSlug)
+	secret := &serverCredentialValues{
+		Password: password,
+		Username: username,
+	}
 
 	return c.put(ctx, p, secret)
 }
 
-// DeleteSecret will remove the secret for a given server UUID and secret type.
-func (c *Client) DeleteSecret(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerResponse, error) {
-	p := path.Join(serversEndpoint, srvUUID.String(), serverSecretsEndpoint, secretSlug)
+// DeleteCredential will remove the secret for a given server UUID and secret type.
+func (c *Client) DeleteCredential(ctx context.Context, srvUUID uuid.UUID, secretSlug string) (*ServerResponse, error) {
+	p := path.Join(serversEndpoint, srvUUID.String(), serverCredentialsEndpoint, secretSlug)
 
 	return c.delete(ctx, p)
 }
 
-// ListServerSecretTypes will return all server secret types
-func (c *Client) ListServerSecretTypes(ctx context.Context, params *PaginationParams) ([]ServerSecretType, *ServerResponse, error) {
-	types := &[]ServerSecretType{}
+// ListServerCredentialTypes will return all server secret types
+func (c *Client) ListServerCredentialTypes(ctx context.Context, params *PaginationParams) ([]ServerCredentialType, *ServerResponse, error) {
+	types := &[]ServerCredentialType{}
 	r := ServerResponse{Records: types}
 
-	if err := c.list(ctx, serverSecretTypeEndpoint, params, &r); err != nil {
+	if err := c.list(ctx, serverCredentialTypeEndpoint, params, &r); err != nil {
 		return nil, nil, err
 	}
 
 	return *types, &r, nil
 }
 
-// CreateServerSecretType will create a new server secret type
-func (c *Client) CreateServerSecretType(ctx context.Context, sType *ServerSecretType) (*ServerResponse, error) {
-	return c.post(ctx, serverSecretTypeEndpoint, sType)
+// CreateServerCredentialType will create a new server secret type
+func (c *Client) CreateServerCredentialType(ctx context.Context, sType *ServerCredentialType) (*ServerResponse, error) {
+	return c.post(ctx, serverCredentialTypeEndpoint, sType)
 }

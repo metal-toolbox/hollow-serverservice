@@ -13,7 +13,7 @@ import (
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
-func TestIntegrationServerSecretsUpsert(t *testing.T) {
+func TestIntegrationServerCredentialsUpsert(t *testing.T) {
 	ctx := context.TODO()
 	s := serverTest(t)
 
@@ -21,10 +21,10 @@ func TestIntegrationServerSecretsUpsert(t *testing.T) {
 		s.Client.SetToken(authToken)
 
 		id := uuid.MustParse(dbtools.FixtureDory.ID)
-		slug := serverservice.ServerSecretTypeBMC
-		path := fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/secrets/%s", id, slug)
+		slug := serverservice.ServerCredentialTypeBMC
+		path := fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/credentials/%s", id, slug)
 
-		resp, err := s.Client.SetSecret(ctx, id, slug, "something")
+		resp, err := s.Client.SetCredential(ctx, id, slug, "postgre", "something")
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -38,41 +38,42 @@ func TestIntegrationServerSecretsUpsert(t *testing.T) {
 
 	t.Run("inserts when secret doesn't exist", func(t *testing.T) {
 		uuid := uuid.MustParse(dbtools.FixtureMarlin.ID)
-		slug := serverservice.ServerSecretTypeBMC
+		slug := serverservice.ServerCredentialTypeBMC
 
 		// Make sure our server doesn't already have a BMC secret
-		secret, _, err := s.Client.GetSecret(ctx, uuid, slug)
+		secret, _, err := s.Client.GetCredential(ctx, uuid, slug)
 		require.Error(t, err)
 		require.Nil(t, secret)
 		require.Contains(t, err.Error(), "not found")
 
 		// Create the secret
-		_, err = s.Client.SetSecret(ctx, uuid, slug, "supersecret")
+		_, err = s.Client.SetCredential(ctx, uuid, slug, "postgre", "supersecret")
 		assert.NoError(t, err)
 
 		// Ensure we can retrieve the secret we set
-		secret, _, err = s.Client.GetSecret(ctx, uuid, slug)
+		secret, _, err = s.Client.GetCredential(ctx, uuid, slug)
 		assert.NoError(t, err)
-		assert.Equal(t, "supersecret", secret.Value)
+		assert.Equal(t, "supersecret", secret.Password)
+		assert.Equal(t, "postgre", secret.Username)
 	})
 
 	t.Run("updates when secret already exist", func(t *testing.T) {
 		uuid := uuid.MustParse(dbtools.FixtureNemo.ID)
-		slug := serverservice.ServerSecretTypeBMC
+		slug := serverservice.ServerCredentialTypeBMC
 
 		// Get the existing secret
-		secret, _, err := s.Client.GetSecret(ctx, uuid, slug)
+		secret, _, err := s.Client.GetCredential(ctx, uuid, slug)
 		assert.NoError(t, err)
-		assert.NotEqual(t, "mynewSecret!", secret.Value)
+		assert.NotEqual(t, "mynewSecret!", secret.Password)
 
 		// Update the secret
-		_, err = s.Client.SetSecret(ctx, uuid, slug, "mynewSecret!")
+		_, err = s.Client.SetCredential(ctx, uuid, slug, "postgre", "mynewSecret!")
 		assert.NoError(t, err)
 
 		// Get the new secret
-		newSecret, _, err := s.Client.GetSecret(ctx, uuid, slug)
+		newSecret, _, err := s.Client.GetCredential(ctx, uuid, slug)
 		assert.NoError(t, err)
-		assert.Equal(t, "mynewSecret!", newSecret.Value)
+		assert.Equal(t, "mynewSecret!", newSecret.Password)
 		// ensure timestamps were updated correctly
 		assert.Equal(t, secret.CreatedAt, newSecret.CreatedAt)
 		assert.NotEqual(t, newSecret.UpdatedAt, secret.UpdatedAt)
@@ -81,10 +82,10 @@ func TestIntegrationServerSecretsUpsert(t *testing.T) {
 
 	t.Run("fails if server uuid not found", func(t *testing.T) {
 		uuid := uuid.New()
-		slug := serverservice.ServerSecretTypeBMC
+		slug := serverservice.ServerCredentialTypeBMC
 
 		// Make sure our server doesn't already have a BMC secret
-		_, err := s.Client.SetSecret(ctx, uuid, slug, "secret")
+		_, err := s.Client.SetCredential(ctx, uuid, slug, "postgre", "secret")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "server not found")
 	})
@@ -93,7 +94,7 @@ func TestIntegrationServerSecretsUpsert(t *testing.T) {
 		uuid := uuid.MustParse(dbtools.FixtureMarlin.ID)
 		slug := "notfound"
 
-		_, err := s.Client.SetSecret(ctx, uuid, slug, "secret")
+		_, err := s.Client.SetCredential(ctx, uuid, slug, "postgre", "secret")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "not found")
 	})
@@ -106,9 +107,9 @@ func TestIntegrationServerSecretsDelete(t *testing.T) {
 		s.Client.SetToken(authToken)
 
 		id := uuid.MustParse(dbtools.FixtureNemo.ID)
-		slug := serverservice.ServerSecretTypeBMC
+		slug := serverservice.ServerCredentialTypeBMC
 
-		_, err := s.Client.DeleteSecret(ctx, id, slug)
+		_, err := s.Client.DeleteCredential(ctx, id, slug)
 		if !expectError {
 			assert.NoError(t, err)
 		}
