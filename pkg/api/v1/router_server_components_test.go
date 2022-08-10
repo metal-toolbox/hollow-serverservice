@@ -661,9 +661,7 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 				tt.components[0].Model = "testUpdatedVA"
 
 				listParams = &serverservice.ServerComponentListParams{
-					Name:   "Normal Fin",
-					Serial: "Right",
-					Model:  "testUpdatedVA",
+					Model: "testUpdatedVA",
 				}
 			}
 
@@ -679,9 +677,7 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 				tt.components[0].Model = "testUpdatedA"
 
 				listParams = &serverservice.ServerComponentListParams{
-					Name:   "Normal Fin",
-					Serial: "Right",
-					Model:  "testUpdatedA",
+					Model: "testUpdatedA",
 				}
 			}
 
