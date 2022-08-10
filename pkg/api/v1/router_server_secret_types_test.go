@@ -10,13 +10,13 @@ import (
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
-func TestIntegrationServerSecretTypesList(t *testing.T) {
+func TestIntegrationServerCredentialTypesList(t *testing.T) {
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		r, resp, err := s.Client.ListServerSecretTypes(ctx, nil)
+		r, resp, err := s.Client.ListServerCredentialTypes(ctx, nil)
 		if !expectError {
 			require.NoError(t, err)
 			assert.Len(t, r, 1)
@@ -33,18 +33,18 @@ func TestIntegrationServerSecretTypesList(t *testing.T) {
 	})
 }
 
-func TestIntegrationServerSecretTypesCreate(t *testing.T) {
+func TestIntegrationServerCredentialTypesCreate(t *testing.T) {
 	ctx := context.TODO()
 	s := serverTest(t)
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		resp, err := s.Client.CreateServerSecretType(ctx, &serverservice.ServerSecretType{Name: "Test Type"})
+		resp, err := s.Client.CreateServerCredentialType(ctx, &serverservice.ServerCredentialType{Name: "Test Type"})
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, "http://test.hollow.com/api/v1/server-secret-types/test-type", resp.Links.Self.Href)
+			assert.Equal(t, "http://test.hollow.com/api/v1/server-credential-types/test-type", resp.Links.Self.Href)
 		}
 
 		return err
@@ -53,10 +53,10 @@ func TestIntegrationServerSecretTypesCreate(t *testing.T) {
 	s.Client.SetToken(validToken(adminScopes))
 
 	t.Run("creating a duplicate type fails", func(t *testing.T) {
-		slug := serverservice.ServerSecretTypeBMC
+		slug := serverservice.ServerCredentialTypeBMC
 
 		// Make sure our server doesn't already have a BMC secret
-		_, err := s.Client.CreateServerSecretType(ctx, &serverservice.ServerSecretType{Name: "Test Type", Slug: slug})
+		_, err := s.Client.CreateServerCredentialType(ctx, &serverservice.ServerCredentialType{Name: "Test Type", Slug: slug})
 		assert.Error(t, err)
 		require.Contains(t, err.Error(), "duplicate key")
 	})

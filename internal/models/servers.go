@@ -89,12 +89,12 @@ var ServerWhere = struct {
 var ServerRels = struct {
 	Attributes          string
 	ServerComponents    string
-	ServerSecrets       string
+	ServerCredentials   string
 	VersionedAttributes string
 }{
 	Attributes:          "Attributes",
 	ServerComponents:    "ServerComponents",
-	ServerSecrets:       "ServerSecrets",
+	ServerCredentials:   "ServerCredentials",
 	VersionedAttributes: "VersionedAttributes",
 }
 
@@ -102,7 +102,7 @@ var ServerRels = struct {
 type serverR struct {
 	Attributes          AttributeSlice          `boil:"Attributes" json:"Attributes" toml:"Attributes" yaml:"Attributes"`
 	ServerComponents    ServerComponentSlice    `boil:"ServerComponents" json:"ServerComponents" toml:"ServerComponents" yaml:"ServerComponents"`
-	ServerSecrets       ServerSecretSlice       `boil:"ServerSecrets" json:"ServerSecrets" toml:"ServerSecrets" yaml:"ServerSecrets"`
+	ServerCredentials   ServerCredentialSlice   `boil:"ServerCredentials" json:"ServerCredentials" toml:"ServerCredentials" yaml:"ServerCredentials"`
 	VersionedAttributes VersionedAttributeSlice `boil:"VersionedAttributes" json:"VersionedAttributes" toml:"VersionedAttributes" yaml:"VersionedAttributes"`
 }
 
@@ -125,11 +125,11 @@ func (r *serverR) GetServerComponents() ServerComponentSlice {
 	return r.ServerComponents
 }
 
-func (r *serverR) GetServerSecrets() ServerSecretSlice {
+func (r *serverR) GetServerCredentials() ServerCredentialSlice {
 	if r == nil {
 		return nil
 	}
-	return r.ServerSecrets
+	return r.ServerCredentials
 }
 
 func (r *serverR) GetVersionedAttributes() VersionedAttributeSlice {
@@ -456,18 +456,18 @@ func (o *Server) ServerComponents(mods ...qm.QueryMod) serverComponentQuery {
 	return ServerComponents(queryMods...)
 }
 
-// ServerSecrets retrieves all the server_secret's ServerSecrets with an executor.
-func (o *Server) ServerSecrets(mods ...qm.QueryMod) serverSecretQuery {
+// ServerCredentials retrieves all the server_credential's ServerCredentials with an executor.
+func (o *Server) ServerCredentials(mods ...qm.QueryMod) serverCredentialQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"server_secrets\".\"server_id\"=?", o.ID),
+		qm.Where("\"server_credentials\".\"server_id\"=?", o.ID),
 	)
 
-	return ServerSecrets(queryMods...)
+	return ServerCredentials(queryMods...)
 }
 
 // VersionedAttributes retrieves all the versioned_attribute's VersionedAttributes with an executor.
@@ -680,9 +680,9 @@ func (serverL) LoadServerComponents(ctx context.Context, e boil.ContextExecutor,
 	return nil
 }
 
-// LoadServerSecrets allows an eager lookup of values, cached into the
+// LoadServerCredentials allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (serverL) LoadServerSecrets(ctx context.Context, e boil.ContextExecutor, singular bool, maybeServer interface{}, mods queries.Applicator) error {
+func (serverL) LoadServerCredentials(ctx context.Context, e boil.ContextExecutor, singular bool, maybeServer interface{}, mods queries.Applicator) error {
 	var slice []*Server
 	var object *Server
 
@@ -720,8 +720,8 @@ func (serverL) LoadServerSecrets(ctx context.Context, e boil.ContextExecutor, si
 	}
 
 	query := NewQuery(
-		qm.From(`server_secrets`),
-		qm.WhereIn(`server_secrets.server_id in ?`, args...),
+		qm.From(`server_credentials`),
+		qm.WhereIn(`server_credentials.server_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -729,22 +729,22 @@ func (serverL) LoadServerSecrets(ctx context.Context, e boil.ContextExecutor, si
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load server_secrets")
+		return errors.Wrap(err, "failed to eager load server_credentials")
 	}
 
-	var resultSlice []*ServerSecret
+	var resultSlice []*ServerCredential
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice server_secrets")
+		return errors.Wrap(err, "failed to bind eager loaded slice server_credentials")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on server_secrets")
+		return errors.Wrap(err, "failed to close results in eager load on server_credentials")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for server_secrets")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for server_credentials")
 	}
 
-	if len(serverSecretAfterSelectHooks) != 0 {
+	if len(serverCredentialAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -752,10 +752,10 @@ func (serverL) LoadServerSecrets(ctx context.Context, e boil.ContextExecutor, si
 		}
 	}
 	if singular {
-		object.R.ServerSecrets = resultSlice
+		object.R.ServerCredentials = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
-				foreign.R = &serverSecretR{}
+				foreign.R = &serverCredentialR{}
 			}
 			foreign.R.Server = object
 		}
@@ -765,9 +765,9 @@ func (serverL) LoadServerSecrets(ctx context.Context, e boil.ContextExecutor, si
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
 			if local.ID == foreign.ServerID {
-				local.R.ServerSecrets = append(local.R.ServerSecrets, foreign)
+				local.R.ServerCredentials = append(local.R.ServerCredentials, foreign)
 				if foreign.R == nil {
-					foreign.R = &serverSecretR{}
+					foreign.R = &serverCredentialR{}
 				}
 				foreign.R.Server = local
 				break
@@ -1056,11 +1056,11 @@ func (o *Server) AddServerComponents(ctx context.Context, exec boil.ContextExecu
 	return nil
 }
 
-// AddServerSecrets adds the given related objects to the existing relationships
+// AddServerCredentials adds the given related objects to the existing relationships
 // of the server, optionally inserting them as new records.
-// Appends related to o.R.ServerSecrets.
+// Appends related to o.R.ServerCredentials.
 // Sets related.R.Server appropriately.
-func (o *Server) AddServerSecrets(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ServerSecret) error {
+func (o *Server) AddServerCredentials(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ServerCredential) error {
 	var err error
 	for _, rel := range related {
 		if insert {
@@ -1070,9 +1070,9 @@ func (o *Server) AddServerSecrets(ctx context.Context, exec boil.ContextExecutor
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE \"server_secrets\" SET %s WHERE %s",
+				"UPDATE \"server_credentials\" SET %s WHERE %s",
 				strmangle.SetParamNames("\"", "\"", 1, []string{"server_id"}),
-				strmangle.WhereClause("\"", "\"", 2, serverSecretPrimaryKeyColumns),
+				strmangle.WhereClause("\"", "\"", 2, serverCredentialPrimaryKeyColumns),
 			)
 			values := []interface{}{o.ID, rel.ID}
 
@@ -1091,15 +1091,15 @@ func (o *Server) AddServerSecrets(ctx context.Context, exec boil.ContextExecutor
 
 	if o.R == nil {
 		o.R = &serverR{
-			ServerSecrets: related,
+			ServerCredentials: related,
 		}
 	} else {
-		o.R.ServerSecrets = append(o.R.ServerSecrets, related...)
+		o.R.ServerCredentials = append(o.R.ServerCredentials, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
-			rel.R = &serverSecretR{
+			rel.R = &serverCredentialR{
 				Server: o,
 			}
 		} else {

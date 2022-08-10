@@ -3,7 +3,7 @@ package serverservice_test
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
@@ -28,7 +28,7 @@ func (md *MockHTTPRequestDoer) Do(req *http.Request) (*http.Response, error) {
 
 	// Make sure this isn't null to prevent null pointer errors in tests
 	if md.Response.Body == nil {
-		md.Response.Body = ioutil.NopCloser(bytes.NewBufferString("Hello World"))
+		md.Response.Body = io.NopCloser(bytes.NewBufferString("Hello World"))
 	}
 
 	return md.Response, md.Error
@@ -39,7 +39,7 @@ func mockClient(body string, status int) *serverservice.Client {
 	mockDoer := &MockHTTPRequestDoer{
 		Response: &http.Response{
 			StatusCode: status,
-			Body:       ioutil.NopCloser(bytes.NewReader([]byte(body))),
+			Body:       io.NopCloser(bytes.NewReader([]byte(body))),
 		},
 		Error: nil,
 	}

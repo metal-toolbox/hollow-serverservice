@@ -798,14 +798,14 @@ func testServerToManyServerComponents(t *testing.T) {
 	}
 }
 
-func testServerToManyServerSecrets(t *testing.T) {
+func testServerToManyServerCredentials(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a Server
-	var b, c ServerSecret
+	var b, c ServerCredential
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, serverDBTypes, true, serverColumnsWithDefault...); err != nil {
@@ -816,10 +816,10 @@ func testServerToManyServerSecrets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, serverSecretDBTypes, false, serverSecretColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, serverCredentialDBTypes, false, serverCredentialColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, serverSecretDBTypes, false, serverSecretColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, serverCredentialDBTypes, false, serverCredentialColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -833,7 +833,7 @@ func testServerToManyServerSecrets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.ServerSecrets().All(ctx, tx)
+	check, err := a.ServerCredentials().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -856,18 +856,18 @@ func testServerToManyServerSecrets(t *testing.T) {
 	}
 
 	slice := ServerSlice{&a}
-	if err = a.L.LoadServerSecrets(ctx, tx, false, (*[]*Server)(&slice), nil); err != nil {
+	if err = a.L.LoadServerCredentials(ctx, tx, false, (*[]*Server)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.ServerSecrets); got != 2 {
+	if got := len(a.R.ServerCredentials); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.ServerSecrets = nil
-	if err = a.L.LoadServerSecrets(ctx, tx, true, &a, nil); err != nil {
+	a.R.ServerCredentials = nil
+	if err = a.L.LoadServerCredentials(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.ServerSecrets); got != 2 {
+	if got := len(a.R.ServerCredentials); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -1279,7 +1279,7 @@ func testServerToManyAddOpServerComponents(t *testing.T) {
 		}
 	}
 }
-func testServerToManyAddOpServerSecrets(t *testing.T) {
+func testServerToManyAddOpServerCredentials(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -1287,15 +1287,15 @@ func testServerToManyAddOpServerSecrets(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Server
-	var b, c, d, e ServerSecret
+	var b, c, d, e ServerCredential
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, serverDBTypes, false, strmangle.SetComplement(serverPrimaryKeyColumns, serverColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*ServerSecret{&b, &c, &d, &e}
+	foreigners := []*ServerCredential{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, serverSecretDBTypes, false, strmangle.SetComplement(serverSecretPrimaryKeyColumns, serverSecretColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, serverCredentialDBTypes, false, strmangle.SetComplement(serverCredentialPrimaryKeyColumns, serverCredentialColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -1310,13 +1310,13 @@ func testServerToManyAddOpServerSecrets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*ServerSecret{
+	foreignersSplitByInsertion := [][]*ServerCredential{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddServerSecrets(ctx, tx, i != 0, x...)
+		err = a.AddServerCredentials(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1338,14 +1338,14 @@ func testServerToManyAddOpServerSecrets(t *testing.T) {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.ServerSecrets[i*2] != first {
+		if a.R.ServerCredentials[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.ServerSecrets[i*2+1] != second {
+		if a.R.ServerCredentials[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.ServerSecrets().Count(ctx, tx)
+		count, err := a.ServerCredentials().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

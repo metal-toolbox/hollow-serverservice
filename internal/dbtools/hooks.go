@@ -12,7 +12,7 @@ import (
 // RegisterHooks adds any hooks that are configured to the models library
 func RegisterHooks() {
 	models.AddServerComponentTypeHook(boil.BeforeInsertHook, setServerComponentTypeSlug)
-	models.AddServerSecretTypeHook(boil.BeforeInsertHook, setServerSecretTypeSlug)
+	models.AddServerCredentialTypeHook(boil.BeforeInsertHook, setServerCredentialTypeSlug)
 }
 
 func setServerComponentTypeSlug(ctx context.Context, exec boil.ContextExecutor, t *models.ServerComponentType) error {
@@ -23,7 +23,7 @@ func setServerComponentTypeSlug(ctx context.Context, exec boil.ContextExecutor, 
 	return nil
 }
 
-func setServerSecretTypeSlug(ctx context.Context, exec boil.ContextExecutor, t *models.ServerSecretType) error {
+func setServerCredentialTypeSlug(ctx context.Context, exec boil.ContextExecutor, t *models.ServerCredentialType) error {
 	if t.Slug == "" {
 		t.Slug = slug.Make(t.Name)
 	}

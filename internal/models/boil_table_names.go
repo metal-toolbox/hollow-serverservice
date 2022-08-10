@@ -8,8 +8,8 @@ var TableNames = struct {
 	ComponentFirmwareVersion string
 	ServerComponentTypes     string
 	ServerComponents         string
-	ServerSecretTypes        string
-	ServerSecrets            string
+	ServerCredentialTypes    string
+	ServerCredentials        string
 	Servers                  string
 	VersionedAttributes      string
 }{
@@ -17,8 +17,8 @@ var TableNames = struct {
 	ComponentFirmwareVersion: "component_firmware_version",
 	ServerComponentTypes:     "server_component_types",
 	ServerComponents:         "server_components",
-	ServerSecretTypes:        "server_secret_types",
-	ServerSecrets:            "server_secrets",
+	ServerCredentialTypes:    "server_credential_types",
+	ServerCredentials:        "server_credentials",
 	Servers:                  "servers",
 	VersionedAttributes:      "versioned_attributes",
 }

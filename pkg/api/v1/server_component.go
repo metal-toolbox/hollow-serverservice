@@ -15,7 +15,8 @@ import (
 // processors, NICs, hard drives, etc.
 //
 // Note: when setting validator struct tags, ensure no extra spaces are present between
-//       comma separated values or validation will fail with a not so useful 500 error.
+//
+//	comma separated values or validation will fail with a not so useful 500 error.
 type ServerComponent struct {
 	UUID                uuid.UUID             `json:"uuid"`
 	ServerUUID          uuid.UUID             `json:"server_uuid" binding:"required"`

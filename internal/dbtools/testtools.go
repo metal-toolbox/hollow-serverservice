@@ -94,10 +94,10 @@ func cleanDB() {
 	models.VersionedAttributes().DeleteAll(ctx, testDB)
 	models.ServerComponents().DeleteAll(ctx, testDB)
 	models.ServerComponentTypes().DeleteAll(ctx, testDB)
-	models.ServerSecrets().DeleteAll(ctx, testDB)
+	models.ServerCredentials().DeleteAll(ctx, testDB)
 	models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true)
 	models.ComponentFirmwareVersions().DeleteAll(ctx, testDB)
-	// don't delete the builtin ServerSecretTypes. Those are expected to exist for the application to work
-	models.ServerSecretTypes(models.ServerSecretTypeWhere.Builtin.EQ(false)).DeleteAll(ctx, testDB)
+	// don't delete the builtin ServerCredentialTypes. Those are expected to exist for the application to work
+	models.ServerCredentialTypes(models.ServerCredentialTypeWhere.Builtin.EQ(false)).DeleteAll(ctx, testDB)
 	testDB.Exec("SET sql_safe_updates = true;")
 }
