@@ -198,6 +198,23 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			"200",
 			"",
 		},
+		{
+			"duplicate vendor/model/version not allowed",
+			&serverservice.ComponentFirmwareVersion{
+				UUID:          uuid.New(),
+				Vendor:        "dell",
+				Model:         "r615",
+				Filename:      "foobar",
+				Version:       "12345",
+				Component:     "bios",
+				Checksum:      "foobar",
+				UpstreamURL:   "https://vendor.com/firmware-file",
+				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
+			},
+			true,
+			"500",
+			"unable to insert into component_firmware_version: pq: duplicate key value violates unique constraint \"vendor_model_version_unique\"",
+		},
 	}
 
 	for _, tt := range testCases {
