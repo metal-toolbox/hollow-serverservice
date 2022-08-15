@@ -529,9 +529,7 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 
 	// identify component and server fixture for test
 	for _, server := range servers {
-		server := server
 		for _, c := range server.Components {
-			c := c
 			if c.Name == fixtureComponentName && c.Vendor == fixtureComponentVendor && c.Serial == fixtureComponentSerial {
 				componentFixture = append(componentFixture, c)
 				serverFixture = server
