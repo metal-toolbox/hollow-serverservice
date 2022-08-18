@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-service: crdb
+  name: crdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-service: crdb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        k8s-service: crdb
+    spec:
+      containers:
+        - args:
+            - start-single-node
+            - --insecure
+          image: cockroachdb/cockroach:latest-v21.1
+          name: crdb
+          ports:
+            - containerPort: 8080
+            - containerPort: 26257
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500M
+            requests:
+              cpu: 500m
+              memory: 500M
+          volumeMounts:
+            - mountPath: /cockroach/cockroach-data
+              name: db
+      restartPolicy: Always
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: db

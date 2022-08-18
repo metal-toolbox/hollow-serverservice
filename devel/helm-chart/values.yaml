@@ -1,0 +1,7 @@
+serverservice:
+  image:
+    repository: ghcr.io/metal-toolbox/hollow-serverservice
+    tag: v0.14.2
+    pullPolicy: Always
+crdb:
+  image: cockroachdb/cockroach:latest-v21.1

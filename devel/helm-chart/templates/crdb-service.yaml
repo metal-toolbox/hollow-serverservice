@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-service: crdb
+  name: crdb
+spec:
+  ports:
+    - name: "26257"
+      port: 26257
+      targetPort: 26257
+  selector:
+    k8s-service: crdb

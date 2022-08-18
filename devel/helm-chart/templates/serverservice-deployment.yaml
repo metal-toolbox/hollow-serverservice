@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-service: serverservice
+  name: serverservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-service: serverservice
+  template:
+    metadata:
+      labels:
+        k8s-service: serverservice
+    spec:
+      initContainers:
+        - args:
+            - migrate
+            - up
+          env:
+            - name: SERVERSERVICE_DB_URI
+              value: postgresql://root@crdb:26257/defaultdb?sslmode=disable
+          image: ghcr.io/metal-toolbox/hollow-serverservice:v0.14.2
+          name: serverservice-migrate
+      containers:
+        - env:
+            - name: SERVERSERVICE_DB_URI
+              value: postgresql://root@crdb:26257/defaultdb?sslmode=disable
+            - name: SERVERSERVICE_OIDC_ENABLED
+              value: "false"
+          image: ghcr.io/metal-toolbox/hollow-serverservice:v0.14.2
+          name: serverservice
+          args:
+            - serve
+            # base64 key generated with,
+            # $ echo "foobar1234567890abcdefghijklmno" | base64
+            - --db-encryption-driver=base64key://Zm9vYmFyMTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ubwo=
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200M
+            requests:
+              cpu: 200m
+              memory: 200M
+      restartPolicy: Always
