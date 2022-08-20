@@ -14,6 +14,7 @@ To run the server service locally you can bring it up with docker-compose. This 
 ```
 docker-compose -f quickstart.yml up
 ```
+
 ### Enable tracing
 
 To run the server service locally with tracing enabled you just need to include the `quickstart-tracing.yml` file.
@@ -41,6 +42,7 @@ Add a new migration file under `db/migrations/` with the schema change
 make docker-up
 make test-database
 sqlboiler crdb --add-soft-deletes
+```
 
 ### Run individual integration tests
 
@@ -51,6 +53,7 @@ export SERVERSERVICE_DB_URI="host=localhost port=26257 user=root sslmode=disable
 ```
 
 Run test.
+
 ```
 go test -timeout 30s -tags testtools -run ^TestIntegrationServerListComponents$ go.hollow.sh/serverservice/pkg/api/v1 -v
 ```

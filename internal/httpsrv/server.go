@@ -18,8 +18,12 @@ import (
 	"gocloud.dev/secrets"
 
 	v1api "go.hollow.sh/serverservice/pkg/api/v1"
+
+	swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title	The serverservice API
 // Server implements the HTTP Server
 type Server struct {
 	Logger        *zap.Logger
@@ -99,6 +103,8 @@ func (s *Server) setup() *gin.Engine {
 	r.GET("/healthz", s.livenessCheck)
 	r.GET("/healthz/liveness", s.livenessCheck)
 	r.GET("/healthz/readiness", s.readinessCheck)
+
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := r.Group("/api/v1")
 	{
