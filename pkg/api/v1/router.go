@@ -18,16 +18,6 @@ import (
 
 )
 
-// @title           serverservice API
-// @version         1.0
-// @description     serverservice API holds hardware and asset information
-
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host      localhost:8000
-// @BasePath  /api/v1
-
 // Router provides a router for the v1 API
 type Router struct {
 	AuthMW        *ginjwt.Middleware

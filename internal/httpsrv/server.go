@@ -18,6 +18,7 @@ import (
 	"gocloud.dev/secrets"
 
 	v1api "go.hollow.sh/serverservice/pkg/api/v1"
+	docs "go.hollow.sh/serverservice/docs"
 
 	swaggerFiles "github.com/swaggo/files"
     ginSwagger "github.com/swaggo/gin-swagger"
@@ -103,8 +104,8 @@ func (s *Server) setup() *gin.Engine {
 	r.GET("/healthz", s.livenessCheck)
 	r.GET("/healthz/liveness", s.livenessCheck)
 	r.GET("/healthz/readiness", s.readinessCheck)
-
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+    docs.SwaggerInfo.BasePath = "/api/v1"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := r.Group("/api/v1")
 	{

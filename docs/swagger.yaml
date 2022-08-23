@@ -1,4 +1,12 @@
+basePath: /api/v1
+host: localhost:8000
 info:
   contact: {}
+  description: serverservice API holds hardware and asset information
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: serverservice API
+  version: "1.0"
 paths: {}
 swagger: "2.0"

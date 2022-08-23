@@ -9,6 +9,7 @@ services:
     environment:
       - SERVERSERVICE_OIDC_ENABLED=false
       - SERVERSERVICE_DB_URI=postgresql://root@crdb:26257/defaultdb?sslmode=disable
+      - SERVERSERVICE_DB_ENCRYPTION-DRIVER=base64key://c29tZXNlY3JldHN0cmluZ3BsZWFzZWlzdGhpc29rYXk=
     ports:
       - "8000:8000"
     restart: unless-stopped
