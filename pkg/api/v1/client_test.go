@@ -110,6 +110,10 @@ func mockClientTests(t *testing.T, f func(ctx context.Context, respCode int, exp
 }
 
 func realClientTests(t *testing.T, f func(ctx context.Context, token string, respCode int, expectError bool) error) {
+	scopedRealClientTests(t, adminScopes, f)
+}
+
+func scopedRealClientTests(t *testing.T, scopes []string, f func(ctx context.Context, token string, respCode int, expectError bool) error) {
 	ctx := context.Background()
 	timeCtx, cancel := context.WithTimeout(ctx, 1*time.Nanosecond)
 
@@ -126,7 +130,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 		{
 			"happy path",
 			ctx,
-			validToken(adminScopes),
+			validToken(scopes),
 			http.StatusOK,
 			false,
 			"",
@@ -151,7 +155,7 @@ func realClientTests(t *testing.T, f func(ctx context.Context, token string, res
 		{
 			"fake timeout",
 			timeCtx,
-			validToken(adminScopes),
+			validToken(scopes),
 			http.StatusOK,
 			true,
 			"context deadline exceeded",

@@ -16,7 +16,8 @@ import (
 func TestIntegrationFirmwareList(t *testing.T) {
 	s := serverTest(t)
 
-	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+	scopes := []string{"read:server-component-firmwares", "write:server-component-firmwares"}
+	scopedRealClientTests(t, scopes, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
 		params := serverservice.ComponentFirmwareVersionListParams{
