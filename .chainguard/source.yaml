@@ -1,0 +1,10 @@
+---
+spec:
+  authorities:
+    # Accept all keyless signatures validated from the public sigstore instance.
+    # This is open source software after all. All we want to know is that the
+    # person that did the commit has control over their email address.
+    - keyless: {}
+    # Add this if you also want to allow commits signed by GitHub.
+    - key:
+        kms: https://github.com/web-flow.gpg
