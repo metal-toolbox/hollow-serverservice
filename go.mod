@@ -3,7 +3,7 @@ module go.hollow.sh/serverservice
 go 1.19
 
 require (
-	github.com/XSAM/otelsql v0.15.0
+	github.com/XSAM/otelsql v0.16.0
 	github.com/cockroachdb/cockroach-go/v2 v2.2.15
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.4.0
