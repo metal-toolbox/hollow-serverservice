@@ -90,11 +90,11 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 	// /server-component-firmwares
 	srvCmpntFw := rg.Group("/server-component-firmwares")
 	{
-		srvCmpntFw.GET("", amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareList)
-		srvCmpntFw.POST("", amw.RequiredScopes(createScopes("server")), r.serverComponentFirmwareCreate)
-		srvCmpntFw.GET("/:uuid", amw.RequiredScopes(readScopes("server")), r.serverComponentFirmwareGet)
-		srvCmpntFw.PUT("/:uuid", amw.RequiredScopes(updateScopes("server")), r.serverComponentFirmwareUpdate)
-		srvCmpntFw.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server")), r.serverComponentFirmwareDelete)
+		srvCmpntFw.GET("", amw.RequiredScopes(readScopes("server-component-firmwares")), r.serverComponentFirmwareList)
+		srvCmpntFw.POST("", amw.RequiredScopes(createScopes("server-component-firmwares")), r.serverComponentFirmwareCreate)
+		srvCmpntFw.GET("/:uuid", amw.RequiredScopes(readScopes("server-component-firmwares")), r.serverComponentFirmwareGet)
+		srvCmpntFw.PUT("/:uuid", amw.RequiredScopes(updateScopes("server-component-firmwares")), r.serverComponentFirmwareUpdate)
+		srvCmpntFw.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server-component-firmwares")), r.serverComponentFirmwareDelete)
 	}
 
 	// /server-credential-types
