@@ -11,7 +11,7 @@ services:
       - SERVERSERVICE_TRACING_ENVIRONMENT=dev-dockercompose
 
   jaeger:
-    image: jaegertracing/all-in-one:1.37.0
+    image: jaegertracing/all-in-one:1.38.0
     ports:
       - "16686:16686" # The UI port
     networks:
