@@ -122,15 +122,26 @@ var ComponentFirmwareVersionWhere = struct {
 
 // ComponentFirmwareVersionRels is where relationship names are stored.
 var ComponentFirmwareVersionRels = struct {
-}{}
+	FirmwareComponentFirmwareSetMaps string
+}{
+	FirmwareComponentFirmwareSetMaps: "FirmwareComponentFirmwareSetMaps",
+}
 
 // componentFirmwareVersionR is where relationships are stored.
 type componentFirmwareVersionR struct {
+	FirmwareComponentFirmwareSetMaps ComponentFirmwareSetMapSlice `boil:"FirmwareComponentFirmwareSetMaps" json:"FirmwareComponentFirmwareSetMaps" toml:"FirmwareComponentFirmwareSetMaps" yaml:"FirmwareComponentFirmwareSetMaps"`
 }
 
 // NewStruct creates a new relationship struct
 func (*componentFirmwareVersionR) NewStruct() *componentFirmwareVersionR {
 	return &componentFirmwareVersionR{}
+}
+
+func (r *componentFirmwareVersionR) GetFirmwareComponentFirmwareSetMaps() ComponentFirmwareSetMapSlice {
+	if r == nil {
+		return nil
+	}
+	return r.FirmwareComponentFirmwareSetMaps
 }
 
 // componentFirmwareVersionL is where Load methods for each relationship are stored.
@@ -420,6 +431,171 @@ func (q componentFirmwareVersionQuery) Exists(ctx context.Context, exec boil.Con
 	}
 
 	return count > 0, nil
+}
+
+// FirmwareComponentFirmwareSetMaps retrieves all the component_firmware_set_map's ComponentFirmwareSetMaps with an executor via firmware_id column.
+func (o *ComponentFirmwareVersion) FirmwareComponentFirmwareSetMaps(mods ...qm.QueryMod) componentFirmwareSetMapQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"component_firmware_set_map\".\"firmware_id\"=?", o.ID),
+	)
+
+	return ComponentFirmwareSetMaps(queryMods...)
+}
+
+// LoadFirmwareComponentFirmwareSetMaps allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (componentFirmwareVersionL) LoadFirmwareComponentFirmwareSetMaps(ctx context.Context, e boil.ContextExecutor, singular bool, maybeComponentFirmwareVersion interface{}, mods queries.Applicator) error {
+	var slice []*ComponentFirmwareVersion
+	var object *ComponentFirmwareVersion
+
+	if singular {
+		object = maybeComponentFirmwareVersion.(*ComponentFirmwareVersion)
+	} else {
+		slice = *maybeComponentFirmwareVersion.(*[]*ComponentFirmwareVersion)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &componentFirmwareVersionR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &componentFirmwareVersionR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`component_firmware_set_map`),
+		qm.WhereIn(`component_firmware_set_map.firmware_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load component_firmware_set_map")
+	}
+
+	var resultSlice []*ComponentFirmwareSetMap
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice component_firmware_set_map")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on component_firmware_set_map")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for component_firmware_set_map")
+	}
+
+	if len(componentFirmwareSetMapAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.FirmwareComponentFirmwareSetMaps = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &componentFirmwareSetMapR{}
+			}
+			foreign.R.Firmware = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.FirmwareID {
+				local.R.FirmwareComponentFirmwareSetMaps = append(local.R.FirmwareComponentFirmwareSetMaps, foreign)
+				if foreign.R == nil {
+					foreign.R = &componentFirmwareSetMapR{}
+				}
+				foreign.R.Firmware = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// AddFirmwareComponentFirmwareSetMaps adds the given related objects to the existing relationships
+// of the component_firmware_version, optionally inserting them as new records.
+// Appends related to o.R.FirmwareComponentFirmwareSetMaps.
+// Sets related.R.Firmware appropriately.
+func (o *ComponentFirmwareVersion) AddFirmwareComponentFirmwareSetMaps(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ComponentFirmwareSetMap) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.FirmwareID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"component_firmware_set_map\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"firmware_id"}),
+				strmangle.WhereClause("\"", "\"", 2, componentFirmwareSetMapPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.FirmwareID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &componentFirmwareVersionR{
+			FirmwareComponentFirmwareSetMaps: related,
+		}
+	} else {
+		o.R.FirmwareComponentFirmwareSetMaps = append(o.R.FirmwareComponentFirmwareSetMaps, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &componentFirmwareSetMapR{
+				Firmware: o,
+			}
+		} else {
+			rel.R.Firmware = o
+		}
+	}
+	return nil
 }
 
 // ComponentFirmwareVersions retrieves all the records using an executor.
