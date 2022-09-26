@@ -29,10 +29,10 @@ func TestIntegrationFirmwareList(t *testing.T) {
 		r, resp, err := s.Client.ListServerComponentFirmware(ctx, &params)
 		if !expectError {
 			require.NoError(t, err)
-			assert.Len(t, r, 3)
-			assert.EqualValues(t, 3, resp.PageCount)
+			assert.Len(t, r, 6)
+			assert.EqualValues(t, 6, resp.PageCount)
 			assert.EqualValues(t, 1, resp.TotalPages)
-			assert.EqualValues(t, 3, resp.TotalRecordCount)
+			assert.EqualValues(t, 6, resp.TotalRecordCount)
 			// We returned everything, so we shouldnt have a next page info
 			assert.Nil(t, resp.Links.Next)
 			assert.Nil(t, resp.Links.Previous)
@@ -52,7 +52,13 @@ func TestIntegrationFirmwareList(t *testing.T) {
 			&serverservice.ComponentFirmwareVersionListParams{
 				Vendor: "Dell",
 			},
-			[]string{dbtools.FixtureDellR640.ID, dbtools.FixtureDellR6515.ID},
+			[]string{
+				dbtools.FixtureDellR640BMC.ID,
+				dbtools.FixtureDellR640BIOS.ID,
+				dbtools.FixtureDellR6515BMC.ID,
+				dbtools.FixtureDellR6515BIOS.ID,
+				dbtools.FixtureDellR640CPLD.ID,
+			},
 			false,
 			"",
 		},
@@ -70,7 +76,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 			&serverservice.ComponentFirmwareVersionListParams{
 				Version: "2.6.6",
 			},
-			[]string{dbtools.FixtureDellR6515.ID},
+			[]string{dbtools.FixtureDellR6515BIOS.ID},
 			false,
 			"",
 		},
@@ -100,11 +106,11 @@ func TestIntegrationFirmwareGet(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		fw, _, err := s.Client.GetServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID))
+		fw, _, err := s.Client.GetServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640BMC.ID))
 
 		if !expectError {
 			require.NoError(t, err)
-			assert.Equal(t, fw.UUID, uuid.MustParse(dbtools.FixtureDellR640.ID))
+			assert.Equal(t, fw.UUID, uuid.MustParse(dbtools.FixtureDellR640BMC.ID))
 		}
 
 		return err
@@ -237,7 +243,7 @@ func TestIntegrationServerComponentFirmwareDelete(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		_, err := s.Client.DeleteServerComponentFirmware(ctx, serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640.ID)})
+		_, err := s.Client.DeleteServerComponentFirmware(ctx, serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640BMC.ID)})
 
 		return err
 	})
@@ -250,7 +256,7 @@ func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
 		s.Client.SetToken(authToken)
 
 		fw := serverservice.ComponentFirmwareVersion{
-			UUID:          uuid.MustParse(dbtools.FixtureDellR640.ID),
+			UUID:          uuid.MustParse(dbtools.FixtureDellR640BMC.ID),
 			Vendor:        "dell",
 			Model:         "r615",
 			Filename:      "foobarino",
@@ -261,12 +267,12 @@ func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
 			RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r615/bios/filename.ext",
 		}
 
-		resp, err := s.Client.UpdateServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID), fw)
+		resp, err := s.Client.UpdateServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640BMC.ID), fw)
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
-			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/server-component-firmwares/%s", dbtools.FixtureDellR640.ID), resp.Links.Self.Href)
-			fw, _, _ := s.Client.GetServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640.ID))
+			assert.Equal(t, fmt.Sprintf("http://test.hollow.com/api/v1/server-component-firmwares/%s", dbtools.FixtureDellR640BMC.ID), resp.Links.Self.Href)
+			fw, _, _ := s.Client.GetServerComponentFirmware(ctx, uuid.MustParse(dbtools.FixtureDellR640BMC.ID))
 			assert.Equal(t, "foobarino", fw.Filename)
 		}
 
