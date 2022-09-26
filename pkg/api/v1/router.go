@@ -103,6 +103,17 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 		srvCredentialTypes.GET("", amw.RequiredScopes(readScopes("server-credential-types")), r.serverCredentialTypesList)
 		srvCredentialTypes.POST("", amw.RequiredScopes(createScopes("server-credential-types")), r.serverCredentialTypesCreate)
 	}
+
+	// /server-component-firmware-sets
+	srvCmpntFwSets := rg.Group("/server-component-firmware-sets")
+	{
+		srvCmpntFwSets.GET("", amw.RequiredScopes(readScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetList)
+		srvCmpntFwSets.POST("", amw.RequiredScopes(createScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetCreate)
+		srvCmpntFwSets.GET("/:uuid", amw.RequiredScopes(readScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetGet)
+		srvCmpntFwSets.PUT("/:uuid", amw.RequiredScopes(updateScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetUpdate)
+		srvCmpntFwSets.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetDelete)
+		srvCmpntFwSets.POST("/:uuid/remove-firmware", amw.RequiredScopes(deleteScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetRemoveFirmware)
+	}
 }
 
 func createScopes(items ...string) []string {
