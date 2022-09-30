@@ -365,7 +365,7 @@ func TestIntegrationServerComponentFirmwareSetGet(t *testing.T) {
 			"resource not found",
 		},
 		{
-			"update an existing firmware set - update name, referenced firmware",
+			"get an existing firmware set",
 			firmwareSetID,
 			false,
 			"200",
@@ -417,7 +417,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 		expectedFirmwareCount       int
 		expectedTotalRecordCount    int
 		expectedPage                int
-		expectedErorr               bool
+		expectedError               bool
 		errorMsg                    string
 	}{
 
@@ -476,7 +476,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			got, resp, err := s.Client.ListServerComponentFirmwareSet(context.TODO(), tt.params)
-			if tt.expectedErorr {
+			if tt.expectedError {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errorMsg)
 				return

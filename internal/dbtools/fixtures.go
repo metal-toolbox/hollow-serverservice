@@ -389,7 +389,9 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureFirmwareUUIDsR640 = append(FixtureFirmwareUUIDsR640, FixtureDellR640BIOS.ID)
 
-	// fixture is not included in FixtureFirmwareUUIDsR640 slice by choice
+	// This fixture is not included in FixtureFirmwareUUIDsR640 slice
+	// since its part of the test TestIntegrationServerComponentFirmwareSetUpdate
+	// where its added into the firmware set.
 	FixtureDellR640CPLD = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
 		Model:         "R640",
