@@ -11,14 +11,14 @@ The server service is a microservice within the Hollow eco-system. Server servic
 
 To run the server service locally you can bring it up with docker-compose. This will run with released images from the hollow container registry.
 
-```
+```bash
 docker-compose -f quickstart.yml up
 ```
 ### Enable tracing
 
 To run the server service locally with tracing enabled you just need to include the `quickstart-tracing.yml` file.
 
-```
+```bash
 docker-compose -f quickstart.yml -f quickstart-tracing.yml up
 ```
 
@@ -26,7 +26,7 @@ docker-compose -f quickstart.yml -f quickstart-tracing.yml up
 
 The `quickstart.yml` compose file will run server service from released images and not the local code base. If you are doing development and want to run with your local code you can use the following command.
 
-```
+```bash
 docker-compose -f quickstart.yml -f quickstart-dev.yml up --build
 ```
 
@@ -37,20 +37,22 @@ NOTE: `--build` is required to get docker-compose to rebuild the container if yo
 
 Add a new migration file under `db/migrations/` with the schema change
 
-```
+```bash
 make docker-up
 make test-database
 sqlboiler crdb --add-soft-deletes
+```
 
 ### Run individual integration tests
 
 Export the DB URI required for integration tests.
 
-```
+```bash
 export SERVERSERVICE_DB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test"
 ```
 
 Run test.
-```
+
+```bash
 go test -timeout 30s -tags testtools -run ^TestIntegrationServerListComponents$ go.hollow.sh/serverservice/pkg/api/v1 -v
 ```
