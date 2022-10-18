@@ -1,16 +1,15 @@
 package serverservice
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
@@ -37,6 +36,7 @@ func (r *Router) serverComponentFirmwareSetList(c *gin.Context) {
 	}
 
 	mods := params.queryMods()
+	mods = append(mods, qm.Load("Attributes"))
 
 	count, err := models.ComponentFirmwareSets(mods...).Count(c.Request.Context(), r.DB)
 	if err != nil {
@@ -99,6 +99,7 @@ func (r *Router) serverComponentFirmwareSetGet(c *gin.Context) {
 	// query firmware set
 	mods := []qm.QueryMod{
 		qm.Where("id=?", setIDParsed),
+		qm.Load("Attributes"),
 	}
 
 	dbFirmwareSet, err := models.ComponentFirmwareSets(mods...).One(c.Request.Context(), r.DB)
@@ -183,7 +184,7 @@ func (r *Router) serverComponentFirmwareSetCreate(c *gin.Context) {
 		return
 	}
 
-	err = r.firmwareSetCreateTx(c.Request.Context(), dbFirmwareSet, firmwareUUIDs)
+	err = r.firmwareSetCreateTx(c.Request.Context(), dbFirmwareSet, firmwareSetPayload.Attributes, firmwareUUIDs)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -246,7 +247,7 @@ func (r *Router) firmwareSetVetFirmwareUUIDsForCreate(c *gin.Context, firmwareUU
 	return vetted, nil
 }
 
-func (r *Router) firmwareSetCreateTx(ctx context.Context, dbFirmwareSet *models.ComponentFirmwareSet, firmwareUUIDs []uuid.UUID) error {
+func (r *Router) firmwareSetCreateTx(ctx context.Context, dbFirmwareSet *models.ComponentFirmwareSet, attrs []Attributes, firmwareUUIDs []uuid.UUID) error {
 	// being transaction to insert a new firmware set and its references
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -259,6 +260,21 @@ func (r *Router) firmwareSetCreateTx(ctx context.Context, dbFirmwareSet *models.
 	// insert set
 	if err := dbFirmwareSet.Insert(ctx, tx, boil.Infer()); err != nil {
 		return err
+	}
+
+	// insert attributes
+	for _, attributes := range attrs {
+		dbAttributes, err := attributes.toDBModel()
+		if err != nil {
+			return err
+		}
+
+		dbAttributes.ComponentFirmwareSetID = null.StringFrom(dbFirmwareSet.ID)
+
+		err = dbFirmwareSet.AddAttributes(ctx, tx, true, dbAttributes)
+		if err != nil {
+			return err
+		}
 	}
 
 	// add firmware references
@@ -309,6 +325,19 @@ func (r *Router) serverComponentFirmwareSetUpdate(c *gin.Context) {
 		return
 	}
 
+	dbAttributes := make([]*models.Attribute, 0, len(newValues.Attributes))
+
+	for _, attributes := range newValues.Attributes {
+		dbAttribute, err := attributes.toDBModel()
+		if err != nil {
+			dbErrorResponse(c, err)
+			return
+		}
+
+		dbAttribute.ComponentFirmwareSetID = null.StringFrom(newValues.ID.String())
+		dbAttributes = append(dbAttributes, dbAttribute)
+	}
+
 	// vet and parse firmware uuids
 	var firmwareUUIDs []uuid.UUID
 
@@ -326,7 +355,7 @@ func (r *Router) serverComponentFirmwareSetUpdate(c *gin.Context) {
 		}
 	}
 
-	err = r.firmwareSetUpdateTx(c.Request.Context(), dbFirmwareSet, firmwareUUIDs)
+	err = r.firmwareSetUpdateTx(c.Request.Context(), dbFirmwareSet, dbAttributes, firmwareUUIDs)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -415,7 +444,7 @@ func (r *Router) firmwareSetMap(ctx context.Context, firmwareSet *models.Compone
 	return m, nil
 }
 
-func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.ComponentFirmwareSet, firmwareUUIDs []uuid.UUID) error {
+func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.ComponentFirmwareSet, attributes []*models.Attribute, firmwareUUIDs []uuid.UUID) error {
 	// being transaction to update a firmware set and its references
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -435,18 +464,13 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 		currentValues.Name = newValues.Name
 	}
 
-	// compare metadata column
-	if !bytes.Equal(newValues.Metadata.JSON, []byte(`null`)) {
-		_, err := json.Marshal(newValues.Metadata)
-		if err != nil {
-			return errors.Wrap(err, "expected valid JSON in metadata attribute")
-		}
-
-		currentValues.Metadata = newValues.Metadata
-	}
-
 	// update set
 	if _, err := currentValues.Update(ctx, tx, boil.Infer()); err != nil {
+		return err
+	}
+
+	// set attributes
+	if err := currentValues.SetAttributes(ctx, tx, true, attributes...); err != nil {
 		return err
 	}
 

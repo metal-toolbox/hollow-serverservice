@@ -1,11 +1,9 @@
 package serverservice
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/volatiletech/null/v8"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -15,7 +13,7 @@ type ComponentFirmwareSet struct {
 	CreatedAt         time.Time                  `json:"created_at"`
 	UpdatedAt         time.Time                  `json:"updated_at"`
 	Name              string                     `json:"name"`
-	Metadata          json.RawMessage            `json:"metadata"`
+	Attributes        []Attributes               `json:"attributes"`
 	ComponentFirmware []ComponentFirmwareVersion `json:"component_firmware"`
 	UUID              uuid.UUID                  `json:"uuid"`
 }
@@ -29,7 +27,6 @@ func (s *ComponentFirmwareSet) fromDBModel(dbFS *models.ComponentFirmwareSet, fi
 	}
 
 	s.Name = dbFS.Name
-	s.Metadata = dbFS.Metadata.JSON
 
 	for _, firmware := range firmwares {
 		f := ComponentFirmwareVersion{}
@@ -42,6 +39,14 @@ func (s *ComponentFirmwareSet) fromDBModel(dbFS *models.ComponentFirmwareSet, fi
 		s.ComponentFirmware = append(s.ComponentFirmware, f)
 	}
 
+	// relation attributes
+	if dbFS.R.Attributes != nil {
+		s.Attributes, err = convertFromDBAttributes(dbFS.R.Attributes)
+		if err != nil {
+			return err
+		}
+	}
+
 	s.CreatedAt = dbFS.CreatedAt.Time
 	s.UpdatedAt = dbFS.UpdatedAt.Time
 
@@ -50,17 +55,16 @@ func (s *ComponentFirmwareSet) fromDBModel(dbFS *models.ComponentFirmwareSet, fi
 
 // ComponentFirmwareSetRequest represents the payload to create a firmware set
 type ComponentFirmwareSetRequest struct {
-	Name                   string          `json:"name"`
-	Metadata               json.RawMessage `json:"metadata"`
-	ComponentFirmwareUUIDs []string        `json:"component_firmware_uuids"`
-	ID                     uuid.UUID       `json:"uuid"`
+	Name                   string       `json:"name"`
+	Attributes             []Attributes `json:"attributes"`
+	ComponentFirmwareUUIDs []string     `json:"component_firmware_uuids"`
+	ID                     uuid.UUID    `json:"uuid"`
 }
 
 func (sc *ComponentFirmwareSetRequest) toDBModelFirmwareSet() (*models.ComponentFirmwareSet, error) {
 	s := &models.ComponentFirmwareSet{
-		ID:       sc.ID.String(),
-		Name:     sc.Name,
-		Metadata: null.JSONFrom(sc.Metadata),
+		ID:   sc.ID.String(),
+		Name: sc.Name,
 	}
 
 	if sc.ID == uuid.Nil {
