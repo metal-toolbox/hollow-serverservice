@@ -11,16 +11,13 @@ linters-settings:
 linters:
   enable:
     # default linters
-    - deadcode
     - errcheck
     - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
 
     # additional linters
     - bodyclose
