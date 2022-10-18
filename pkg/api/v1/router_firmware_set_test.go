@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
+	"go.hollow.sh/serverservice/internal/models"
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
@@ -62,7 +63,6 @@ func TestIntegrationServerComponentFirmwareSetCreate(t *testing.T) {
 			testFirmwareSet = serverservice.ComponentFirmwareSetRequest{
 				Name:                   "test-firmware-set",
 				ComponentFirmwareUUIDs: r640FirmwareIDs,
-				Metadata:               []byte(`{"created by": "foobar"}`),
 			}
 		}
 
@@ -143,6 +143,12 @@ func TestIntegrationServerComponentFirmwareSetCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareSetRequest{
 				Name:                   "foobar",
 				ComponentFirmwareUUIDs: r640FirmwareIDs,
+				Attributes: []serverservice.Attributes{
+					{
+						Namespace: "sh.hollow.firmware_set.metadata",
+						Data:      json.RawMessage(`{"created by": "foobar"}`),
+					},
+				},
 			},
 			false,
 			"200",
@@ -271,9 +277,14 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 		{
 			"update an existing firmware set - update metadata",
 			&serverservice.ComponentFirmwareSetRequest{
-				Name:     "foobar-updated",
-				ID:       firmwareSetID,
-				Metadata: []byte(`{"hello":"world"}`),
+				Name: "foobar-updated",
+				ID:   firmwareSetID,
+				Attributes: []serverservice.Attributes{
+					{
+						Namespace: "sh.hollow.firmware_set.metadata",
+						Data:      json.RawMessage(`{"created by": "foobar"}`),
+					},
+				},
 			},
 			false,
 			"200",
@@ -295,18 +306,21 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 			assert.Equal(t, "resource updated", resp.Message)
 
 			// query firmware set and assert attributes are updated
-			updateFirmwareSet, _, err := s.Client.GetServerComponentFirmwareSet(context.TODO(), firmwareSetID)
+			got, _, err := s.Client.GetServerComponentFirmwareSet(context.TODO(), firmwareSetID)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			assert.NotNil(t, updateFirmwareSet)
-			assert.Equal(t, updateFirmwareSet.UUID.String(), firmwareSetID.String())
-			assert.Equal(t, tt.firmwareSetPayload.Name, updateFirmwareSet.Name)
-			assert.Equal(t, 3, len(updateFirmwareSet.ComponentFirmware))
+			assert.NotNil(t, got)
+			assert.Equal(t, got.UUID.String(), firmwareSetID.String())
+			assert.Equal(t, tt.firmwareSetPayload.Name, got.Name)
+			assert.Equal(t, 3, len(got.ComponentFirmware))
 
-			if len(tt.firmwareSetPayload.Metadata) > 0 {
-				assert.Equal(t, tt.firmwareSetPayload.Metadata, updateFirmwareSet.Metadata)
+			// assert firmware set attributes
+			if len(tt.firmwareSetPayload.Attributes) > 0 {
+				assert.Equal(t, 1, len(got.Attributes))
+				assert.Equal(t, tt.firmwareSetPayload.Attributes[0].Namespace, got.Attributes[0].Namespace)
+				assertAttributesEqual(t, tt.firmwareSetPayload.Attributes[0].Data, got.Attributes[0].Data)
 			}
 
 			if tt.expectedError {
@@ -388,11 +402,34 @@ func TestIntegrationServerComponentFirmwareSetGet(t *testing.T) {
 			assert.Equal(t, got.UUID, tt.firmwareSetID)
 
 			// assert firmware set attributes
+			assert.Equal(t, 1, len(got.Attributes))
+			assert.Equal(t, dbtools.FixtureFirmwareSetR640Attribute.Namespace, got.Attributes[0].Namespace)
+			assertAttributesEqual(t, []byte(dbtools.FixtureFirmwareSetR640Attribute.Data), got.Attributes[0].Data)
+
+			// assert component firmware
 			assert.Equal(t, 2, len(got.ComponentFirmware))
 			assert.Equal(t, "r640", got.Name)
-			assert.Equal(t, json.RawMessage(`{"created-by":"foobar"}`), got.Metadata)
 		})
 	}
+}
+
+func assertAttributesEqual(t *testing.T, a, b []byte) {
+	t.Helper()
+
+	// unmarshal fixture attribute data
+	aData := map[string]string{}
+	if err := json.Unmarshal(a, &aData); err != nil {
+		t.Fatal(err)
+	}
+
+	// unmarshal got attribute data
+	bData := map[string]string{}
+	if err := json.Unmarshal(b, &bData); err != nil {
+		t.Fatal(err)
+	}
+
+	// assert fixture data
+	assert.Equal(t, aData, bData)
 }
 
 func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
@@ -410,21 +447,21 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 	})
 
 	testCases := []struct {
-		testName                    string
-		params                      *serverservice.ComponentFirmwareSetListParams
-		expectedFirmwareSetMetadata json.RawMessage
-		expectedFirmwareModel       string
-		expectedFirmwareCount       int
-		expectedTotalRecordCount    int
-		expectedPage                int
-		expectedError               bool
-		errorMsg                    string
+		testName                     string
+		params                       *serverservice.ComponentFirmwareSetListParams
+		expectedFirmwareSetAttribute *models.Attribute
+		expectedFirmwareModel        string
+		expectedFirmwareCount        int
+		expectedTotalRecordCount     int
+		expectedPage                 int
+		expectedError                bool
+		errorMsg                     string
 	}{
 
 		{
 			"list firmware set by name - r640",
 			&serverservice.ComponentFirmwareSetListParams{Name: "r640"},
-			json.RawMessage(`{"created-by":"foobar"}`),
+			dbtools.FixtureFirmwareSetR640Attribute,
 			"R640",
 			2,
 			1,
@@ -435,7 +472,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 		{
 			"list firmware set by name - r6515",
 			&serverservice.ComponentFirmwareSetListParams{Name: "r6515"},
-			json.RawMessage(`{"created-by":"foobar"}`),
+			dbtools.FixtureFirmwareSetR6515Attribute,
 			"R6515",
 			2,
 			1,
@@ -490,8 +527,10 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 				assert.Equal(t, tt.expectedFirmwareCount, len(got[0].ComponentFirmware))
 			}
 
-			if tt.expectedFirmwareSetMetadata != nil {
-				assert.Equal(t, tt.expectedFirmwareSetMetadata, got[0].Metadata)
+			if tt.expectedFirmwareSetAttribute != nil {
+				assert.Equal(t, 1, len(got[0].Attributes))
+				assert.Equal(t, tt.expectedFirmwareSetAttribute.Namespace, got[0].Attributes[0].Namespace)
+				assertAttributesEqual(t, []byte(tt.expectedFirmwareSetAttribute.Data), got[0].Attributes[0].Data)
 			}
 
 			if tt.expectedFirmwareModel != "" {
