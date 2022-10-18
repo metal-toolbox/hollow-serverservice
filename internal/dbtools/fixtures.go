@@ -71,11 +71,13 @@ var (
 	FixtureServerComponents models.ServerComponentSlice
 
 	// ComponentFirmwareSet fixtures
-	FixtureFirmwareUUIDsR6515 []string
-	FixtureFirmwareSetR6515   *models.ComponentFirmwareSet
+	FixtureFirmwareUUIDsR6515        []string
+	FixtureFirmwareSetR6515          *models.ComponentFirmwareSet
+	FixtureFirmwareSetR6515Attribute *models.Attribute
 
-	FixtureFirmwareUUIDsR640 []string
-	FixtureFirmwareSetR640   *models.ComponentFirmwareSet
+	FixtureFirmwareUUIDsR640        []string
+	FixtureFirmwareSetR640          *models.ComponentFirmwareSet
+	FixtureFirmwareSetR640Attribute *models.Attribute
 )
 
 func addFixtures(t *testing.T) error {
@@ -477,12 +479,19 @@ func setupFirmwareSetR6515(ctx context.Context, db *sqlx.DB) error {
 		}
 	}
 
-	FixtureFirmwareSetR6515 = &models.ComponentFirmwareSet{
-		Name:     "r6515",
-		Metadata: null.NewJSON([]byte(`{ "created-by": "foobar"}`), true),
-	}
+	FixtureFirmwareSetR6515 = &models.ComponentFirmwareSet{Name: "r6515"}
 
 	if err := FixtureFirmwareSetR6515.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareSetR6515Attribute = &models.Attribute{
+		ComponentFirmwareSetID: null.StringFrom(FixtureFirmwareSetR6515.ID),
+		Namespace:              "sh.hollow.firmware_set.labels",
+		Data:                   types.JSON([]byte(`{"vendor": "dell", "model": "r6515"}`)),
+	}
+
+	if err := FixtureFirmwareSetR6515.AddAttributes(ctx, db, true, FixtureFirmwareSetR6515Attribute); err != nil {
 		return err
 	}
 
@@ -508,12 +517,19 @@ func setupFirmwareSetR640(ctx context.Context, db *sqlx.DB) error {
 		}
 	}
 
-	FixtureFirmwareSetR640 = &models.ComponentFirmwareSet{
-		Name:     "r640",
-		Metadata: null.NewJSON([]byte(`{ "created-by": "foobar"}`), true),
-	}
+	FixtureFirmwareSetR640 = &models.ComponentFirmwareSet{Name: "r640"}
 
 	if err := FixtureFirmwareSetR640.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareSetR640Attribute = &models.Attribute{
+		ComponentFirmwareSetID: null.StringFrom(FixtureFirmwareSetR640.ID),
+		Namespace:              "sh.hollow.firmware_set.labels",
+		Data:                   types.JSON([]byte(`{"vendor": "dell", "model": "r640"}`)),
+	}
+
+	if err := FixtureFirmwareSetR640.AddAttributes(ctx, db, true, FixtureFirmwareSetR640Attribute); err != nil {
 		return err
 	}
 
