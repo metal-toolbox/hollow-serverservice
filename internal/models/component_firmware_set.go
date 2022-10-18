@@ -26,7 +26,6 @@ import (
 type ComponentFirmwareSet struct {
 	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Metadata  null.JSON `boil:"metadata" json:"metadata,omitempty" toml:"metadata" yaml:"metadata,omitempty"`
 	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
@@ -37,13 +36,11 @@ type ComponentFirmwareSet struct {
 var ComponentFirmwareSetColumns = struct {
 	ID        string
 	Name      string
-	Metadata  string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
 	Name:      "name",
-	Metadata:  "metadata",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -51,72 +48,54 @@ var ComponentFirmwareSetColumns = struct {
 var ComponentFirmwareSetTableColumns = struct {
 	ID        string
 	Name      string
-	Metadata  string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "component_firmware_set.id",
 	Name:      "component_firmware_set.name",
-	Metadata:  "component_firmware_set.metadata",
 	CreatedAt: "component_firmware_set.created_at",
 	UpdatedAt: "component_firmware_set.updated_at",
 }
 
 // Generated where
 
-type whereHelpernull_JSON struct{ field string }
-
-func (w whereHelpernull_JSON) EQ(x null.JSON) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_JSON) NEQ(x null.JSON) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_JSON) LT(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_JSON) LTE(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_JSON) GT(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_JSON) GTE(x null.JSON) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var ComponentFirmwareSetWhere = struct {
 	ID        whereHelperstring
 	Name      whereHelperstring
-	Metadata  whereHelpernull_JSON
 	CreatedAt whereHelpernull_Time
 	UpdatedAt whereHelpernull_Time
 }{
 	ID:        whereHelperstring{field: "\"component_firmware_set\".\"id\""},
 	Name:      whereHelperstring{field: "\"component_firmware_set\".\"name\""},
-	Metadata:  whereHelpernull_JSON{field: "\"component_firmware_set\".\"metadata\""},
 	CreatedAt: whereHelpernull_Time{field: "\"component_firmware_set\".\"created_at\""},
 	UpdatedAt: whereHelpernull_Time{field: "\"component_firmware_set\".\"updated_at\""},
 }
 
 // ComponentFirmwareSetRels is where relationship names are stored.
 var ComponentFirmwareSetRels = struct {
+	Attributes                          string
 	FirmwareSetComponentFirmwareSetMaps string
 }{
+	Attributes:                          "Attributes",
 	FirmwareSetComponentFirmwareSetMaps: "FirmwareSetComponentFirmwareSetMaps",
 }
 
 // componentFirmwareSetR is where relationships are stored.
 type componentFirmwareSetR struct {
+	Attributes                          AttributeSlice               `boil:"Attributes" json:"Attributes" toml:"Attributes" yaml:"Attributes"`
 	FirmwareSetComponentFirmwareSetMaps ComponentFirmwareSetMapSlice `boil:"FirmwareSetComponentFirmwareSetMaps" json:"FirmwareSetComponentFirmwareSetMaps" toml:"FirmwareSetComponentFirmwareSetMaps" yaml:"FirmwareSetComponentFirmwareSetMaps"`
 }
 
 // NewStruct creates a new relationship struct
 func (*componentFirmwareSetR) NewStruct() *componentFirmwareSetR {
 	return &componentFirmwareSetR{}
+}
+
+func (r *componentFirmwareSetR) GetAttributes() AttributeSlice {
+	if r == nil {
+		return nil
+	}
+	return r.Attributes
 }
 
 func (r *componentFirmwareSetR) GetFirmwareSetComponentFirmwareSetMaps() ComponentFirmwareSetMapSlice {
@@ -130,9 +109,9 @@ func (r *componentFirmwareSetR) GetFirmwareSetComponentFirmwareSetMaps() Compone
 type componentFirmwareSetL struct{}
 
 var (
-	componentFirmwareSetAllColumns            = []string{"id", "name", "metadata", "created_at", "updated_at"}
+	componentFirmwareSetAllColumns            = []string{"id", "name", "created_at", "updated_at"}
 	componentFirmwareSetColumnsWithoutDefault = []string{"name"}
-	componentFirmwareSetColumnsWithDefault    = []string{"id", "metadata", "created_at", "updated_at"}
+	componentFirmwareSetColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	componentFirmwareSetPrimaryKeyColumns     = []string{"id"}
 	componentFirmwareSetGeneratedColumns      = []string{}
 )
@@ -384,7 +363,6 @@ func (q componentFirmwareSetQuery) All(ctx context.Context, exec boil.ContextExe
 	return o, nil
 }
 
-
 // Count returns the count of all ComponentFirmwareSet records in the query.
 func (q componentFirmwareSetQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
@@ -416,6 +394,20 @@ func (q componentFirmwareSetQuery) Exists(ctx context.Context, exec boil.Context
 	return count > 0, nil
 }
 
+// Attributes retrieves all the attribute's Attributes with an executor.
+func (o *ComponentFirmwareSet) Attributes(mods ...qm.QueryMod) attributeQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"attributes\".\"component_firmware_set_id\"=?", o.ID),
+	)
+
+	return Attributes(queryMods...)
+}
+
 // FirmwareSetComponentFirmwareSetMaps retrieves all the component_firmware_set_map's ComponentFirmwareSetMaps with an executor via firmware_set_id column.
 func (o *ComponentFirmwareSet) FirmwareSetComponentFirmwareSetMaps(mods ...qm.QueryMod) componentFirmwareSetMapQuery {
 	var queryMods []qm.QueryMod
@@ -428,6 +420,104 @@ func (o *ComponentFirmwareSet) FirmwareSetComponentFirmwareSetMaps(mods ...qm.Qu
 	)
 
 	return ComponentFirmwareSetMaps(queryMods...)
+}
+
+// LoadAttributes allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (componentFirmwareSetL) LoadAttributes(ctx context.Context, e boil.ContextExecutor, singular bool, maybeComponentFirmwareSet interface{}, mods queries.Applicator) error {
+	var slice []*ComponentFirmwareSet
+	var object *ComponentFirmwareSet
+
+	if singular {
+		object = maybeComponentFirmwareSet.(*ComponentFirmwareSet)
+	} else {
+		slice = *maybeComponentFirmwareSet.(*[]*ComponentFirmwareSet)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &componentFirmwareSetR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &componentFirmwareSetR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.ID) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`attributes`),
+		qm.WhereIn(`attributes.component_firmware_set_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load attributes")
+	}
+
+	var resultSlice []*Attribute
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice attributes")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on attributes")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for attributes")
+	}
+
+	if len(attributeAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Attributes = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &attributeR{}
+			}
+			foreign.R.ComponentFirmwareSet = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.ComponentFirmwareSetID) {
+				local.R.Attributes = append(local.R.Attributes, foreign)
+				if foreign.R == nil {
+					foreign.R = &attributeR{}
+				}
+				foreign.R.ComponentFirmwareSet = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadFirmwareSetComponentFirmwareSetMaps allows an eager lookup of values, cached into the
@@ -522,6 +612,133 @@ func (componentFirmwareSetL) LoadFirmwareSetComponentFirmwareSetMaps(ctx context
 				foreign.R.FirmwareSet = local
 				break
 			}
+		}
+	}
+
+	return nil
+}
+
+// AddAttributes adds the given related objects to the existing relationships
+// of the component_firmware_set, optionally inserting them as new records.
+// Appends related to o.R.Attributes.
+// Sets related.R.ComponentFirmwareSet appropriately.
+func (o *ComponentFirmwareSet) AddAttributes(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Attribute) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.ComponentFirmwareSetID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"attributes\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"component_firmware_set_id"}),
+				strmangle.WhereClause("\"", "\"", 2, attributePrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.ComponentFirmwareSetID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &componentFirmwareSetR{
+			Attributes: related,
+		}
+	} else {
+		o.R.Attributes = append(o.R.Attributes, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &attributeR{
+				ComponentFirmwareSet: o,
+			}
+		} else {
+			rel.R.ComponentFirmwareSet = o
+		}
+	}
+	return nil
+}
+
+// SetAttributes removes all previously related items of the
+// component_firmware_set replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.ComponentFirmwareSet's Attributes accordingly.
+// Replaces o.R.Attributes with related.
+// Sets related.R.ComponentFirmwareSet's Attributes accordingly.
+func (o *ComponentFirmwareSet) SetAttributes(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Attribute) error {
+	query := "update \"attributes\" set \"component_firmware_set_id\" = null where \"component_firmware_set_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.Attributes {
+			queries.SetScanner(&rel.ComponentFirmwareSetID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.ComponentFirmwareSet = nil
+		}
+		o.R.Attributes = nil
+	}
+
+	return o.AddAttributes(ctx, exec, insert, related...)
+}
+
+// RemoveAttributes relationships from objects passed in.
+// Removes related items from R.Attributes (uses pointer comparison, removal does not keep order)
+// Sets related.R.ComponentFirmwareSet.
+func (o *ComponentFirmwareSet) RemoveAttributes(ctx context.Context, exec boil.ContextExecutor, related ...*Attribute) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.ComponentFirmwareSetID, nil)
+		if rel.R != nil {
+			rel.R.ComponentFirmwareSet = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("component_firmware_set_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Attributes {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Attributes)
+			if ln > 1 && i < ln-1 {
+				o.R.Attributes[i] = o.R.Attributes[ln-1]
+			}
+			o.R.Attributes = o.R.Attributes[:ln-1]
+			break
 		}
 	}
 

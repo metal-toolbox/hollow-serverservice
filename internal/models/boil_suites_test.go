@@ -194,6 +194,7 @@ func TestInsert(t *testing.T) {
 func TestToOne(t *testing.T) {
 	t.Run("AttributeToServerUsingServer", testAttributeToOneServerUsingServer)
 	t.Run("AttributeToServerComponentUsingServerComponent", testAttributeToOneServerComponentUsingServerComponent)
+	t.Run("AttributeToComponentFirmwareSetUsingComponentFirmwareSet", testAttributeToOneComponentFirmwareSetUsingComponentFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareSetUsingFirmwareSet", testComponentFirmwareSetMapToOneComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareVersionUsingFirmware", testComponentFirmwareSetMapToOneComponentFirmwareVersionUsingFirmware)
 	t.Run("ServerComponentToServerUsingServer", testServerComponentToOneServerUsingServer)
@@ -211,6 +212,7 @@ func TestOneToOne(t *testing.T) {}
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
+	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManyAttributes)
 	t.Run("ComponentFirmwareSetToFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetToManyFirmwareSetComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersionToFirmwareComponentFirmwareSetMaps", testComponentFirmwareVersionToManyFirmwareComponentFirmwareSetMaps)
 	t.Run("ServerComponentTypeToServerComponents", testServerComponentTypeToManyServerComponents)
@@ -228,6 +230,7 @@ func TestToMany(t *testing.T) {
 func TestToOneSet(t *testing.T) {
 	t.Run("AttributeToServerUsingAttributes", testAttributeToOneSetOpServerUsingServer)
 	t.Run("AttributeToServerComponentUsingAttributes", testAttributeToOneSetOpServerComponentUsingServerComponent)
+	t.Run("AttributeToComponentFirmwareSetUsingAttributes", testAttributeToOneSetOpComponentFirmwareSetUsingComponentFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareSetUsingFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetMapToOneSetOpComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareVersionUsingFirmwareComponentFirmwareSetMaps", testComponentFirmwareSetMapToOneSetOpComponentFirmwareVersionUsingFirmware)
 	t.Run("ServerComponentToServerUsingServerComponents", testServerComponentToOneSetOpServerUsingServer)
@@ -243,6 +246,7 @@ func TestToOneSet(t *testing.T) {
 func TestToOneRemove(t *testing.T) {
 	t.Run("AttributeToServerUsingAttributes", testAttributeToOneRemoveOpServerUsingServer)
 	t.Run("AttributeToServerComponentUsingAttributes", testAttributeToOneRemoveOpServerComponentUsingServerComponent)
+	t.Run("AttributeToComponentFirmwareSetUsingAttributes", testAttributeToOneRemoveOpComponentFirmwareSetUsingComponentFirmwareSet)
 	t.Run("VersionedAttributeToServerUsingVersionedAttributes", testVersionedAttributeToOneRemoveOpServerUsingServer)
 	t.Run("VersionedAttributeToServerComponentUsingVersionedAttributes", testVersionedAttributeToOneRemoveOpServerComponentUsingServerComponent)
 }
@@ -258,6 +262,7 @@ func TestOneToOneRemove(t *testing.T) {}
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
+	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManyAddOpAttributes)
 	t.Run("ComponentFirmwareSetToFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetToManyAddOpFirmwareSetComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersionToFirmwareComponentFirmwareSetMaps", testComponentFirmwareVersionToManyAddOpFirmwareComponentFirmwareSetMaps)
 	t.Run("ServerComponentTypeToServerComponents", testServerComponentTypeToManyAddOpServerComponents)
@@ -273,6 +278,7 @@ func TestToManyAdd(t *testing.T) {
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManySet(t *testing.T) {
+	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManySetOpAttributes)
 	t.Run("ServerComponentToAttributes", testServerComponentToManySetOpAttributes)
 	t.Run("ServerComponentToVersionedAttributes", testServerComponentToManySetOpVersionedAttributes)
 	t.Run("ServerToAttributes", testServerToManySetOpAttributes)
@@ -282,6 +288,7 @@ func TestToManySet(t *testing.T) {
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyRemove(t *testing.T) {
+	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManyRemoveOpAttributes)
 	t.Run("ServerComponentToAttributes", testServerComponentToManyRemoveOpAttributes)
 	t.Run("ServerComponentToVersionedAttributes", testServerComponentToManyRemoveOpVersionedAttributes)
 	t.Run("ServerToAttributes", testServerToManyRemoveOpAttributes)
