@@ -213,7 +213,6 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 		expectedResponse   string
 		errorMsg           string
 	}{
-
 		{
 			"component firmware set UUID required",
 			&serverservice.ComponentFirmwareSetRequest{
@@ -275,13 +274,13 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 			"",
 		},
 		{
-			"update an existing firmware set - update metadata",
+			"update an existing firmware set - update labels",
 			&serverservice.ComponentFirmwareSetRequest{
 				Name: "foobar-updated",
 				ID:   firmwareSetID,
 				Attributes: []serverservice.Attributes{
 					{
-						Namespace: "sh.hollow.firmware_set.metadata",
+						Namespace: "sh.hollow.firmware_set.labels",
 						Data:      json.RawMessage(`{"created by": "foobar"}`),
 					},
 				},
