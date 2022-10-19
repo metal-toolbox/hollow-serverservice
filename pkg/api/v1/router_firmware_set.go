@@ -465,12 +465,23 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 	}
 
 	// update set
-	if _, err := currentValues.Update(ctx, tx, boil.Infer()); err != nil {
+	if _, err := newValues.Update(ctx, tx, boil.Infer()); err != nil {
 		return err
 	}
 
-	// set attributes
-	if err := currentValues.SetAttributes(ctx, tx, true, attributes...); err != nil {
+	// remove existing attributes
+	attrs, err := currentValues.Attributes().All(ctx, tx)
+	if err != nil {
+		return err
+	}
+
+	_, err = attrs.DeleteAll(ctx, tx)
+	if err != nil {
+		return err
+	}
+
+	// add new ones
+	if err := newValues.AddAttributes(ctx, tx, true, attributes...); err != nil {
 		return err
 	}
 
