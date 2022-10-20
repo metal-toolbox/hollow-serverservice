@@ -1,6 +1,7 @@
 package serverservice
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,12 +31,22 @@ func (p *ComponentFirmwareSetListParams) setQuery(q url.Values) {
 }
 
 // queryMods converts the list params into sql conditions that can be added to sql queries
-func (p *ComponentFirmwareSetListParams) queryMods() []qm.QueryMod {
+func (p *ComponentFirmwareSetListParams) queryMods(tableName string) []qm.QueryMod {
 	mods := []qm.QueryMod{}
 
 	if p.Name != "" {
 		m := models.ComponentFirmwareSetWhere.Name.EQ(p.Name)
 		mods = append(mods, m)
+	}
+
+	if len(p.AttributeListParams) > 0 {
+		for i, lp := range p.AttributeListParams {
+			attrJoinAsTableName := fmt.Sprintf("%s_attr_%d", tableName, i)
+			whereStmt := fmt.Sprintf("attributes as %s on %s.component_firmware_set_id = %s.id", attrJoinAsTableName, attrJoinAsTableName, tableName)
+			mods = append(mods, qm.LeftOuterJoin(whereStmt))
+
+			mods = append(mods, lp.queryMods(attrJoinAsTableName))
+		}
 	}
 
 	return mods
