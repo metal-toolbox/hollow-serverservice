@@ -496,6 +496,32 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 			"",
 		},
 		{
+			"list firmware set by attribute params",
+			&serverservice.ComponentFirmwareSetListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
+					{
+						Namespace: "sh.hollow.firmware_set.labels",
+						Keys:      []string{"vendor"},
+						Operator:  "eq",
+						Value:     "dell",
+					},
+					{
+						Namespace: "sh.hollow.firmware_set.labels",
+						Keys:      []string{"model"},
+						Operator:  "eq",
+						Value:     "r640",
+					},
+				},
+			},
+			dbtools.FixtureFirmwareSetR640Attribute,
+			"R640",
+			2,
+			1,
+			1,
+			false,
+			"",
+		},
+		{
 			"list with incorrect firmware set Name attribute returns no records",
 			&serverservice.ComponentFirmwareSetListParams{
 				Name: "does-not-exist",

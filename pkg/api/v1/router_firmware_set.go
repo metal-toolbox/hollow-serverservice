@@ -29,15 +29,19 @@ var (
 func (r *Router) serverComponentFirmwareSetList(c *gin.Context) {
 	pager := parsePagination(c)
 
+	// unmarshal query parameters
 	var params ComponentFirmwareSetListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
 		badRequestResponse(c, "invalid filter payload: ComponentFirmwareSetListParams{}", err)
 		return
 	}
 
-	mods := params.queryMods()
-	mods = append(mods, qm.Load("Attributes"))
+	// query parameters to query mods
+	params.AttributeListParams = parseQueryAttributesListParams(c, "attr")
+	mods := params.queryMods(models.TableNames.ComponentFirmwareSet)
+	mods = append(mods, qm.Load(models.ComponentFirmwareSetRels.Attributes))
 
+	// count rows
 	count, err := models.ComponentFirmwareSets(mods...).Count(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
@@ -48,8 +52,7 @@ func (r *Router) serverComponentFirmwareSetList(c *gin.Context) {
 	pager.Preload = false
 	pager.OrderBy = models.ComponentFirmwareSetColumns.CreatedAt + " DESC"
 
-	mods = append(mods, pager.serverQueryMods()...)
-
+	// load firmware sets
 	dbFirmwareSets, err := models.ComponentFirmwareSets(mods...).All(c.Request.Context(), r.DB)
 	if err != nil {
 		dbErrorResponse(c, err)
@@ -58,6 +61,7 @@ func (r *Router) serverComponentFirmwareSetList(c *gin.Context) {
 
 	firmwareSets := make([]ComponentFirmwareSet, 0, count)
 
+	// load firmware set mappings
 	for _, dbFS := range dbFirmwareSets {
 		f := ComponentFirmwareSet{}
 
@@ -99,7 +103,7 @@ func (r *Router) serverComponentFirmwareSetGet(c *gin.Context) {
 	// query firmware set
 	mods := []qm.QueryMod{
 		qm.Where("id=?", setIDParsed),
-		qm.Load("Attributes"),
+		qm.Load(models.ComponentFirmwareSetRels.Attributes),
 	}
 
 	dbFirmwareSet, err := models.ComponentFirmwareSets(mods...).One(c.Request.Context(), r.DB)
@@ -127,7 +131,7 @@ func (r *Router) serverComponentFirmwareSetGet(c *gin.Context) {
 func (r *Router) queryFirmwareSetFirmware(ctx context.Context, firmwareSetID string) ([]*models.ComponentFirmwareVersion, error) {
 	mapMods := []qm.QueryMod{
 		qm.Where("firmware_set_id=?", firmwareSetID),
-		qm.Load("Firmware"),
+		qm.Load(models.ComponentFirmwareSetMapRels.Firmware),
 	}
 
 	// query firmware set references
@@ -465,7 +469,7 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 	}
 
 	// update set
-	if _, err := newValues.Update(ctx, tx, boil.Infer()); err != nil {
+	if _, err := currentValues.Update(ctx, tx, boil.Infer()); err != nil {
 		return err
 	}
 
@@ -480,7 +484,7 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 		return err
 	}
 
-	// add new ones
+	// add new attributes
 	if err := newValues.AddAttributes(ctx, tx, true, attributes...); err != nil {
 		return err
 	}
