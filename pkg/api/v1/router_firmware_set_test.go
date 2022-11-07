@@ -448,7 +448,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 	testCases := []struct {
 		testName                     string
 		params                       *serverservice.ComponentFirmwareSetListParams
-		expectedFirmwareSetAttribute *models.Attribute
+		expectedFirmwareSetAttribute *models.AttributesFirmwareSet
 		expectedFirmwareModel        string
 		expectedFirmwareCount        int
 		expectedTotalRecordCount     int

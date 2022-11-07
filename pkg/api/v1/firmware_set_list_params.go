@@ -42,7 +42,7 @@ func (p *ComponentFirmwareSetListParams) queryMods(tableName string) []qm.QueryM
 	if len(p.AttributeListParams) > 0 {
 		for i, lp := range p.AttributeListParams {
 			attrJoinAsTableName := fmt.Sprintf("%s_attr_%d", tableName, i)
-			whereStmt := fmt.Sprintf("attributes as %s on %s.component_firmware_set_id = %s.id", attrJoinAsTableName, attrJoinAsTableName, tableName)
+			whereStmt := fmt.Sprintf("%s as %s on %s.firmware_set_id = %s.id", models.TableNames.AttributesFirmwareSet, attrJoinAsTableName, attrJoinAsTableName, tableName)
 			mods = append(mods, qm.LeftOuterJoin(whereStmt))
 
 			mods = append(mods, lp.queryMods(attrJoinAsTableName))

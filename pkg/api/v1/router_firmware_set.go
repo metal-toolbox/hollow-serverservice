@@ -39,7 +39,7 @@ func (r *Router) serverComponentFirmwareSetList(c *gin.Context) {
 	// query parameters to query mods
 	params.AttributeListParams = parseQueryAttributesListParams(c, "attr")
 	mods := params.queryMods(models.TableNames.ComponentFirmwareSet)
-	mods = append(mods, qm.Load(models.ComponentFirmwareSetRels.Attributes))
+	mods = append(mods, qm.Load(models.ComponentFirmwareSetRels.FirmwareSetAttributesFirmwareSets))
 
 	// count rows
 	count, err := models.ComponentFirmwareSets(mods...).Count(c.Request.Context(), r.DB)
@@ -103,7 +103,7 @@ func (r *Router) serverComponentFirmwareSetGet(c *gin.Context) {
 	// query firmware set
 	mods := []qm.QueryMod{
 		qm.Where("id=?", setIDParsed),
-		qm.Load(models.ComponentFirmwareSetRels.Attributes),
+		qm.Load(models.ComponentFirmwareSetRels.FirmwareSetAttributesFirmwareSets),
 	}
 
 	dbFirmwareSet, err := models.ComponentFirmwareSets(mods...).One(c.Request.Context(), r.DB)
@@ -268,14 +268,10 @@ func (r *Router) firmwareSetCreateTx(ctx context.Context, dbFirmwareSet *models.
 
 	// insert attributes
 	for _, attributes := range attrs {
-		dbAttributes, err := attributes.toDBModel()
-		if err != nil {
-			return err
-		}
+		dbAttributes := attributes.toDBModelAttributesFirmwareSet()
+		dbAttributes.FirmwareSetID = null.StringFrom(dbFirmwareSet.ID)
 
-		dbAttributes.ComponentFirmwareSetID = null.StringFrom(dbFirmwareSet.ID)
-
-		err = dbFirmwareSet.AddAttributes(ctx, tx, true, dbAttributes)
+		err = dbFirmwareSet.AddFirmwareSetAttributesFirmwareSets(ctx, tx, true, dbAttributes)
 		if err != nil {
 			return err
 		}
@@ -329,17 +325,13 @@ func (r *Router) serverComponentFirmwareSetUpdate(c *gin.Context) {
 		return
 	}
 
-	dbAttributes := make([]*models.Attribute, 0, len(newValues.Attributes))
+	dbAttributesFirmwareSet := make([]*models.AttributesFirmwareSet, 0, len(newValues.Attributes))
 
 	for _, attributes := range newValues.Attributes {
-		dbAttribute, err := attributes.toDBModel()
-		if err != nil {
-			dbErrorResponse(c, err)
-			return
-		}
+		attr := attributes.toDBModelAttributesFirmwareSet()
 
-		dbAttribute.ComponentFirmwareSetID = null.StringFrom(newValues.ID.String())
-		dbAttributes = append(dbAttributes, dbAttribute)
+		attr.FirmwareSetID = null.StringFrom(newValues.ID.String())
+		dbAttributesFirmwareSet = append(dbAttributesFirmwareSet, attr)
 	}
 
 	// vet and parse firmware uuids
@@ -359,7 +351,7 @@ func (r *Router) serverComponentFirmwareSetUpdate(c *gin.Context) {
 		}
 	}
 
-	err = r.firmwareSetUpdateTx(c.Request.Context(), dbFirmwareSet, dbAttributes, firmwareUUIDs)
+	err = r.firmwareSetUpdateTx(c.Request.Context(), dbFirmwareSet, dbAttributesFirmwareSet, firmwareUUIDs)
 	if err != nil {
 		dbErrorResponse(c, err)
 		return
@@ -448,7 +440,7 @@ func (r *Router) firmwareSetMap(ctx context.Context, firmwareSet *models.Compone
 	return m, nil
 }
 
-func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.ComponentFirmwareSet, attributes []*models.Attribute, firmwareUUIDs []uuid.UUID) error {
+func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.ComponentFirmwareSet, attributes models.AttributesFirmwareSetSlice, firmwareUUIDs []uuid.UUID) error {
 	// being transaction to update a firmware set and its references
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -460,36 +452,37 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 
 	currentValues, err := models.FindComponentFirmwareSet(ctx, tx, newValues.ID)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
-	// compare Name column
+	// update name column
 	if newValues.Name != "" && newValues.Name != currentValues.Name {
 		currentValues.Name = newValues.Name
 	}
 
-	// update set
 	if _, err := currentValues.Update(ctx, tx, boil.Infer()); err != nil {
 		return err
 	}
 
-	// remove existing attributes
-	attrs, err := currentValues.Attributes().All(ctx, tx)
+	// retrieve referenced firmware set attributes
+	attrs, err := currentValues.FirmwareSetAttributesFirmwareSets().All(ctx, tx)
 	if err != nil {
 		return err
 	}
 
+	// remove current referenced firmware set attributes
 	_, err = attrs.DeleteAll(ctx, tx)
 	if err != nil {
 		return err
 	}
 
-	// add new attributes
-	if err := newValues.AddAttributes(ctx, tx, true, attributes...); err != nil {
+	// add new firmware set attributes
+	if err := newValues.AddFirmwareSetAttributesFirmwareSets(ctx, tx, true, attributes...); err != nil {
 		return err
 	}
 
-	// add firmware references
+	// add new firmware references
 	for _, id := range firmwareUUIDs {
 		m := models.ComponentFirmwareSetMap{FirmwareSetID: newValues.ID, FirmwareID: id.String()}
 

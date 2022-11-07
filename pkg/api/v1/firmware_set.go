@@ -1,9 +1,11 @@
 package serverservice
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -16,6 +18,32 @@ type ComponentFirmwareSet struct {
 	Attributes        []Attributes               `json:"attributes"`
 	ComponentFirmware []ComponentFirmwareVersion `json:"component_firmware"`
 	UUID              uuid.UUID                  `json:"uuid"`
+}
+
+func convertFromDBModelAttributesFirmwareSet(dbAttrsFirmwareSet models.AttributesFirmwareSetSlice) ([]Attributes, error) {
+	data := []Attributes{}
+
+	if dbAttrsFirmwareSet == nil {
+		return data, nil
+	}
+
+	for _, a := range dbAttrsFirmwareSet {
+		data = append(data, Attributes{
+			Namespace: a.Namespace,
+			Data:      json.RawMessage(a.Data),
+			CreatedAt: a.CreatedAt.Time,
+			UpdatedAt: a.UpdatedAt.Time,
+		})
+	}
+
+	return data, nil
+}
+
+func (a *Attributes) toDBModelAttributesFirmwareSet() *models.AttributesFirmwareSet {
+	return &models.AttributesFirmwareSet{
+		Namespace: a.Namespace,
+		Data:      types.JSON(a.Data),
+	}
 }
 
 func (s *ComponentFirmwareSet) fromDBModel(dbFS *models.ComponentFirmwareSet, firmwares []*models.ComponentFirmwareVersion) error {
@@ -40,8 +68,8 @@ func (s *ComponentFirmwareSet) fromDBModel(dbFS *models.ComponentFirmwareSet, fi
 	}
 
 	// relation attributes
-	if dbFS.R.Attributes != nil {
-		s.Attributes, err = convertFromDBAttributes(dbFS.R.Attributes)
+	if dbFS.R.FirmwareSetAttributesFirmwareSets != nil {
+		s.Attributes, err = convertFromDBModelAttributesFirmwareSet(dbFS.R.FirmwareSetAttributesFirmwareSets)
 		if err != nil {
 			return err
 		}
