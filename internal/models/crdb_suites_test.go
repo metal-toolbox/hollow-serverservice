@@ -7,6 +7,7 @@ import "testing"
 
 func TestUpsert(t *testing.T) {
 	t.Run("Attributes", testAttributesUpsert)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsUpsert)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsUpsert)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsUpsert)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsUpsert)

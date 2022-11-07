@@ -13,6 +13,7 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Attributes", testAttributes)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSets)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSets)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersions)
@@ -38,6 +39,7 @@ func TestSliceSoftDeleteAll(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	t.Run("Attributes", testAttributesDelete)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsDelete)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsDelete)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsDelete)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsDelete)
@@ -51,6 +53,7 @@ func TestDelete(t *testing.T) {
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Attributes", testAttributesQueryDeleteAll)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsQueryDeleteAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsQueryDeleteAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsQueryDeleteAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsQueryDeleteAll)
@@ -64,6 +67,7 @@ func TestQueryDeleteAll(t *testing.T) {
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Attributes", testAttributesSliceDeleteAll)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsSliceDeleteAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsSliceDeleteAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsSliceDeleteAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSliceDeleteAll)
@@ -77,6 +81,7 @@ func TestSliceDeleteAll(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	t.Run("Attributes", testAttributesExists)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsExists)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsExists)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsExists)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsExists)
@@ -90,6 +95,7 @@ func TestExists(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	t.Run("Attributes", testAttributesFind)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsFind)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsFind)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsFind)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsFind)
@@ -103,6 +109,7 @@ func TestFind(t *testing.T) {
 
 func TestBind(t *testing.T) {
 	t.Run("Attributes", testAttributesBind)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsBind)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsBind)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsBind)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsBind)
@@ -116,6 +123,7 @@ func TestBind(t *testing.T) {
 
 func TestOne(t *testing.T) {
 	t.Run("Attributes", testAttributesOne)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsOne)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsOne)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsOne)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsOne)
@@ -129,6 +137,7 @@ func TestOne(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	t.Run("Attributes", testAttributesAll)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsAll)
@@ -142,6 +151,7 @@ func TestAll(t *testing.T) {
 
 func TestCount(t *testing.T) {
 	t.Run("Attributes", testAttributesCount)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsCount)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsCount)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsCount)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsCount)
@@ -155,6 +165,7 @@ func TestCount(t *testing.T) {
 
 func TestHooks(t *testing.T) {
 	t.Run("Attributes", testAttributesHooks)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsHooks)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsHooks)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsHooks)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsHooks)
@@ -169,6 +180,8 @@ func TestHooks(t *testing.T) {
 func TestInsert(t *testing.T) {
 	t.Run("Attributes", testAttributesInsert)
 	t.Run("Attributes", testAttributesInsertWhitelist)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsInsert)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsInsertWhitelist)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsInsert)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsInsertWhitelist)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsInsert)
@@ -194,7 +207,7 @@ func TestInsert(t *testing.T) {
 func TestToOne(t *testing.T) {
 	t.Run("AttributeToServerUsingServer", testAttributeToOneServerUsingServer)
 	t.Run("AttributeToServerComponentUsingServerComponent", testAttributeToOneServerComponentUsingServerComponent)
-	t.Run("AttributeToComponentFirmwareSetUsingComponentFirmwareSet", testAttributeToOneComponentFirmwareSetUsingComponentFirmwareSet)
+	t.Run("AttributesFirmwareSetToComponentFirmwareSetUsingFirmwareSet", testAttributesFirmwareSetToOneComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareSetUsingFirmwareSet", testComponentFirmwareSetMapToOneComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareVersionUsingFirmware", testComponentFirmwareSetMapToOneComponentFirmwareVersionUsingFirmware)
 	t.Run("ServerComponentToServerUsingServer", testServerComponentToOneServerUsingServer)
@@ -212,7 +225,7 @@ func TestOneToOne(t *testing.T) {}
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
-	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManyAttributes)
+	t.Run("ComponentFirmwareSetToFirmwareSetAttributesFirmwareSets", testComponentFirmwareSetToManyFirmwareSetAttributesFirmwareSets)
 	t.Run("ComponentFirmwareSetToFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetToManyFirmwareSetComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersionToFirmwareComponentFirmwareSetMaps", testComponentFirmwareVersionToManyFirmwareComponentFirmwareSetMaps)
 	t.Run("ServerComponentTypeToServerComponents", testServerComponentTypeToManyServerComponents)
@@ -230,7 +243,7 @@ func TestToMany(t *testing.T) {
 func TestToOneSet(t *testing.T) {
 	t.Run("AttributeToServerUsingAttributes", testAttributeToOneSetOpServerUsingServer)
 	t.Run("AttributeToServerComponentUsingAttributes", testAttributeToOneSetOpServerComponentUsingServerComponent)
-	t.Run("AttributeToComponentFirmwareSetUsingAttributes", testAttributeToOneSetOpComponentFirmwareSetUsingComponentFirmwareSet)
+	t.Run("AttributesFirmwareSetToComponentFirmwareSetUsingFirmwareSetAttributesFirmwareSets", testAttributesFirmwareSetToOneSetOpComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareSetUsingFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetMapToOneSetOpComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareVersionUsingFirmwareComponentFirmwareSetMaps", testComponentFirmwareSetMapToOneSetOpComponentFirmwareVersionUsingFirmware)
 	t.Run("ServerComponentToServerUsingServerComponents", testServerComponentToOneSetOpServerUsingServer)
@@ -246,7 +259,7 @@ func TestToOneSet(t *testing.T) {
 func TestToOneRemove(t *testing.T) {
 	t.Run("AttributeToServerUsingAttributes", testAttributeToOneRemoveOpServerUsingServer)
 	t.Run("AttributeToServerComponentUsingAttributes", testAttributeToOneRemoveOpServerComponentUsingServerComponent)
-	t.Run("AttributeToComponentFirmwareSetUsingAttributes", testAttributeToOneRemoveOpComponentFirmwareSetUsingComponentFirmwareSet)
+	t.Run("AttributesFirmwareSetToComponentFirmwareSetUsingFirmwareSetAttributesFirmwareSets", testAttributesFirmwareSetToOneRemoveOpComponentFirmwareSetUsingFirmwareSet)
 	t.Run("VersionedAttributeToServerUsingVersionedAttributes", testVersionedAttributeToOneRemoveOpServerUsingServer)
 	t.Run("VersionedAttributeToServerComponentUsingVersionedAttributes", testVersionedAttributeToOneRemoveOpServerComponentUsingServerComponent)
 }
@@ -262,7 +275,7 @@ func TestOneToOneRemove(t *testing.T) {}
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
-	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManyAddOpAttributes)
+	t.Run("ComponentFirmwareSetToFirmwareSetAttributesFirmwareSets", testComponentFirmwareSetToManyAddOpFirmwareSetAttributesFirmwareSets)
 	t.Run("ComponentFirmwareSetToFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetToManyAddOpFirmwareSetComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersionToFirmwareComponentFirmwareSetMaps", testComponentFirmwareVersionToManyAddOpFirmwareComponentFirmwareSetMaps)
 	t.Run("ServerComponentTypeToServerComponents", testServerComponentTypeToManyAddOpServerComponents)
@@ -278,7 +291,7 @@ func TestToManyAdd(t *testing.T) {
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManySet(t *testing.T) {
-	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManySetOpAttributes)
+	t.Run("ComponentFirmwareSetToFirmwareSetAttributesFirmwareSets", testComponentFirmwareSetToManySetOpFirmwareSetAttributesFirmwareSets)
 	t.Run("ServerComponentToAttributes", testServerComponentToManySetOpAttributes)
 	t.Run("ServerComponentToVersionedAttributes", testServerComponentToManySetOpVersionedAttributes)
 	t.Run("ServerToAttributes", testServerToManySetOpAttributes)
@@ -288,7 +301,7 @@ func TestToManySet(t *testing.T) {
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyRemove(t *testing.T) {
-	t.Run("ComponentFirmwareSetToAttributes", testComponentFirmwareSetToManyRemoveOpAttributes)
+	t.Run("ComponentFirmwareSetToFirmwareSetAttributesFirmwareSets", testComponentFirmwareSetToManyRemoveOpFirmwareSetAttributesFirmwareSets)
 	t.Run("ServerComponentToAttributes", testServerComponentToManyRemoveOpAttributes)
 	t.Run("ServerComponentToVersionedAttributes", testServerComponentToManyRemoveOpVersionedAttributes)
 	t.Run("ServerToAttributes", testServerToManyRemoveOpAttributes)
@@ -297,6 +310,7 @@ func TestToManyRemove(t *testing.T) {
 
 func TestReload(t *testing.T) {
 	t.Run("Attributes", testAttributesReload)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsReload)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsReload)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsReload)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsReload)
@@ -310,6 +324,7 @@ func TestReload(t *testing.T) {
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Attributes", testAttributesReloadAll)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsReloadAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsReloadAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsReloadAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsReloadAll)
@@ -323,6 +338,7 @@ func TestReloadAll(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	t.Run("Attributes", testAttributesSelect)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsSelect)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsSelect)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsSelect)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSelect)
@@ -336,6 +352,7 @@ func TestSelect(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	t.Run("Attributes", testAttributesUpdate)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsUpdate)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsUpdate)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsUpdate)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsUpdate)
@@ -349,6 +366,7 @@ func TestUpdate(t *testing.T) {
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Attributes", testAttributesSliceUpdateAll)
+	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsSliceUpdateAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsSliceUpdateAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsSliceUpdateAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSliceUpdateAll)

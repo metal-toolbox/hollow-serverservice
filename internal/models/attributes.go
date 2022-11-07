@@ -25,57 +25,52 @@ import (
 
 // Attribute is an object representing the database table.
 type Attribute struct {
-	ID                     string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ServerID               null.String `boil:"server_id" json:"server_id,omitempty" toml:"server_id" yaml:"server_id,omitempty"`
-	ServerComponentID      null.String `boil:"server_component_id" json:"server_component_id,omitempty" toml:"server_component_id" yaml:"server_component_id,omitempty"`
-	Namespace              string      `boil:"namespace" json:"namespace" toml:"namespace" yaml:"namespace"`
-	Data                   types.JSON  `boil:"data" json:"data" toml:"data" yaml:"data"`
-	CreatedAt              null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt              null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	ComponentFirmwareSetID null.String `boil:"component_firmware_set_id" json:"component_firmware_set_id,omitempty" toml:"component_firmware_set_id" yaml:"component_firmware_set_id,omitempty"`
+	ID                string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ServerID          null.String `boil:"server_id" json:"server_id,omitempty" toml:"server_id" yaml:"server_id,omitempty"`
+	ServerComponentID null.String `boil:"server_component_id" json:"server_component_id,omitempty" toml:"server_component_id" yaml:"server_component_id,omitempty"`
+	Namespace         string      `boil:"namespace" json:"namespace" toml:"namespace" yaml:"namespace"`
+	Data              types.JSON  `boil:"data" json:"data" toml:"data" yaml:"data"`
+	CreatedAt         null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt         null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *attributeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L attributeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var AttributeColumns = struct {
-	ID                     string
-	ServerID               string
-	ServerComponentID      string
-	Namespace              string
-	Data                   string
-	CreatedAt              string
-	UpdatedAt              string
-	ComponentFirmwareSetID string
+	ID                string
+	ServerID          string
+	ServerComponentID string
+	Namespace         string
+	Data              string
+	CreatedAt         string
+	UpdatedAt         string
 }{
-	ID:                     "id",
-	ServerID:               "server_id",
-	ServerComponentID:      "server_component_id",
-	Namespace:              "namespace",
-	Data:                   "data",
-	CreatedAt:              "created_at",
-	UpdatedAt:              "updated_at",
-	ComponentFirmwareSetID: "component_firmware_set_id",
+	ID:                "id",
+	ServerID:          "server_id",
+	ServerComponentID: "server_component_id",
+	Namespace:         "namespace",
+	Data:              "data",
+	CreatedAt:         "created_at",
+	UpdatedAt:         "updated_at",
 }
 
 var AttributeTableColumns = struct {
-	ID                     string
-	ServerID               string
-	ServerComponentID      string
-	Namespace              string
-	Data                   string
-	CreatedAt              string
-	UpdatedAt              string
-	ComponentFirmwareSetID string
+	ID                string
+	ServerID          string
+	ServerComponentID string
+	Namespace         string
+	Data              string
+	CreatedAt         string
+	UpdatedAt         string
 }{
-	ID:                     "attributes.id",
-	ServerID:               "attributes.server_id",
-	ServerComponentID:      "attributes.server_component_id",
-	Namespace:              "attributes.namespace",
-	Data:                   "attributes.data",
-	CreatedAt:              "attributes.created_at",
-	UpdatedAt:              "attributes.updated_at",
-	ComponentFirmwareSetID: "attributes.component_firmware_set_id",
+	ID:                "attributes.id",
+	ServerID:          "attributes.server_id",
+	ServerComponentID: "attributes.server_component_id",
+	Namespace:         "attributes.namespace",
+	Data:              "attributes.data",
+	CreatedAt:         "attributes.created_at",
+	UpdatedAt:         "attributes.updated_at",
 }
 
 // Generated where
@@ -173,41 +168,36 @@ func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var AttributeWhere = struct {
-	ID                     whereHelperstring
-	ServerID               whereHelpernull_String
-	ServerComponentID      whereHelpernull_String
-	Namespace              whereHelperstring
-	Data                   whereHelpertypes_JSON
-	CreatedAt              whereHelpernull_Time
-	UpdatedAt              whereHelpernull_Time
-	ComponentFirmwareSetID whereHelpernull_String
+	ID                whereHelperstring
+	ServerID          whereHelpernull_String
+	ServerComponentID whereHelpernull_String
+	Namespace         whereHelperstring
+	Data              whereHelpertypes_JSON
+	CreatedAt         whereHelpernull_Time
+	UpdatedAt         whereHelpernull_Time
 }{
-	ID:                     whereHelperstring{field: "\"attributes\".\"id\""},
-	ServerID:               whereHelpernull_String{field: "\"attributes\".\"server_id\""},
-	ServerComponentID:      whereHelpernull_String{field: "\"attributes\".\"server_component_id\""},
-	Namespace:              whereHelperstring{field: "\"attributes\".\"namespace\""},
-	Data:                   whereHelpertypes_JSON{field: "\"attributes\".\"data\""},
-	CreatedAt:              whereHelpernull_Time{field: "\"attributes\".\"created_at\""},
-	UpdatedAt:              whereHelpernull_Time{field: "\"attributes\".\"updated_at\""},
-	ComponentFirmwareSetID: whereHelpernull_String{field: "\"attributes\".\"component_firmware_set_id\""},
+	ID:                whereHelperstring{field: "\"attributes\".\"id\""},
+	ServerID:          whereHelpernull_String{field: "\"attributes\".\"server_id\""},
+	ServerComponentID: whereHelpernull_String{field: "\"attributes\".\"server_component_id\""},
+	Namespace:         whereHelperstring{field: "\"attributes\".\"namespace\""},
+	Data:              whereHelpertypes_JSON{field: "\"attributes\".\"data\""},
+	CreatedAt:         whereHelpernull_Time{field: "\"attributes\".\"created_at\""},
+	UpdatedAt:         whereHelpernull_Time{field: "\"attributes\".\"updated_at\""},
 }
 
 // AttributeRels is where relationship names are stored.
 var AttributeRels = struct {
-	Server               string
-	ServerComponent      string
-	ComponentFirmwareSet string
+	Server          string
+	ServerComponent string
 }{
-	Server:               "Server",
-	ServerComponent:      "ServerComponent",
-	ComponentFirmwareSet: "ComponentFirmwareSet",
+	Server:          "Server",
+	ServerComponent: "ServerComponent",
 }
 
 // attributeR is where relationships are stored.
 type attributeR struct {
-	Server               *Server               `boil:"Server" json:"Server" toml:"Server" yaml:"Server"`
-	ServerComponent      *ServerComponent      `boil:"ServerComponent" json:"ServerComponent" toml:"ServerComponent" yaml:"ServerComponent"`
-	ComponentFirmwareSet *ComponentFirmwareSet `boil:"ComponentFirmwareSet" json:"ComponentFirmwareSet" toml:"ComponentFirmwareSet" yaml:"ComponentFirmwareSet"`
+	Server          *Server          `boil:"Server" json:"Server" toml:"Server" yaml:"Server"`
+	ServerComponent *ServerComponent `boil:"ServerComponent" json:"ServerComponent" toml:"ServerComponent" yaml:"ServerComponent"`
 }
 
 // NewStruct creates a new relationship struct
@@ -229,20 +219,13 @@ func (r *attributeR) GetServerComponent() *ServerComponent {
 	return r.ServerComponent
 }
 
-func (r *attributeR) GetComponentFirmwareSet() *ComponentFirmwareSet {
-	if r == nil {
-		return nil
-	}
-	return r.ComponentFirmwareSet
-}
-
 // attributeL is where Load methods for each relationship are stored.
 type attributeL struct{}
 
 var (
-	attributeAllColumns            = []string{"id", "server_id", "server_component_id", "namespace", "data", "created_at", "updated_at", "component_firmware_set_id"}
+	attributeAllColumns            = []string{"id", "server_id", "server_component_id", "namespace", "data", "created_at", "updated_at"}
 	attributeColumnsWithoutDefault = []string{"namespace", "data"}
-	attributeColumnsWithDefault    = []string{"id", "server_id", "server_component_id", "created_at", "updated_at", "component_firmware_set_id"}
+	attributeColumnsWithDefault    = []string{"id", "server_id", "server_component_id", "created_at", "updated_at"}
 	attributePrimaryKeyColumns     = []string{"id"}
 	attributeGeneratedColumns      = []string{}
 )
@@ -547,17 +530,6 @@ func (o *Attribute) ServerComponent(mods ...qm.QueryMod) serverComponentQuery {
 	return ServerComponents(queryMods...)
 }
 
-// ComponentFirmwareSet pointed to by the foreign key.
-func (o *Attribute) ComponentFirmwareSet(mods ...qm.QueryMod) componentFirmwareSetQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.ComponentFirmwareSetID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return ComponentFirmwareSets(queryMods...)
-}
-
 // LoadServer allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (attributeL) LoadServer(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttribute interface{}, mods queries.Applicator) error {
@@ -775,114 +747,6 @@ func (attributeL) LoadServerComponent(ctx context.Context, e boil.ContextExecuto
 	return nil
 }
 
-// LoadComponentFirmwareSet allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (attributeL) LoadComponentFirmwareSet(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttribute interface{}, mods queries.Applicator) error {
-	var slice []*Attribute
-	var object *Attribute
-
-	if singular {
-		object = maybeAttribute.(*Attribute)
-	} else {
-		slice = *maybeAttribute.(*[]*Attribute)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &attributeR{}
-		}
-		if !queries.IsNil(object.ComponentFirmwareSetID) {
-			args = append(args, object.ComponentFirmwareSetID)
-		}
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &attributeR{}
-			}
-
-			for _, a := range args {
-				if queries.Equal(a, obj.ComponentFirmwareSetID) {
-					continue Outer
-				}
-			}
-
-			if !queries.IsNil(obj.ComponentFirmwareSetID) {
-				args = append(args, obj.ComponentFirmwareSetID)
-			}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`component_firmware_set`),
-		qm.WhereIn(`component_firmware_set.id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load ComponentFirmwareSet")
-	}
-
-	var resultSlice []*ComponentFirmwareSet
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice ComponentFirmwareSet")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for component_firmware_set")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for component_firmware_set")
-	}
-
-	if len(attributeAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.ComponentFirmwareSet = foreign
-		if foreign.R == nil {
-			foreign.R = &componentFirmwareSetR{}
-		}
-		foreign.R.Attributes = append(foreign.R.Attributes, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if queries.Equal(local.ComponentFirmwareSetID, foreign.ID) {
-				local.R.ComponentFirmwareSet = foreign
-				if foreign.R == nil {
-					foreign.R = &componentFirmwareSetR{}
-				}
-				foreign.R.Attributes = append(foreign.R.Attributes, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // SetServer of the attribute to the related item.
 // Sets o.R.Server to related.
 // Adds o to related.R.Attributes.
@@ -1030,86 +894,6 @@ func (o *Attribute) RemoveServerComponent(ctx context.Context, exec boil.Context
 
 	for i, ri := range related.R.Attributes {
 		if queries.Equal(o.ServerComponentID, ri.ServerComponentID) {
-			continue
-		}
-
-		ln := len(related.R.Attributes)
-		if ln > 1 && i < ln-1 {
-			related.R.Attributes[i] = related.R.Attributes[ln-1]
-		}
-		related.R.Attributes = related.R.Attributes[:ln-1]
-		break
-	}
-	return nil
-}
-
-// SetComponentFirmwareSet of the attribute to the related item.
-// Sets o.R.ComponentFirmwareSet to related.
-// Adds o to related.R.Attributes.
-func (o *Attribute) SetComponentFirmwareSet(ctx context.Context, exec boil.ContextExecutor, insert bool, related *ComponentFirmwareSet) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"attributes\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"component_firmware_set_id"}),
-		strmangle.WhereClause("\"", "\"", 2, attributePrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	queries.Assign(&o.ComponentFirmwareSetID, related.ID)
-	if o.R == nil {
-		o.R = &attributeR{
-			ComponentFirmwareSet: related,
-		}
-	} else {
-		o.R.ComponentFirmwareSet = related
-	}
-
-	if related.R == nil {
-		related.R = &componentFirmwareSetR{
-			Attributes: AttributeSlice{o},
-		}
-	} else {
-		related.R.Attributes = append(related.R.Attributes, o)
-	}
-
-	return nil
-}
-
-// RemoveComponentFirmwareSet relationship.
-// Sets o.R.ComponentFirmwareSet to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Attribute) RemoveComponentFirmwareSet(ctx context.Context, exec boil.ContextExecutor, related *ComponentFirmwareSet) error {
-	var err error
-
-	queries.SetScanner(&o.ComponentFirmwareSetID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("component_firmware_set_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.ComponentFirmwareSet = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Attributes {
-		if queries.Equal(o.ComponentFirmwareSetID, ri.ComponentFirmwareSetID) {
 			continue
 		}
 

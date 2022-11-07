@@ -542,14 +542,14 @@ func testComponentFirmwareSetsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testComponentFirmwareSetToManyAttributes(t *testing.T) {
+func testComponentFirmwareSetToManyFirmwareSetAttributesFirmwareSets(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a ComponentFirmwareSet
-	var b, c Attribute
+	var b, c AttributesFirmwareSet
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, componentFirmwareSetDBTypes, true, componentFirmwareSetColumnsWithDefault...); err != nil {
@@ -560,15 +560,15 @@ func testComponentFirmwareSetToManyAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, attributeDBTypes, false, attributeColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, attributesFirmwareSetDBTypes, false, attributesFirmwareSetColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, attributeDBTypes, false, attributeColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, attributesFirmwareSetDBTypes, false, attributesFirmwareSetColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.ComponentFirmwareSetID, a.ID)
-	queries.Assign(&c.ComponentFirmwareSetID, a.ID)
+	queries.Assign(&b.FirmwareSetID, a.ID)
+	queries.Assign(&c.FirmwareSetID, a.ID)
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -576,17 +576,17 @@ func testComponentFirmwareSetToManyAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.Attributes().All(ctx, tx)
+	check, err := a.FirmwareSetAttributesFirmwareSets().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.ComponentFirmwareSetID, b.ComponentFirmwareSetID) {
+		if queries.Equal(v.FirmwareSetID, b.FirmwareSetID) {
 			bFound = true
 		}
-		if queries.Equal(v.ComponentFirmwareSetID, c.ComponentFirmwareSetID) {
+		if queries.Equal(v.FirmwareSetID, c.FirmwareSetID) {
 			cFound = true
 		}
 	}
@@ -599,18 +599,18 @@ func testComponentFirmwareSetToManyAttributes(t *testing.T) {
 	}
 
 	slice := ComponentFirmwareSetSlice{&a}
-	if err = a.L.LoadAttributes(ctx, tx, false, (*[]*ComponentFirmwareSet)(&slice), nil); err != nil {
+	if err = a.L.LoadFirmwareSetAttributesFirmwareSets(ctx, tx, false, (*[]*ComponentFirmwareSet)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Attributes); got != 2 {
+	if got := len(a.R.FirmwareSetAttributesFirmwareSets); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.Attributes = nil
-	if err = a.L.LoadAttributes(ctx, tx, true, &a, nil); err != nil {
+	a.R.FirmwareSetAttributesFirmwareSets = nil
+	if err = a.L.LoadFirmwareSetAttributesFirmwareSets(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Attributes); got != 2 {
+	if got := len(a.R.FirmwareSetAttributesFirmwareSets); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -697,7 +697,7 @@ func testComponentFirmwareSetToManyFirmwareSetComponentFirmwareSetMaps(t *testin
 	}
 }
 
-func testComponentFirmwareSetToManyAddOpAttributes(t *testing.T) {
+func testComponentFirmwareSetToManyAddOpFirmwareSetAttributesFirmwareSets(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -705,15 +705,15 @@ func testComponentFirmwareSetToManyAddOpAttributes(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a ComponentFirmwareSet
-	var b, c, d, e Attribute
+	var b, c, d, e AttributesFirmwareSet
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, componentFirmwareSetDBTypes, false, strmangle.SetComplement(componentFirmwareSetPrimaryKeyColumns, componentFirmwareSetColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Attribute{&b, &c, &d, &e}
+	foreigners := []*AttributesFirmwareSet{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, attributeDBTypes, false, strmangle.SetComplement(attributePrimaryKeyColumns, attributeColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, attributesFirmwareSetDBTypes, false, strmangle.SetComplement(attributesFirmwareSetPrimaryKeyColumns, attributesFirmwareSetColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -728,13 +728,13 @@ func testComponentFirmwareSetToManyAddOpAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*Attribute{
+	foreignersSplitByInsertion := [][]*AttributesFirmwareSet{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddAttributes(ctx, tx, i != 0, x...)
+		err = a.AddFirmwareSetAttributesFirmwareSets(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -742,28 +742,28 @@ func testComponentFirmwareSetToManyAddOpAttributes(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.ComponentFirmwareSetID) {
-			t.Error("foreign key was wrong value", a.ID, first.ComponentFirmwareSetID)
+		if !queries.Equal(a.ID, first.FirmwareSetID) {
+			t.Error("foreign key was wrong value", a.ID, first.FirmwareSetID)
 		}
-		if !queries.Equal(a.ID, second.ComponentFirmwareSetID) {
-			t.Error("foreign key was wrong value", a.ID, second.ComponentFirmwareSetID)
+		if !queries.Equal(a.ID, second.FirmwareSetID) {
+			t.Error("foreign key was wrong value", a.ID, second.FirmwareSetID)
 		}
 
-		if first.R.ComponentFirmwareSet != &a {
+		if first.R.FirmwareSet != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.ComponentFirmwareSet != &a {
+		if second.R.FirmwareSet != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.Attributes[i*2] != first {
+		if a.R.FirmwareSetAttributesFirmwareSets[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.Attributes[i*2+1] != second {
+		if a.R.FirmwareSetAttributesFirmwareSets[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.Attributes().Count(ctx, tx)
+		count, err := a.FirmwareSetAttributesFirmwareSets().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -773,7 +773,7 @@ func testComponentFirmwareSetToManyAddOpAttributes(t *testing.T) {
 	}
 }
 
-func testComponentFirmwareSetToManySetOpAttributes(t *testing.T) {
+func testComponentFirmwareSetToManySetOpFirmwareSetAttributesFirmwareSets(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -781,15 +781,15 @@ func testComponentFirmwareSetToManySetOpAttributes(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a ComponentFirmwareSet
-	var b, c, d, e Attribute
+	var b, c, d, e AttributesFirmwareSet
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, componentFirmwareSetDBTypes, false, strmangle.SetComplement(componentFirmwareSetPrimaryKeyColumns, componentFirmwareSetColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Attribute{&b, &c, &d, &e}
+	foreigners := []*AttributesFirmwareSet{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, attributeDBTypes, false, strmangle.SetComplement(attributePrimaryKeyColumns, attributeColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, attributesFirmwareSetDBTypes, false, strmangle.SetComplement(attributesFirmwareSetPrimaryKeyColumns, attributesFirmwareSetColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -804,25 +804,12 @@ func testComponentFirmwareSetToManySetOpAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.SetAttributes(ctx, tx, false, &b, &c)
+	err = a.SetFirmwareSetAttributesFirmwareSets(ctx, tx, false, &b, &c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.Attributes().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetAttributes(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Attributes().Count(ctx, tx)
+	count, err := a.FirmwareSetAttributesFirmwareSets().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -830,41 +817,54 @@ func testComponentFirmwareSetToManySetOpAttributes(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	if !queries.IsValuerNil(b.ComponentFirmwareSetID) {
+	err = a.SetFirmwareSetAttributesFirmwareSets(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.FirmwareSetAttributesFirmwareSets().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.FirmwareSetID) {
 		t.Error("want b's foreign key value to be nil")
 	}
-	if !queries.IsValuerNil(c.ComponentFirmwareSetID) {
+	if !queries.IsValuerNil(c.FirmwareSetID) {
 		t.Error("want c's foreign key value to be nil")
 	}
-	if !queries.Equal(a.ID, d.ComponentFirmwareSetID) {
-		t.Error("foreign key was wrong value", a.ID, d.ComponentFirmwareSetID)
+	if !queries.Equal(a.ID, d.FirmwareSetID) {
+		t.Error("foreign key was wrong value", a.ID, d.FirmwareSetID)
 	}
-	if !queries.Equal(a.ID, e.ComponentFirmwareSetID) {
-		t.Error("foreign key was wrong value", a.ID, e.ComponentFirmwareSetID)
-	}
-
-	if b.R.ComponentFirmwareSet != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.ComponentFirmwareSet != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.ComponentFirmwareSet != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.ComponentFirmwareSet != &a {
-		t.Error("relationship was not added properly to the foreign struct")
+	if !queries.Equal(a.ID, e.FirmwareSetID) {
+		t.Error("foreign key was wrong value", a.ID, e.FirmwareSetID)
 	}
 
-	if a.R.Attributes[0] != &d {
+	if b.R.FirmwareSet != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.FirmwareSet != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.FirmwareSet != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.FirmwareSet != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if a.R.FirmwareSetAttributesFirmwareSets[0] != &d {
 		t.Error("relationship struct slice not set to correct value")
 	}
-	if a.R.Attributes[1] != &e {
+	if a.R.FirmwareSetAttributesFirmwareSets[1] != &e {
 		t.Error("relationship struct slice not set to correct value")
 	}
 }
 
-func testComponentFirmwareSetToManyRemoveOpAttributes(t *testing.T) {
+func testComponentFirmwareSetToManyRemoveOpFirmwareSetAttributesFirmwareSets(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -872,15 +872,15 @@ func testComponentFirmwareSetToManyRemoveOpAttributes(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a ComponentFirmwareSet
-	var b, c, d, e Attribute
+	var b, c, d, e AttributesFirmwareSet
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, componentFirmwareSetDBTypes, false, strmangle.SetComplement(componentFirmwareSetPrimaryKeyColumns, componentFirmwareSetColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Attribute{&b, &c, &d, &e}
+	foreigners := []*AttributesFirmwareSet{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, attributeDBTypes, false, strmangle.SetComplement(attributePrimaryKeyColumns, attributeColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, attributesFirmwareSetDBTypes, false, strmangle.SetComplement(attributesFirmwareSetPrimaryKeyColumns, attributesFirmwareSetColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -889,12 +889,12 @@ func testComponentFirmwareSetToManyRemoveOpAttributes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.AddAttributes(ctx, tx, true, foreigners...)
+	err = a.AddFirmwareSetAttributesFirmwareSets(ctx, tx, true, foreigners...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.Attributes().Count(ctx, tx)
+	count, err := a.FirmwareSetAttributesFirmwareSets().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -902,12 +902,12 @@ func testComponentFirmwareSetToManyRemoveOpAttributes(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	err = a.RemoveAttributes(ctx, tx, foreigners[:2]...)
+	err = a.RemoveFirmwareSetAttributesFirmwareSets(ctx, tx, foreigners[:2]...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err = a.Attributes().Count(ctx, tx)
+	count, err = a.FirmwareSetAttributesFirmwareSets().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -915,35 +915,35 @@ func testComponentFirmwareSetToManyRemoveOpAttributes(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	if !queries.IsValuerNil(b.ComponentFirmwareSetID) {
+	if !queries.IsValuerNil(b.FirmwareSetID) {
 		t.Error("want b's foreign key value to be nil")
 	}
-	if !queries.IsValuerNil(c.ComponentFirmwareSetID) {
+	if !queries.IsValuerNil(c.FirmwareSetID) {
 		t.Error("want c's foreign key value to be nil")
 	}
 
-	if b.R.ComponentFirmwareSet != nil {
+	if b.R.FirmwareSet != nil {
 		t.Error("relationship was not removed properly from the foreign struct")
 	}
-	if c.R.ComponentFirmwareSet != nil {
+	if c.R.FirmwareSet != nil {
 		t.Error("relationship was not removed properly from the foreign struct")
 	}
-	if d.R.ComponentFirmwareSet != &a {
+	if d.R.FirmwareSet != &a {
 		t.Error("relationship to a should have been preserved")
 	}
-	if e.R.ComponentFirmwareSet != &a {
+	if e.R.FirmwareSet != &a {
 		t.Error("relationship to a should have been preserved")
 	}
 
-	if len(a.R.Attributes) != 2 {
+	if len(a.R.FirmwareSetAttributesFirmwareSets) != 2 {
 		t.Error("should have preserved two relationships")
 	}
 
 	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Attributes[1] != &d {
+	if a.R.FirmwareSetAttributesFirmwareSets[1] != &d {
 		t.Error("relationship to d should have been preserved")
 	}
-	if a.R.Attributes[0] != &e {
+	if a.R.FirmwareSetAttributesFirmwareSets[0] != &e {
 		t.Error("relationship to e should have been preserved")
 	}
 }
