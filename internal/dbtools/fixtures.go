@@ -62,10 +62,22 @@ var (
 	FixtureAllServers     models.ServerSlice
 
 	// ComponentFirmwareVersion fixtures
-	FixtureDellR640         *models.ComponentFirmwareVersion
-	FixtureDellR6515        *models.ComponentFirmwareVersion
+	FixtureDellR640BMC      *models.ComponentFirmwareVersion
+	FixtureDellR640BIOS     *models.ComponentFirmwareVersion
+	FixtureDellR640CPLD     *models.ComponentFirmwareVersion
+	FixtureDellR6515BMC     *models.ComponentFirmwareVersion
+	FixtureDellR6515BIOS    *models.ComponentFirmwareVersion
 	FixtureSuperMicro       *models.ComponentFirmwareVersion
 	FixtureServerComponents models.ServerComponentSlice
+
+	// ComponentFirmwareSet fixtures
+	FixtureFirmwareUUIDsR6515        []string
+	FixtureFirmwareSetR6515          *models.ComponentFirmwareSet
+	FixtureFirmwareSetR6515Attribute *models.AttributesFirmwareSet
+
+	FixtureFirmwareUUIDsR640        []string
+	FixtureFirmwareSetR640          *models.ComponentFirmwareSet
+	FixtureFirmwareSetR640Attribute *models.AttributesFirmwareSet
 )
 
 func addFixtures(t *testing.T) error {
@@ -105,6 +117,14 @@ func addFixtures(t *testing.T) error {
 	}
 
 	if err := setupFirmwareSuperMicro(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareSetR6515(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareSetR640(ctx, testDB); err != nil {
 		return err
 	}
 
@@ -335,7 +355,9 @@ func setupChuckles(ctx context.Context, db *sqlx.DB) error {
 }
 
 func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
-	FixtureDellR640 = &models.ComponentFirmwareVersion{
+	FixtureFirmwareUUIDsR640 = []string{}
+
+	FixtureDellR640BMC = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
 		Model:         "R640",
 		Filename:      "iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
@@ -346,7 +368,44 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bmc/iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
 	}
 
-	if err := FixtureDellR640.Insert(ctx, db, boil.Infer()); err != nil {
+	if err := FixtureDellR640BMC.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareUUIDsR640 = append(FixtureFirmwareUUIDsR640, FixtureDellR640BMC.ID)
+
+	FixtureDellR640BIOS = &models.ComponentFirmwareVersion{
+		Vendor:        "Dell",
+		Model:         "R640",
+		Filename:      "bios.exe",
+		Version:       "2.4.4",
+		Component:     "bios",
+		Checksum:      "78ad2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f",
+		UpstreamURL:   "https://vendor.com/firmwares/bios-2.4.4.EXE",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/bios/bios-2.4.4.EXE",
+	}
+
+	if err := FixtureDellR640BIOS.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareUUIDsR640 = append(FixtureFirmwareUUIDsR640, FixtureDellR640BIOS.ID)
+
+	// This fixture is not included in FixtureFirmwareUUIDsR640 slice
+	// since its part of the test TestIntegrationServerComponentFirmwareSetUpdate
+	// where its added into the firmware set.
+	FixtureDellR640CPLD = &models.ComponentFirmwareVersion{
+		Vendor:        "Dell",
+		Model:         "R640",
+		Filename:      "cpld.exe",
+		Version:       "1.0.1",
+		Component:     "cpld",
+		Checksum:      "676d2fe5bca0745151d678ddeb26679464ccb13ca3f1a3d289b77e211344402f",
+		UpstreamURL:   "https://vendor.com/firmwares/cpld.exe",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/cpld/cpld.EXE",
+	}
+
+	if err := FixtureDellR640CPLD.Insert(ctx, db, boil.Infer()); err != nil {
 		return err
 	}
 
@@ -354,7 +413,9 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 }
 
 func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
-	FixtureDellR6515 = &models.ComponentFirmwareVersion{
+	FixtureFirmwareUUIDsR6515 = []string{}
+
+	FixtureDellR6515BIOS = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
 		Model:         "R6515",
 		Filename:      "BIOS_C4FT0_WN64_2.6.6.EXE",
@@ -365,9 +426,28 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bios/BIOS_C4FT0_WN64_2.6.6.EXE",
 	}
 
-	if err := FixtureDellR6515.Insert(ctx, db, boil.Infer()); err != nil {
+	if err := FixtureDellR6515BIOS.Insert(ctx, db, boil.Infer()); err != nil {
 		return err
 	}
+
+	FixtureFirmwareUUIDsR6515 = append(FixtureFirmwareUUIDsR6515, FixtureDellR6515BIOS.ID)
+
+	FixtureDellR6515BMC = &models.ComponentFirmwareVersion{
+		Vendor:        "Dell",
+		Model:         "R6515",
+		Filename:      "BMC-5.20.20.20.EXE",
+		Version:       "5.20.20.20",
+		Component:     "bmc",
+		Checksum:      "abccb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4",
+		UpstreamURL:   "https://vendor.com/firmwares/BMC-5.20.20.20.EXE",
+		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r6515/bmc/BMC-5.20.20.20.EXE",
+	}
+
+	if err := FixtureDellR6515BMC.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareUUIDsR6515 = append(FixtureFirmwareUUIDsR6515, FixtureDellR6515BMC.ID)
 
 	return nil
 }
@@ -386,6 +466,82 @@ func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
 
 	if err := FixtureSuperMicro.Insert(ctx, db, boil.Infer()); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func setupFirmwareSetR6515(ctx context.Context, db *sqlx.DB) error {
+	// setup firmware fixtures if they haven't been
+	if len(FixtureFirmwareUUIDsR6515) == 0 {
+		if err := setupFirmwareDellR6515(ctx, db); err != nil {
+			return err
+		}
+	}
+
+	FixtureFirmwareSetR6515 = &models.ComponentFirmwareSet{Name: "r6515"}
+
+	if err := FixtureFirmwareSetR6515.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareSetR6515Attribute = &models.AttributesFirmwareSet{
+		FirmwareSetID: null.StringFrom(FixtureFirmwareSetR6515.ID),
+		Namespace:     "sh.hollow.firmware_set.labels",
+		Data:          types.JSON([]byte(`{"vendor": "dell", "model": "r6515"}`)),
+	}
+
+	if err := FixtureFirmwareSetR6515.AddFirmwareSetAttributesFirmwareSets(ctx, db, true, FixtureFirmwareSetR6515Attribute); err != nil {
+		return err
+	}
+
+	for _, firmwareID := range FixtureFirmwareUUIDsR6515 {
+		m := &models.ComponentFirmwareSetMap{
+			FirmwareSetID: FixtureFirmwareSetR6515.ID,
+			FirmwareID:    firmwareID,
+		}
+
+		if err := m.Insert(ctx, db, boil.Infer()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func setupFirmwareSetR640(ctx context.Context, db *sqlx.DB) error {
+	// setup firmware fixtures if they haven't been
+	if len(FixtureFirmwareUUIDsR640) == 0 {
+		if err := setupFirmwareDellR640(ctx, db); err != nil {
+			return err
+		}
+	}
+
+	FixtureFirmwareSetR640 = &models.ComponentFirmwareSet{Name: "r640"}
+
+	if err := FixtureFirmwareSetR640.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareSetR640Attribute = &models.AttributesFirmwareSet{
+		FirmwareSetID: null.StringFrom(FixtureFirmwareSetR640.ID),
+		Namespace:     "sh.hollow.firmware_set.labels",
+		Data:          types.JSON([]byte(`{"vendor": "dell", "model": "r640"}`)),
+	}
+
+	if err := FixtureFirmwareSetR640.AddFirmwareSetAttributesFirmwareSets(ctx, db, true, FixtureFirmwareSetR640Attribute); err != nil {
+		return err
+	}
+
+	for _, firmwareID := range FixtureFirmwareUUIDsR640 {
+		m := &models.ComponentFirmwareSetMap{
+			FirmwareSetID: FixtureFirmwareSetR640.ID,
+			FirmwareID:    firmwareID,
+		}
+
+		if err := m.Insert(ctx, db, boil.Infer()); err != nil {
+			return err
+		}
 	}
 
 	return nil

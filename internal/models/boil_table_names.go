@@ -5,6 +5,9 @@ package models
 
 var TableNames = struct {
 	Attributes               string
+	AttributesFirmwareSet    string
+	ComponentFirmwareSet     string
+	ComponentFirmwareSetMap  string
 	ComponentFirmwareVersion string
 	ServerComponentTypes     string
 	ServerComponents         string
@@ -14,6 +17,9 @@ var TableNames = struct {
 	VersionedAttributes      string
 }{
 	Attributes:               "attributes",
+	AttributesFirmwareSet:    "attributes_firmware_set",
+	ComponentFirmwareSet:     "component_firmware_set",
+	ComponentFirmwareSetMap:  "component_firmware_set_map",
 	ComponentFirmwareVersion: "component_firmware_version",
 	ServerComponentTypes:     "server_component_types",
 	ServerComponents:         "server_components",

@@ -67,6 +67,7 @@ func (c *crdbTester) setup() error {
 	}
 
 	dumpCmd := exec.Command("cockroach", "dump", c.dbName, "--url", c.dbURL, "--insecure", "--dump-mode=schema")
+	// dumpCmd := exec.Command("cockroach", "sql", "--url", c.testDBURL, "--database", c.testDBName, "--insecure", "show create all tables")
 	createCmd := exec.Command("cockroach", "sql", "--url", c.testDBURL, "--database", c.testDBName, "--insecure")
 
 	r, w := io.Pipe()

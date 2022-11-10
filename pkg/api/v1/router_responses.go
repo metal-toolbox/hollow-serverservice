@@ -12,6 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	errBadRequest = errors.New("bad request")
+)
+
 // ServerResponse represents the data that the server will return on any given call
 type ServerResponse struct {
 	PageSize         int                 `json:"page_size,omitempty"`
@@ -52,6 +56,10 @@ func notFoundResponse(c *gin.Context, message string) {
 }
 
 func badRequestResponse(c *gin.Context, message string, err error) {
+	if err == nil {
+		err = errBadRequest
+	}
+
 	c.JSON(http.StatusBadRequest, &ServerResponse{Message: message, Error: err.Error()})
 }
 
