@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -94,6 +95,10 @@ func updatedResponse(c *gin.Context, slug string) {
 }
 
 func dbErrorResponse(c *gin.Context, err error) {
+	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+		badRequestResponse(c, "", err)
+	}
+
 	if errors.Is(err, sql.ErrNoRows) {
 		c.JSON(http.StatusNotFound, &ServerResponse{Message: "resource not found", Error: err.Error()})
 	} else {
