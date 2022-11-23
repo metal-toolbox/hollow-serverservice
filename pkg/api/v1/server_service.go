@@ -36,6 +36,7 @@ type ClientInterface interface {
 	ListComponents(context.Context, *ServerComponentListParams) ([]ServerComponent, *ServerResponse, error)
 	CreateComponents(context.Context, uuid.UUID, ServerComponentSlice) (*ServerResponse, error)
 	UpdateComponents(context.Context, uuid.UUID, ServerComponentSlice) (*ServerResponse, error)
+	DeleteServerComponents(context.Context, uuid.UUID) (*ServerResponse, error)
 	CreateVersionedAttributes(context.Context, uuid.UUID, VersionedAttributes) (*ServerResponse, error)
 	GetVersionedAttributes(context.Context, uuid.UUID, string) ([]VersionedAttributes, *ServerResponse, error)
 	ListVersionedAttributes(context.Context, uuid.UUID) ([]VersionedAttributes, *ServerResponse, error)
@@ -186,6 +187,11 @@ func (c *Client) CreateComponents(ctx context.Context, srvUUID uuid.UUID, compon
 func (c *Client) UpdateComponents(ctx context.Context, srvUUID uuid.UUID, components ServerComponentSlice) (*ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint)
 	return c.put(ctx, path, components)
+}
+
+// DeleteServerComponents will delete components for the given server identifier.
+func (c *Client) DeleteServerComponents(ctx context.Context, srvUUID uuid.UUID) (*ServerResponse, error) {
+	return c.delete(ctx, fmt.Sprintf("%s/%s/%s", serversEndpoint, srvUUID, serverComponentsEndpoint))
 }
 
 // CreateVersionedAttributes will create a new versioned attribute for a given server

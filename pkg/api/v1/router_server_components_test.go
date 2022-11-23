@@ -737,3 +737,67 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegrationServerComponentDelete(t *testing.T) {
+	s := serverTest(t)
+
+	var serverID uuid.UUID
+
+	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
+		s.Client.SetToken(authToken)
+
+		var err error
+
+		_, err = s.Client.DeleteServerComponents(ctx, serverID)
+		if !expectError {
+			return nil
+		}
+
+		return err
+	})
+
+	serverID, err := uuid.Parse(dbtools.FixtureNemo.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var testCases = []struct {
+		testName         string
+		serverID         uuid.UUID
+		expectedError    bool
+		errorMsg         string
+		expectedResponse string
+	}{
+		{
+			"unknown server UUID returns not found",
+			uuid.New(),
+			true,
+			"",
+			"resource not found",
+		},
+		{
+			"server components removed",
+			serverID,
+			false,
+			"",
+			"resource deleted",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.testName, func(t *testing.T) {
+			resp, err := s.Client.DeleteServerComponents(context.TODO(), tt.serverID)
+
+			if tt.expectedError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+				assert.Contains(t, err.Error(), tt.expectedResponse)
+				return
+			}
+
+			assert.Nil(t, err)
+			assert.NotNil(t, resp)
+			assert.Contains(t, tt.expectedResponse, resp.Message)
+		})
+	}
+}
