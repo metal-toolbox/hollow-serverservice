@@ -219,7 +219,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 				RepositoryURL: "https://example-bucket.s3.awsamazon.com/foobar",
 			},
 			true,
-			"500",
+			"400",
 			"unable to insert into component_firmware_version: pq: duplicate key value violates unique constraint \"vendor_model_version_unique\"",
 		},
 	}
