@@ -13,11 +13,11 @@ builds:
       - darwin
     ldflags:
       - -s -w
-      - -X go.hollow.sh/toolbox/version.appName={{.ProjectName}}
-      - -X go.hollow.sh/toolbox/version.version={{.Version}}
-      - -X go.hollow.sh/toolbox/version.commit={{.Commit}}
-      - -X go.hollow.sh/toolbox/version.date={{.Date}}
-      - -X go.hollow.sh/toolbox/version.builtBy=goreleaser
+      - -X go.infratographer.com/x/versionx.appName={{.ProjectName}}
+      - -X go.infratographer.com/x/versionx.version={{.Version}}
+      - -X go.infratographer.com/x/versionx.commit={{.Commit}}
+      - -X go.infratographer.com/x/versionx.date={{.Date}}
+      - -X go.infratographer.com/x/versionx.builtBy=goreleaser
 
 archives:
   -

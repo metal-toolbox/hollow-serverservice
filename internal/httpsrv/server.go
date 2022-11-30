@@ -11,7 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.hollow.sh/toolbox/ginjwt"
-	"go.hollow.sh/toolbox/version"
+	"go.infratographer.com/x/versionx"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
@@ -162,5 +162,5 @@ func (s *Server) readinessCheck(c *gin.Context) {
 
 // version returns the serverservice build information.
 func (s *Server) version(c *gin.Context) {
-	c.JSON(http.StatusOK, version.String())
+	c.JSON(http.StatusOK, versionx.BuildDetails().String())
 }

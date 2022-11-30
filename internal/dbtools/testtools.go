@@ -23,7 +23,7 @@ import (
 )
 
 // TestDBURI is the URI for the test database
-var TestDBURI = os.Getenv("SERVERSERVICE_DB_URI")
+var TestDBURI = os.Getenv("SERVERSERVICE_CRDB_URI")
 var testDB *sqlx.DB
 var testKeeper *secrets.Keeper
 

@@ -6,9 +6,9 @@ services:
       - jaeger
     environment:
       - SERVERSERVICE_TRACING_ENABLED=true
-      - SERVERSERVICE_TRACING_PROVIDER=jaeger
-      - SERVERSERVICE_TRACING_ENDPOINT=http://jaeger:14268/api/traces
       - SERVERSERVICE_TRACING_ENVIRONMENT=dev-dockercompose
+      - SERVERSERVICE_TRACING_PROVIDER=jaeger
+      - SERVERSERVICE_TRACING_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
 
   jaeger:
     image: jaegertracing/all-in-one:1.39.0

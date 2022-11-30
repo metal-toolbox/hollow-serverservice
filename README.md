@@ -48,7 +48,7 @@ sqlboiler crdb --add-soft-deletes
 Export the DB URI required for integration tests.
 
 ```bash
-export SERVERSERVICE_DB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test"
+export SERVERSERVICE_CRDB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test"
 ```
 
 Run test.
