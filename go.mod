@@ -3,7 +3,7 @@ module go.hollow.sh/serverservice
 go 1.19
 
 require (
-	github.com/XSAM/otelsql v0.16.0
+	github.com/XSAM/otelsql v0.17.0 // indirect
 	github.com/cockroachdb/cockroach-go/v2 v2.2.19
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.4.0
@@ -15,10 +15,10 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/pressly/goose/v3 v3.7.0
+	github.com/pressly/goose/v3 v3.7.0 // indirect
 	github.com/prometheus/client_golang v1.13.0 // indirect
 	github.com/spf13/cobra v1.6.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	github.com/volatiletech/null/v8 v8.1.2
@@ -26,21 +26,23 @@ require (
 	github.com/volatiletech/sqlboiler/v4 v4.13.0
 	github.com/volatiletech/strmangle v0.0.4
 	github.com/zsais/go-gin-prometheus v0.1.0
-	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.36.0
-	go.opentelemetry.io/otel v1.10.0
-	go.opentelemetry.io/otel/exporters/jaeger v1.10.0
-	go.opentelemetry.io/otel/sdk v1.10.0
+	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.36.4
+	go.opentelemetry.io/otel v1.11.1
+	go.opentelemetry.io/otel/exporters/jaeger v1.11.1 // indirect
+	go.opentelemetry.io/otel/sdk v1.11.1 // indirect
 	go.uber.org/zap v1.24.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
 require (
 	go.hollow.sh/toolbox v0.4.1
+	go.infratographer.com/x v0.0.0-20221027150904-2ec84992482c
 	gocloud.dev v0.27.0
 )
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ericlagergren/decimal v0.0.0-20211103172832-aca2edc11f73 // indirect
@@ -57,6 +59,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -89,8 +92,14 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/otel/metric v0.31.0 // indirect
-	go.opentelemetry.io/otel/trace v1.10.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.11.1 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.11.1 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.11.1 // indirect
+	go.opentelemetry.io/otel/metric v0.33.0 // indirect
+	go.opentelemetry.io/otel/trace v1.11.1 // indirect
+	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect

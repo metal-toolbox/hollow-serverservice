@@ -2,23 +2,26 @@ package cmd
 
 import (
 	"context"
-	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.hollow.sh/toolbox/ginjwt"
+	"go.infratographer.com/x/crdbx"
+	"go.infratographer.com/x/otelx"
+	"go.infratographer.com/x/viperx"
 	"gocloud.dev/secrets"
 
 	// import gocdk secret drivers
 	_ "gocloud.dev/secrets/localsecrets"
 
+	"go.hollow.sh/serverservice/internal/config"
 	"go.hollow.sh/serverservice/internal/dbtools"
 	"go.hollow.sh/serverservice/internal/httpsrv"
 )
 
-const (
-	defaultDBMaxOpenConns int = 25
-	defaultDBMaxIdleConns int = 25
+var (
+	apiDefaultListen = "0.0.0.0:8000"
 )
 
 // serveCmd represents the serve command
@@ -32,47 +35,41 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().String("listen", "0.0.0.0:8000", "address to listen on")
-	viperBindFlag("listen", serveCmd.Flags().Lookup("listen"))
-	// Tracing Flags
-	serveCmd.Flags().Bool("tracing", false, "enable tracing support")
-	viperBindFlag("tracing.enabled", serveCmd.Flags().Lookup("tracing"))
-	serveCmd.Flags().String("tracing-provider", "jaeger", "tracing provider to use")
-	viperBindFlag("tracing.provider", serveCmd.Flags().Lookup("tracing-provider"))
-	serveCmd.Flags().String("tracing-endpoint", "", "endpoint where traces are sent")
-	viperBindFlag("tracing.endpoint", serveCmd.Flags().Lookup("tracing-endpoint"))
-	serveCmd.Flags().String("tracing-environment", "production", "environment value in traces")
-	viperBindFlag("tracing.environment", serveCmd.Flags().Lookup("tracing-environment"))
+	serveCmd.Flags().String("listen", apiDefaultListen, "address to listen on")
+	viperx.MustBindFlag(viper.GetViper(), "listen", serveCmd.Flags().Lookup("listen"))
+
+	otelx.MustViperFlags(viper.GetViper(), serveCmd.Flags())
+	crdbx.MustViperFlags(viper.GetViper(), serveCmd.Flags())
+
 	// OIDC Flags
 	serveCmd.Flags().Bool("oidc", true, "use oidc auth")
-	viperBindFlag("oidc.enabled", serveCmd.Flags().Lookup("oidc"))
+	viperx.MustBindFlag(viper.GetViper(), "oidc.enabled", serveCmd.Flags().Lookup("oidc"))
 	serveCmd.Flags().String("oidc-aud", "", "expected audience on OIDC JWT")
-	viperBindFlag("oidc.audience", serveCmd.Flags().Lookup("oidc-aud"))
+	viperx.MustBindFlag(viper.GetViper(), "oidc.audience", serveCmd.Flags().Lookup("oidc-aud"))
 	serveCmd.Flags().String("oidc-issuer", "", "expected issuer of OIDC JWT")
-	viperBindFlag("oidc.issuer", serveCmd.Flags().Lookup("oidc-issuer"))
+	viperx.MustBindFlag(viper.GetViper(), "oidc.issuer", serveCmd.Flags().Lookup("oidc-issuer"))
 	serveCmd.Flags().String("oidc-jwksuri", "", "URI for JWKS listing for JWTs")
-	viperBindFlag("oidc.jwksuri", serveCmd.Flags().Lookup("oidc-jwksuri"))
+	viperx.MustBindFlag(viper.GetViper(), "oidc.jwksuri", serveCmd.Flags().Lookup("oidc-jwksuri"))
 	serveCmd.Flags().String("oidc-roles-claim", "claim", "field containing the permissions of an OIDC JWT")
-	viperBindFlag("oidc.claims.roles", serveCmd.Flags().Lookup("oidc-roles-claim"))
+	viperx.MustBindFlag(viper.GetViper(), "oidc.claims.roles", serveCmd.Flags().Lookup("oidc-roles-claim"))
 	serveCmd.Flags().String("oidc-username-claim", "", "additional fields to output in logs from the JWT token, ex (email)")
-	viperBindFlag("oidc.claims.username", serveCmd.Flags().Lookup("oidc-username-claim"))
+	viperx.MustBindFlag(viper.GetViper(), "oidc.claims.username", serveCmd.Flags().Lookup("oidc-username-claim"))
 	// DB Flags
-	serveCmd.Flags().Int("db-conns-max-open", defaultDBMaxOpenConns, "max number of open database connections")
-	viperBindFlag("db.connections.max_open", serveCmd.Flags().Lookup("db-conns-max-open"))
-	serveCmd.Flags().Int("db-conns-max-idle", defaultDBMaxIdleConns, "max number of idle database connections")
-	viperBindFlag("db.connections.max_idle", serveCmd.Flags().Lookup("db-conns-max-idle"))
-	serveCmd.Flags().Duration("db-conns-max-lifetime", 5*60*time.Second, "max database connections lifetime in seconds")
-	viperBindFlag("db.connections.max_lifetime", serveCmd.Flags().Lookup("db-conns-max-lifetime"))
 	serveCmd.Flags().String("db-encryption-driver", "", "encryption driver uri; 32 byte base64 encoded string, (example: base64key://your-encoded-secret-key)")
-	viperBindFlag("db.encryption-driver", serveCmd.Flags().Lookup("db-encryption-driver"))
+	viperx.MustBindFlag(viper.GetViper(), "db.encryption_driver", serveCmd.Flags().Lookup("db-encryption-driver"))
 }
 
 func serve(ctx context.Context) {
-	db := initTracingAndDB()
+	err := otelx.InitTracer(config.AppConfig.Tracing, appName, logger)
+	if err != nil {
+		logger.Fatalw("unable to initialize tracing system", "error", err)
+	}
+
+	db := initDB()
 
 	dbtools.RegisterHooks()
 
-	keeper, err := secrets.OpenKeeper(ctx, viper.GetString("db.encryption-driver"))
+	keeper, err := secrets.OpenKeeper(ctx, viper.GetString("db.encryption_driver"))
 	if err != nil {
 		logger.Fatalw("failed to open secrets keeper", "error", err)
 	}
@@ -85,7 +82,7 @@ func serve(ctx context.Context) {
 	hs := &httpsrv.Server{
 		Logger:        logger.Desugar(),
 		Listen:        viper.GetString("listen"),
-		Debug:         viper.GetBool("logging.debug"),
+		Debug:         config.AppConfig.Logging.Debug,
 		DB:            db,
 		SecretsKeeper: keeper,
 		AuthConfig: ginjwt.AuthConfig{
@@ -102,4 +99,17 @@ func serve(ctx context.Context) {
 	if err := hs.Run(); err != nil {
 		logger.Fatalw("failed starting server", "error", err)
 	}
+}
+
+func initDB() *sqlx.DB {
+	dbDriverName := "postgres"
+
+	sqldb, err := crdbx.NewDB(config.AppConfig.CRDB, config.AppConfig.Tracing.Enabled)
+	if err != nil {
+		logger.Fatalw("failed to initialize database connection", "error", err)
+	}
+
+	db := sqlx.NewDb(sqldb, dbDriverName)
+
+	return db
 }

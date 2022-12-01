@@ -1,18 +1,24 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	"go.hollow.sh/toolbox/version"
+	"github.com/spf13/viper"
+	"go.infratographer.com/x/goosex"
+	"go.infratographer.com/x/loggingx"
+	"go.infratographer.com/x/versionx"
 	"go.uber.org/zap"
 
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
+	dbm "go.hollow.sh/serverservice/db"
+	"go.hollow.sh/serverservice/internal/config"
 )
 
 var (
+	appName = "serverservice"
 	cfgFile string
 	logger  *zap.SugaredLogger
 )
@@ -32,13 +38,19 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.hollow.yaml)")
-	rootCmd.PersistentFlags().Bool("debug", false, "enable debug logging")
-	viperBindFlag("logging.debug", rootCmd.PersistentFlags().Lookup("debug"))
-	rootCmd.PersistentFlags().Bool("pretty", false, "enable pretty (human readable) logging output")
-	viperBindFlag("logging.pretty", rootCmd.PersistentFlags().Lookup("pretty"))
 
-	rootCmd.PersistentFlags().String("db-uri", "postgresql://root@localhost:26257/serverservice?sslmode=disable", "URI for database connection")
-	viperBindFlag("db.uri", rootCmd.PersistentFlags().Lookup("db-uri"))
+	// Logging flags
+	loggingx.MustViperFlags(rootCmd.PersistentFlags())
+
+	// Register version command
+	versionx.RegisterCobraCommand(rootCmd, func() { versionx.PrintVersion(logger) })
+
+	// Setup migrate command
+	goosex.RegisterCobraCommand(rootCmd, func() {
+		goosex.SetBaseFS(dbm.Migrations)
+		goosex.SetDBURI(config.AppConfig.CRDB.URI)
+		goosex.SetLogger(logger)
+	})
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -63,40 +75,23 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 
-	setupLogging()
+	setupAppConfig()
+
+	// setupLogging()
+	logger = loggingx.InitLogger(appName, config.AppConfig.Logging)
 
 	if err == nil {
-		logger.Infow("using config file",
-			"file", viper.ConfigFileUsed(),
-		)
+		logger.Infow("using config file", "file", viper.ConfigFileUsed())
 	}
 }
 
-func setupLogging() {
-	cfg := zap.NewProductionConfig()
-	if viper.GetBool("logging.pretty") {
-		cfg = zap.NewDevelopmentConfig()
-	}
-
-	if viper.GetBool("logging.debug") {
-		cfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	} else {
-		cfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
-	}
-
-	l, err := cfg.Build()
+// setupAppConfig loads our config.AppConfig struct with the values bound by
+// viper. Then, anywhere we need these values, we can just return to AppConfig
+// instead of performing viper.GetString(...), viper.GetBool(...), etc.
+func setupAppConfig() {
+	err := viper.Unmarshal(&config.AppConfig)
 	if err != nil {
-		panic(err)
-	}
-
-	logger = l.Sugar().With("app", "serverservice", "version", version.Version())
-	defer logger.Sync() //nolint:errcheck
-}
-
-// viperBindFlag provides a wrapper around the viper bindings that handles error checks
-func viperBindFlag(name string, flag *pflag.Flag) {
-	err := viper.BindPFlag(name, flag)
-	if err != nil {
-		panic(err)
+		fmt.Printf("unable to decode app config: %s", err)
+		os.Exit(1)
 	}
 }

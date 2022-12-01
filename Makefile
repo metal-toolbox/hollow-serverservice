@@ -9,7 +9,7 @@ test: | unit-test integration-test
 
 integration-test: test-database
 	@echo Running integration tests...
-	@SERVERSERVICE_DB_URI="${TEST_DB}" go test -cover -tags testtools,integration -p 1 ./...
+	@SERVERSERVICE_CRDB_URI="${TEST_DB}" go test -cover -tags testtools,integration -p 1 ./...
 
 unit-test: | lint
 	@echo Running unit tests...
@@ -17,7 +17,7 @@ unit-test: | lint
 
 coverage: | test-database
 	@echo Generating coverage report...
-	@SERVERSERVICE_DB_URI="${TEST_DB}" go test ./... -race -coverprofile=coverage.out -covermode=atomic -tags testtools -p 1
+	@SERVERSERVICE_CRDB_URI="${TEST_DB}" go test ./... -race -coverprofile=coverage.out -covermode=atomic -tags testtools -p 1
 	@go tool cover -func=coverage.out
 	@go tool cover -html=coverage.out
 
@@ -49,10 +49,10 @@ docker-clean:
 dev-database: | vendor
 	@cockroach sql --insecure -e "drop database if exists serverservice"
 	@cockroach sql --insecure -e "create database serverservice"
-	@SERVERSERVICE_DB_URI="${DEV_DB}" go run main.go migrate up
+	@SERVERSERVICE_CRDB_URI="${DEV_DB}" go run main.go migrate up
 
 test-database: | vendor
 	@cockroach sql --insecure -e "drop database if exists serverservice_test"
 	@cockroach sql --insecure -e "create database serverservice_test"
-	@SERVERSERVICE_DB_URI="${TEST_DB}" go run main.go migrate up
+	@SERVERSERVICE_CRDB_URI="${TEST_DB}" go run main.go migrate up
 	@cockroach sql --insecure -e "use serverservice_test; ALTER TABLE attributes DROP CONSTRAINT check_server_id_server_component_id; ALTER TABLE versioned_attributes DROP CONSTRAINT check_server_id_server_component_id;"

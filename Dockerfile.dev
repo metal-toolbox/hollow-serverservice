@@ -15,7 +15,7 @@ RUN go mod tidy
 
 # Build the binary.
 # -mod=readonly ensures immutable go.mod and go.sum in container builds.
-RUN export LDFLAG_LOCATION="go.hollow.sh/toolbox/version" && \
+RUN export LDFLAG_LOCATION="go.infratographer.com/x/versionx" && \
     CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o serverservice \
 	-ldflags \
             "-X ${LDFLAG_LOCATION}.appName=serverservice \

@@ -36,7 +36,7 @@ jobs:
           args: --timeout=5m
 
       - name: Run go tests and generate coverage report
-        run: SERVERSERVICE_DB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test" go test -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 ./...
+        run: SERVERSERVICE_CRDB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test" go test -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 ./...
 
       - name: Stop test database
         run: cockroach quit --insecure --host=localhost:26257
