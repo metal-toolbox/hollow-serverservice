@@ -49,7 +49,7 @@ func (p *ServerListParams) queryMods() []qm.QueryMod {
 		mods = append(mods, m)
 	}
 
-	mods = append(mods, qm.Select("distinct servers.*"))
+	mods = append(mods, qm.Distinct("servers.*"))
 
 	for i, lp := range p.AttributeListParams {
 		tableName := fmt.Sprintf("attr_%d", i)

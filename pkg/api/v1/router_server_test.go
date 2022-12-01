@@ -483,7 +483,7 @@ func TestIntegrationServerList(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
-			r, _, err := s.Client.List(context.TODO(), tt.params)
+			servers, resp, err := s.Client.List(context.TODO(), tt.params)
 			if tt.expectError {
 				assert.NoError(t, err)
 				return
@@ -491,7 +491,9 @@ func TestIntegrationServerList(t *testing.T) {
 
 			var actual []string
 
-			for _, srv := range r {
+			assert.Equal(t, int64(len(servers)), resp.TotalRecordCount)
+
+			for _, srv := range servers {
 				actual = append(actual, srv.UUID.String())
 			}
 
