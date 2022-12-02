@@ -60,6 +60,7 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 				srvComponents.POST("", amw.RequiredScopes(createScopes("server", "server:component")), r.serverComponentsCreate)
 				srvComponents.GET("", amw.RequiredScopes(readScopes("server", "server:component")), r.serverComponentGet)
 				srvComponents.PUT("", amw.RequiredScopes(updateScopes("server", "server:component")), r.serverComponentUpdate)
+				srvComponents.DELETE("", amw.RequiredScopes(deleteScopes("server", "server:component")), r.serverComponentDelete)
 			}
 
 			// /servers/:uuid/credentials/:slug

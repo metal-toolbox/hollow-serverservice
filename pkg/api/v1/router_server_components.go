@@ -333,3 +333,20 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 
 	updatedResponse(c, "")
 }
+
+// serverComponentDelete deletes a server component.
+func (r *Router) serverComponentDelete(c *gin.Context) {
+	// load server based on the UUID parameter
+	server, err := r.loadServerFromParams(c)
+	if err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	if _, err := server.ServerComponents().DeleteAll(c.Request.Context(), r.DB); err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	deletedResponse(c)
+}
