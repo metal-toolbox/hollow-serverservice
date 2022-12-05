@@ -2,12 +2,12 @@ package serverservice
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.hollow.sh/toolbox/ginjwt"
 	"gocloud.dev/secrets"
@@ -165,13 +165,11 @@ func (r *Router) parseUUID(c *gin.Context) (uuid.UUID, error) {
 func (r *Router) loadServerFromParams(c *gin.Context) (*models.Server, error) {
 	u, err := r.parseUUID(c)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ErrUUIDParse, err.Error())
 	}
 
 	srv, err := models.FindServer(c.Request.Context(), r.DB, u.String())
 	if err != nil {
-		dbErrorResponse(c, err)
-
 		return nil, err
 	}
 

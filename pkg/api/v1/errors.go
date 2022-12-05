@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
 var (
 	// ErrNoNextPage is the error returned when there is not an additional page of resources
 	ErrNoNextPage = errors.New("no next page found")
+	// ErrUUIDParse is returned when the UUID is invalid.
+	ErrUUIDParse = errors.New("UUID parse error")
 )
 
 // ClientError is returned when invalid arguments are provided to the client

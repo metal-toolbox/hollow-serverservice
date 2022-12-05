@@ -56,6 +56,13 @@ func (r *Router) serverComponentList(c *gin.Context) {
 func (r *Router) serverComponentGet(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -96,7 +103,13 @@ func (r *Router) serverComponentsCreate(c *gin.Context) {
 	// load server based on the UUID parameter
 	server, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
 		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -211,6 +224,13 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 	// load server based on the UUID parameter
 	server, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -339,12 +359,19 @@ func (r *Router) serverComponentDelete(c *gin.Context) {
 	// load server based on the UUID parameter
 	server, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
 		dbErrorResponse(c, err)
+
 		return
 	}
 
 	if _, err := server.ServerComponents().DeleteAll(c.Request.Context(), r.DB); err != nil {
 		dbErrorResponse(c, err)
+
 		return
 	}
 

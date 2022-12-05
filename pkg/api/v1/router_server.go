@@ -2,6 +2,7 @@ package serverservice
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -111,6 +112,13 @@ func (r *Router) serverCreate(c *gin.Context) {
 func (r *Router) serverDelete(c *gin.Context) {
 	dbSRV, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -125,6 +133,13 @@ func (r *Router) serverDelete(c *gin.Context) {
 func (r *Router) serverUpdate(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -150,6 +165,13 @@ func (r *Router) serverUpdate(c *gin.Context) {
 func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -193,6 +215,13 @@ func (r *Router) serverVersionedAttributesGet(c *gin.Context) {
 func (r *Router) serverVersionedAttributesList(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
