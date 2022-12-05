@@ -48,7 +48,12 @@ func ensureValidServerResponse(resp *http.Response) error {
 
 		se.StatusCode = resp.StatusCode
 
-		if err := json.NewDecoder(resp.Body).Decode(&se); err != nil {
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(data, &se); err != nil {
 			se.ErrorMessage = "failed to decode response from server"
 		}
 

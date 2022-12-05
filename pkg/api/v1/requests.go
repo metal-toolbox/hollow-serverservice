@@ -89,5 +89,10 @@ func (c *Client) do(req *http.Request, result interface{}) error {
 
 	defer resp.Body.Close()
 
-	return json.NewDecoder(resp.Body).Decode(&result)
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, result)
 }
