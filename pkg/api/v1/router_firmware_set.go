@@ -170,6 +170,17 @@ func (r *Router) serverComponentFirmwareSetCreate(c *gin.Context) {
 	}
 
 	// vet and parse firmware uuids
+	if len(firmwareSetPayload.ComponentFirmwareUUIDs) == 0 {
+		err := errors.Wrap(errComponentFirmwareSetRequest, "expected one or more firmware UUIDs, got none")
+		badRequestResponse(
+			c,
+			"",
+			err,
+		)
+
+		return
+	}
+
 	firmwareUUIDs, err := r.firmwareSetVetFirmwareUUIDsForCreate(c, firmwareSetPayload.ComponentFirmwareUUIDs)
 	if err != nil {
 		if errors.Is(errDBErr, err) {
@@ -203,17 +214,6 @@ func (r *Router) firmwareSetVetFirmwareUUIDsForCreate(c *gin.Context, firmwareUU
 
 	// unique is a map of keys to limit firmware sets to firmwares with unique vendor, model, component attributes.
 	unique := map[string]bool{}
-
-	if len(firmwareUUIDs) == 0 {
-		err := errors.Wrap(errComponentFirmwareSetRequest, "expected one or more firmware UUIDs, got none")
-		badRequestResponse(
-			c,
-			"",
-			err,
-		)
-
-		return nil, err
-	}
 
 	for _, firmwareUUID := range firmwareUUIDs {
 		// parse uuid
@@ -588,7 +588,7 @@ func (r *Router) serverComponentFirmwareSetRemoveFirmware(c *gin.Context) {
 func (r *Router) serverComponentFirmwareSetDelete(c *gin.Context) {
 	dbFirmware, err := r.componentFirmwareSetFromParams(c)
 	if err != nil {
-		badRequestResponse(c, "", err)
+		dbErrorResponse(c, err)
 		return
 	}
 
@@ -612,8 +612,6 @@ func (r *Router) componentFirmwareSetFromParams(c *gin.Context) (*models.Compone
 
 	firmwareSet, err := models.FindComponentFirmwareSet(c.Request.Context(), r.DB, u.String())
 	if err != nil {
-		dbErrorResponse(c, err)
-
 		return nil, err
 	}
 

@@ -97,6 +97,7 @@ func updatedResponse(c *gin.Context, slug string) {
 func dbErrorResponse(c *gin.Context, err error) {
 	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		badRequestResponse(c, "", err)
+		return
 	}
 
 	if errors.Is(err, sql.ErrNoRows) {

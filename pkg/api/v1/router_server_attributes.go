@@ -2,6 +2,7 @@ package serverservice
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,13 @@ import (
 func (r *Router) serverAttributesList(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -48,6 +56,13 @@ func (r *Router) serverAttributesList(c *gin.Context) {
 func (r *Router) serverAttributesGet(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
@@ -71,6 +86,13 @@ func (r *Router) serverAttributesGet(c *gin.Context) {
 func (r *Router) serverAttributesCreate(c *gin.Context) {
 	srv, err := r.loadServerFromParams(c)
 	if err != nil {
+		if errors.Is(err, ErrUUIDParse) {
+			badRequestResponse(c, "", err)
+			return
+		}
+
+		dbErrorResponse(c, err)
+
 		return
 	}
 
