@@ -36,7 +36,7 @@ require (
 
 require (
 	go.hollow.sh/toolbox v0.4.1
-	go.infratographer.com/x v0.0.0-20221027150904-2ec84992482c
+	go.infratographer.com/x v0.0.0-20221201150359-af418db1bfc3
 	gocloud.dev v0.27.0
 )
 
