@@ -27,16 +27,17 @@ var (
 	// Server Component Types
 	FixtureFinType *models.ServerComponentType
 
-	FixtureNemo                 *models.Server
-	FixtureNemoMetadata         *models.Attribute
-	FixtureNemoOtherdata        *models.Attribute
-	FixtureNemoLeftFin          *models.ServerComponent
-	FixtureNemoRightFin         *models.ServerComponent
-	FixtureNemoLeftFinVersioned *models.VersionedAttribute
-	FixtureNemoVersionedNew     *models.VersionedAttribute
-	FixtureNemoVersionedOld     *models.VersionedAttribute
-	FixtureNemoVersionedV2      *models.VersionedAttribute
-	FixtureNemoBMCSecret        *models.ServerCredential
+	FixtureNemo                  *models.Server
+	FixtureNemoMetadata          *models.Attribute
+	FixtureNemoOtherdata         *models.Attribute
+	FixtureNemoLeftFin           *models.ServerComponent
+	FixtureNemoRightFin          *models.ServerComponent
+	FixtureNemoLeftFinVersioned  *models.VersionedAttribute
+	FixtureNemoVersionedNew      *models.VersionedAttribute
+	FixtureNemoVersionedOld      *models.VersionedAttribute
+	FixtureNemoVersionedV2       *models.VersionedAttribute
+	FixtureNemoBMCSecret         *models.ServerCredential
+	FixtureNemoRightFinOtherData *models.Attribute
 
 	FixtureDory          *models.Server
 	FixtureDoryMetadata  *models.Attribute
@@ -201,6 +202,15 @@ func setupNemo(ctx context.Context, db *sqlx.DB, t *testing.T) error {
 	}
 
 	if err := FixtureNemo.AddServerComponents(ctx, db, true, FixtureNemoLeftFin, FixtureNemoRightFin); err != nil {
+		return err
+	}
+
+	FixtureNemoRightFinOtherData = &models.Attribute{
+		Namespace: FixtureNamespaceOtherdata,
+		Data:      types.JSON([]byte(`{"twitchy": true}`)),
+	}
+
+	if err := FixtureNemoRightFin.AddAttributes(ctx, db, true, FixtureNemoRightFinOtherData); err != nil {
 		return err
 	}
 
