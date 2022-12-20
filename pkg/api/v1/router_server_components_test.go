@@ -636,7 +636,7 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 			"component update on attributes",
 			serverFixture.UUID,
 			componentFixtureCopy(),
-			change{attributes: []byte(`{"status":"OK"}`)},
+			change{attributes: []byte(`{"twitches":"false"}`)},
 			"",
 			"",
 		},
@@ -689,7 +689,7 @@ func TestIntegrationServerUpdateComponents(t *testing.T) {
 			if len(tt.change.attributes) > 0 {
 				tt.components[0].Attributes = []serverservice.Attributes{
 					{
-						Namespace: "hollow.attributes",
+						Namespace: dbtools.FixtureNamespaceOtherdata,
 						Data:      tt.change.attributes,
 					},
 				}
