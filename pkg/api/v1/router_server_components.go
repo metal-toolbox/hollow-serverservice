@@ -1,6 +1,8 @@
 package serverservice
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -13,6 +15,7 @@ import (
 
 var (
 	errSrvComponentPayload = errors.New("error in server component payload")
+	errComponentAttribute  = errors.New("error component attribute")
 )
 
 // serverComponentList returns a response with the list of components that matched the params.
@@ -328,7 +331,7 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 			}
 		}
 
-		// update component  attributes
+		// update component attributes
 		for _, attributes := range srvComponent.Attributes {
 			dbAttributes, err := attributes.toDBModel()
 			if err != nil {
@@ -336,9 +339,35 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 				return
 			}
 
-			dbAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
+			match, err := models.Attributes(
+				qm.Where("server_component_id=?", dbSrvComponent.ID),
+				qm.Where("namespace=?", dbAttributes.Namespace),
+			).One(c.Request.Context(), tx)
+			if err != nil {
+				dbErrorResponse(c, err)
+				return
+			}
 
-			err = dbSrvComponent.AddAttributes(c.Request.Context(), tx, true, dbAttributes)
+			if match == nil {
+				badRequestResponse(
+					c,
+					"",
+					errors.Wrap(errComponentAttribute,
+						fmt.Sprintf(
+							"not found component id: %s, namespace: %s",
+							dbSrvComponent.ID,
+							dbAttributes.Namespace,
+						),
+					),
+				)
+
+				return
+			}
+
+			dbAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
+			dbAttributes.ID = match.ID
+
+			_, err = dbAttributes.Update(c.Request.Context(), tx, boil.Blacklist("server_id"))
 			if err != nil {
 				dbErrorResponse(c, err)
 				return
