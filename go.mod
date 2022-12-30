@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/XSAM/otelsql v0.17.1 // indirect
-	github.com/cockroachdb/cockroach-go/v2 v2.2.19
+	github.com/cockroachdb/cockroach-go/v2 v2.2.20
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/zap v0.1.0
