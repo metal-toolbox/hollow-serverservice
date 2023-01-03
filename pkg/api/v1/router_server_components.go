@@ -1,7 +1,7 @@
 package serverservice
 
 import (
-	"fmt"
+	"database/sql"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -339,39 +339,56 @@ func (r *Router) serverComponentUpdate(c *gin.Context) {
 				return
 			}
 
+			dbAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
+
+			// upsert component attribute data
+
+			//
+			// This update, insert could have been swapped with the sqlboil Upsert() method
+			// although since the attributes table contains a partial index - "WHERE server_component_id is not null"
+			// and the sqlboil Upsert() method has no way of specifying query mods,
+			// the current Upsert() method does not work for this case (the matching row for update is not found in the row scan).
+			//
+			// https://github.com/volatiletech/sqlboiler/issues/856
+			//
+
+			// update attribute when an attribute matching server_component_id, namespace was found
 			match, err := models.Attributes(
 				qm.Where("server_component_id=?", dbSrvComponent.ID),
 				qm.Where("namespace=?", dbAttributes.Namespace),
 			).One(c.Request.Context(), tx)
-			if err != nil {
-				dbErrorResponse(c, err)
-				return
-			}
+			if err == nil {
+				dbAttributes.ID = match.ID
 
-			if match == nil {
-				badRequestResponse(
-					c,
-					"",
-					errors.Wrap(errComponentAttribute,
-						fmt.Sprintf(
-							"not found component id: %s, namespace: %s",
-							dbSrvComponent.ID,
-							dbAttributes.Namespace,
-						),
+				if _, updateErr := dbAttributes.Update(
+					c.Request.Context(),
+					tx,
+					boil.Whitelist(
+						models.AttributeColumns.Data,
+						models.AttributeColumns.UpdatedAt,
 					),
-				)
+				); updateErr != nil {
+					dbErrorResponse(c, errors.Wrap(errComponentAttribute, updateErr.Error()+": update error"))
+					return
+				}
 
-				return
+				continue
 			}
 
-			dbAttributes.ServerComponentID = null.StringFrom(dbSrvComponent.ID)
-			dbAttributes.ID = match.ID
+			// insert attribute since none exists
+			if errors.Is(err, sql.ErrNoRows) {
+				if addErr := dbSrvComponent.AddAttributes(c.Request.Context(), tx, true, dbAttributes); addErr != nil {
+					dbErrorResponse(c, errors.Wrap(errComponentAttribute, addErr.Error()+": add error"))
+					return
+				}
 
-			_, err = dbAttributes.Update(c.Request.Context(), tx, boil.Blacklist("server_id"))
-			if err != nil {
-				dbErrorResponse(c, err)
-				return
+				continue
 			}
+
+			// other errors
+			dbErrorResponse(c, err)
+
+			return
 		}
 	}
 
