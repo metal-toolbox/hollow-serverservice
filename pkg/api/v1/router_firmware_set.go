@@ -212,7 +212,7 @@ func (r *Router) firmwareSetVetFirmwareUUIDsForCreate(c *gin.Context, firmwareUU
 	// validate and collect firmware UUIDs
 	vetted := []uuid.UUID{}
 
-	// unique is a map of keys to limit firmware sets to firmwares with unique vendor, model, component attributes.
+	// unique is a map of keys to limit firmware sets to firmwares with unique vendor, version, component attributes.
 	unique := map[string]bool{}
 
 	for _, firmwareUUID := range firmwareUUIDs {
@@ -232,14 +232,14 @@ func (r *Router) firmwareSetVetFirmwareUUIDsForCreate(c *gin.Context, firmwareUU
 			return nil, errors.Wrap(errDBErr, err.Error())
 		}
 
-		// validate firmware is unique based on vendor, model, component attributes
-		key := strings.ToLower(firmwareVersion.Vendor) + strings.ToLower(firmwareVersion.Model) + strings.ToLower(firmwareVersion.Component)
+		// validate firmware is unique based on vendor, version, component attributes
+		key := strings.ToLower(firmwareVersion.Vendor) + strings.ToLower(firmwareVersion.Version) + strings.ToLower(firmwareVersion.Component)
 
 		_, exists := unique[key]
 		if exists {
 			return nil, errors.Wrap(
 				errComponentFirmwareSetMap,
-				"A firmware set can only reference unique firmware versions based on the vendor, model, component attributes",
+				"A firmware set can only reference unique firmware versions based on the vendor, version, component attributes",
 			)
 		}
 
@@ -370,7 +370,7 @@ func (r *Router) firmwareSetVetFirmwareUUIDsForUpdate(ctx context.Context, firmw
 	vetted := []uuid.UUID{}
 
 	// unique is a map of keys to limit firmware sets to include only firmwares with,
-	// unique vendor, model, component attributes.
+	// unique vendor, version, component attributes.
 	unique := map[string]bool{}
 
 	if len(firmwareUUIDs) == 0 {
@@ -407,14 +407,14 @@ func (r *Router) firmwareSetVetFirmwareUUIDsForUpdate(ctx context.Context, firmw
 			return nil, errors.Wrap(errDBErr, err.Error())
 		}
 
-		// validate firmware is unique based on vendor, model, component attributes
-		key := strings.ToLower(firmwareVersion.Vendor) + strings.ToLower(firmwareVersion.Model) + strings.ToLower(firmwareVersion.Component)
+		// validate firmware is unique based on vendor, version, component attributes
+		key := strings.ToLower(firmwareVersion.Vendor) + strings.ToLower(firmwareVersion.Version) + strings.ToLower(firmwareVersion.Component)
 
 		_, duplicateVendorModelComponent := unique[key]
 		if duplicateVendorModelComponent {
 			return nil, errors.Wrap(
 				errComponentFirmwareSetMap,
-				"A firmware set can only reference unique firmware versions based on the vendor, model, component attributes",
+				"A firmware set can only reference unique firmware versions based on the vendor, version, component attributes",
 			)
 		}
 

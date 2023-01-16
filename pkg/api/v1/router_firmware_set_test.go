@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/exp/slices"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
 	"go.hollow.sh/serverservice/internal/models"
@@ -21,7 +22,7 @@ func r640FirmwareFixtureUUIDs(t *testing.T, firmware []serverservice.ComponentFi
 	ids := []string{}
 
 	for idx, f := range firmware {
-		if f.Model == "R640" {
+		if slices.Contains(f.Model, "R640") {
 			ids = append(ids, firmware[idx].UUID.String())
 		}
 	}

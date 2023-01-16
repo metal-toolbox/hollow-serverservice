@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/volatiletech/sqlboiler/v4/types"
 
 	hollow "go.hollow.sh/serverservice/pkg/api/v1"
 )
@@ -262,7 +263,7 @@ func TestServerServiceCreateServerComponentFirmware(t *testing.T) {
 		firmware := hollow.ComponentFirmwareVersion{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
-			Model:   "R615",
+			Model:   types.StringArray{"R615"},
 			Version: "21.07.00",
 		}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"00000000-0000-0000-0000-000000001234"}`))
@@ -291,7 +292,7 @@ func TestServerServiceServerComponentFirmwareGet(t *testing.T) {
 		firmware := hollow.ComponentFirmwareVersion{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
-			Model:   "R615",
+			Model:   types.StringArray{"R615"},
 			Version: "21.07.00",
 		}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: firmware})
@@ -315,7 +316,7 @@ func TestServerServiceServerComponentFirmwareList(t *testing.T) {
 		firmware := []hollow.ComponentFirmwareVersion{{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
-			Model:   "R615",
+			Model:   types.StringArray{"R615"},
 			Version: "21.07.00",
 		}}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: firmware})

@@ -12,7 +12,7 @@ import (
 type ComponentFirmwareVersion struct {
 	UUID          uuid.UUID `json:"uuid"`
 	Vendor        string    `json:"vendor" binding:"required,lowercase"`
-	Model         string    `json:"model" binding:"required,lowercase"`
+	Model         []string  `json:"model" binding:"required"`
 	Filename      string    `json:"filename" binding:"required"`
 	Version       string    `json:"version" binding:"required"`
 	Component     string    `json:"component" binding:"required,lowercase"`
