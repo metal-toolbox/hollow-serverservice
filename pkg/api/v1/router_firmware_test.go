@@ -206,7 +206,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			"",
 		},
 		{
-			"duplicate vendor/model/version not allowed",
+			"duplicate vendor/component/version not allowed",
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
@@ -220,7 +220,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			},
 			true,
 			"400",
-			"unable to insert into component_firmware_version: pq: duplicate key value violates unique constraint \"vendor_model_version_unique\"",
+			"unable to insert into component_firmware_version: pq: duplicate key value violates unique constraint \"vendor_component_version_unique\"",
 		},
 	}
 
