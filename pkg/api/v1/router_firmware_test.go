@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
 	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
@@ -23,7 +22,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 
 		params := serverservice.ComponentFirmwareVersionListParams{
 			Vendor:  "",
-			Model:   types.StringArray{""},
+			Model:   nil,
 			Version: "",
 		}
 
@@ -66,7 +65,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 		{
 			"search by model",
 			&serverservice.ComponentFirmwareVersionListParams{
-				Model: types.StringArray{"X11DPH-T"},
+				Model: []string{"X11DPH-T"},
 			},
 			[]string{dbtools.FixtureSuperMicro.ID},
 			false,
@@ -127,7 +126,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 		testFirmware := serverservice.ComponentFirmwareVersion{
 			UUID:          uuid.New(),
 			Vendor:        "dell",
-			Model:         types.StringArray{"r615"},
+			Model:         []string{"r615"},
 			Filename:      "foobar",
 			Version:       "21.07.00",
 			Component:     "system",
@@ -160,7 +159,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
-				Model:         types.StringArray{""},
+				Model:         nil,
 				Filename:      "foobar",
 				Version:       "12345",
 				Component:     "bios",
@@ -177,7 +176,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "DELL",
-				Model:         types.StringArray{"r615"},
+				Model:         []string{"r615"},
 				Filename:      "foobar",
 				Version:       "12345",
 				Component:     "bios",
@@ -194,7 +193,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
-				Model:         types.StringArray{"r615"},
+				Model:         []string{"r615"},
 				Filename:      "fooBAR",
 				Version:       "12345",
 				Component:     "bios",
@@ -211,7 +210,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
-				Model:         types.StringArray{"r615"},
+				Model:         []string{"r615"},
 				Filename:      "foobar",
 				Version:       "12345",
 				Component:     "bios",
@@ -259,7 +258,7 @@ func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
 		fw := serverservice.ComponentFirmwareVersion{
 			UUID:          uuid.MustParse(dbtools.FixtureDellR640BMC.ID),
 			Vendor:        "dell",
-			Model:         types.StringArray{"r615"},
+			Model:         []string{"r615"},
 			Filename:      "foobarino",
 			Version:       "21.07.00",
 			Component:     "bios",

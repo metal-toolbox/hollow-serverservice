@@ -450,7 +450,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 		testName                     string
 		params                       *serverservice.ComponentFirmwareSetListParams
 		expectedFirmwareSetAttribute *models.AttributesFirmwareSet
-		expectedFirmwareModel        string
+		expectedFirmwareModel        []string
 		expectedFirmwareCount        int
 		expectedTotalRecordCount     int
 		expectedPage                 int
@@ -462,7 +462,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 			"list firmware set by name - r640",
 			&serverservice.ComponentFirmwareSetListParams{Name: "r640"},
 			dbtools.FixtureFirmwareSetR640Attribute,
-			"R640",
+			[]string{"R640"},
 			2,
 			1,
 			1,
@@ -473,7 +473,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 			"list firmware set by name - r6515",
 			&serverservice.ComponentFirmwareSetListParams{Name: "r6515"},
 			dbtools.FixtureFirmwareSetR6515Attribute,
-			"R6515",
+			[]string{"R6515"},
 			2,
 			1,
 			1,
@@ -489,7 +489,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 				},
 			},
 			nil,
-			"",
+			nil,
 			2,
 			2,
 			2,
@@ -515,7 +515,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 				},
 			},
 			dbtools.FixtureFirmwareSetR640Attribute,
-			"R640",
+			[]string{"R640"},
 			2,
 			1,
 			1,
@@ -528,7 +528,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 				Name: "does-not-exist",
 			},
 			nil,
-			"",
+			nil,
 			0,
 			0,
 			1,
@@ -559,7 +559,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 				assertAttributesEqual(t, []byte(tt.expectedFirmwareSetAttribute.Data), got[0].Attributes[0].Data)
 			}
 
-			if tt.expectedFirmwareModel != "" {
+			if tt.expectedFirmwareModel != nil {
 				assert.Equal(t, tt.expectedFirmwareModel, got[0].ComponentFirmware[0].Model)
 				assert.Equal(t, tt.expectedFirmwareModel, got[0].ComponentFirmware[1].Model)
 			}
