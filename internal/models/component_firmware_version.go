@@ -19,22 +19,23 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
 // ComponentFirmwareVersion is an object representing the database table.
 type ComponentFirmwareVersion struct {
-	ID            string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Component     string    `boil:"component" json:"component" toml:"component" yaml:"component"`
-	Vendor        string    `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
-	Model         string    `boil:"model" json:"model" toml:"model" yaml:"model"`
-	Filename      string    `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
-	Version       string    `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Checksum      string    `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
-	UpstreamURL   string    `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
-	RepositoryURL string    `boil:"repository_url" json:"repository_url" toml:"repository_url" yaml:"repository_url"`
-	CreatedAt     null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt     null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID            string            `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Component     string            `boil:"component" json:"component" toml:"component" yaml:"component"`
+	Vendor        string            `boil:"vendor" json:"vendor" toml:"vendor" yaml:"vendor"`
+	Model         types.StringArray `boil:"model" json:"model" toml:"model" yaml:"model"`
+	Filename      string            `boil:"filename" json:"filename" toml:"filename" yaml:"filename"`
+	Version       string            `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Checksum      string            `boil:"checksum" json:"checksum" toml:"checksum" yaml:"checksum"`
+	UpstreamURL   string            `boil:"upstream_url" json:"upstream_url" toml:"upstream_url" yaml:"upstream_url"`
+	RepositoryURL string            `boil:"repository_url" json:"repository_url" toml:"repository_url" yaml:"repository_url"`
+	CreatedAt     null.Time         `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt     null.Time         `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *componentFirmwareVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L componentFirmwareVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -94,11 +95,32 @@ var ComponentFirmwareVersionTableColumns = struct {
 
 // Generated where
 
+type whereHelpertypes_StringArray struct{ field string }
+
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var ComponentFirmwareVersionWhere = struct {
 	ID            whereHelperstring
 	Component     whereHelperstring
 	Vendor        whereHelperstring
-	Model         whereHelperstring
+	Model         whereHelpertypes_StringArray
 	Filename      whereHelperstring
 	Version       whereHelperstring
 	Checksum      whereHelperstring
@@ -110,7 +132,7 @@ var ComponentFirmwareVersionWhere = struct {
 	ID:            whereHelperstring{field: "\"component_firmware_version\".\"id\""},
 	Component:     whereHelperstring{field: "\"component_firmware_version\".\"component\""},
 	Vendor:        whereHelperstring{field: "\"component_firmware_version\".\"vendor\""},
-	Model:         whereHelperstring{field: "\"component_firmware_version\".\"model\""},
+	Model:         whereHelpertypes_StringArray{field: "\"component_firmware_version\".\"model\""},
 	Filename:      whereHelperstring{field: "\"component_firmware_version\".\"filename\""},
 	Version:       whereHelperstring{field: "\"component_firmware_version\".\"version\""},
 	Checksum:      whereHelperstring{field: "\"component_firmware_version\".\"checksum\""},
