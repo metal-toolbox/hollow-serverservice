@@ -262,7 +262,7 @@ func TestServerServiceCreateServerComponentFirmware(t *testing.T) {
 		firmware := hollow.ComponentFirmwareVersion{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
-			Model:   "R615",
+			Model:   []string{"R615"},
 			Version: "21.07.00",
 		}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"00000000-0000-0000-0000-000000001234"}`))
@@ -291,7 +291,7 @@ func TestServerServiceServerComponentFirmwareGet(t *testing.T) {
 		firmware := hollow.ComponentFirmwareVersion{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
-			Model:   "R615",
+			Model:   []string{"R615"},
 			Version: "21.07.00",
 		}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: firmware})
@@ -315,7 +315,7 @@ func TestServerServiceServerComponentFirmwareList(t *testing.T) {
 		firmware := []hollow.ComponentFirmwareVersion{{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
-			Model:   "R615",
+			Model:   []string{"R615"},
 			Version: "21.07.00",
 		}}
 		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: firmware})

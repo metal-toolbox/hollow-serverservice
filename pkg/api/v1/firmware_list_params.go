@@ -3,6 +3,7 @@ package serverservice
 import (
 	"net/url"
 
+	"github.com/volatiletech/sqlboiler/types"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"go.hollow.sh/serverservice/internal/models"
@@ -10,9 +11,9 @@ import (
 
 // ComponentFirmwareVersionListParams allows you to filter the results
 type ComponentFirmwareVersionListParams struct {
-	Vendor  string `form:"vendor"`
-	Model   string `form:"model"`
-	Version string `form:"version"`
+	Vendor  string   `form:"vendor"`
+	Model   []string `form:"model"`
+	Version string   `form:"version"`
 }
 
 func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
@@ -24,8 +25,10 @@ func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
 		q.Set("vendor", p.Vendor)
 	}
 
-	if p.Model != "" {
-		q.Set("model", p.Model)
+	if p.Model != nil {
+		for _, m := range p.Model {
+			q.Add("model", m)
+		}
 	}
 
 	if p.Version != "" {
@@ -42,8 +45,8 @@ func (p *ComponentFirmwareVersionListParams) queryMods() []qm.QueryMod {
 		mods = append(mods, m)
 	}
 
-	if p.Model != "" {
-		m := models.ComponentFirmwareVersionWhere.Model.EQ(p.Model)
+	if p.Model != nil {
+		m := qm.Where("model @> ?", types.StringArray(p.Model))
 		mods = append(mods, m)
 	}
 

@@ -22,7 +22,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 
 		params := serverservice.ComponentFirmwareVersionListParams{
 			Vendor:  "",
-			Model:   "",
+			Model:   nil,
 			Version: "",
 		}
 
@@ -65,7 +65,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 		{
 			"search by model",
 			&serverservice.ComponentFirmwareVersionListParams{
-				Model: "X11DPH-T",
+				Model: []string{"X11DPH-T"},
 			},
 			[]string{dbtools.FixtureSuperMicro.ID},
 			false,
@@ -126,7 +126,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 		testFirmware := serverservice.ComponentFirmwareVersion{
 			UUID:          uuid.New(),
 			Vendor:        "dell",
-			Model:         "r615",
+			Model:         []string{"r615"},
 			Filename:      "foobar",
 			Version:       "21.07.00",
 			Component:     "system",
@@ -159,7 +159,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
-				Model:         "",
+				Model:         nil,
 				Filename:      "foobar",
 				Version:       "12345",
 				Component:     "bios",
@@ -176,7 +176,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "DELL",
-				Model:         "r615",
+				Model:         []string{"r615"},
 				Filename:      "foobar",
 				Version:       "12345",
 				Component:     "bios",
@@ -193,7 +193,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
-				Model:         "r615",
+				Model:         []string{"r615"},
 				Filename:      "fooBAR",
 				Version:       "12345",
 				Component:     "bios",
@@ -206,11 +206,11 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			"",
 		},
 		{
-			"duplicate vendor/model/version not allowed",
+			"duplicate vendor/component/version not allowed",
 			&serverservice.ComponentFirmwareVersion{
 				UUID:          uuid.New(),
 				Vendor:        "dell",
-				Model:         "r615",
+				Model:         []string{"r615"},
 				Filename:      "foobar",
 				Version:       "12345",
 				Component:     "bios",
@@ -220,7 +220,7 @@ func TestIntegrationServerComponentFirmwareCreate(t *testing.T) {
 			},
 			true,
 			"400",
-			"unable to insert into component_firmware_version: pq: duplicate key value violates unique constraint \"vendor_model_version_unique\"",
+			"unable to insert into component_firmware_version: pq: duplicate key value violates unique constraint \"vendor_component_version_unique\"",
 		},
 	}
 
@@ -258,7 +258,7 @@ func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
 		fw := serverservice.ComponentFirmwareVersion{
 			UUID:          uuid.MustParse(dbtools.FixtureDellR640BMC.ID),
 			Vendor:        "dell",
-			Model:         "r615",
+			Model:         []string{"r615"},
 			Filename:      "foobarino",
 			Version:       "21.07.00",
 			Component:     "bios",

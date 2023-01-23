@@ -369,7 +369,7 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureDellR640BMC = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
-		Model:         "R640",
+		Model:         types.StringArray{"R640"},
 		Filename:      "iDRAC-with-Lifecycle-Controller_Firmware_P8HC9_WN64_5.10.00.00_A00.EXE",
 		Version:       "5.10.00.00",
 		Component:     "bmc",
@@ -386,7 +386,7 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureDellR640BIOS = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
-		Model:         "R640",
+		Model:         types.StringArray{"R640"},
 		Filename:      "bios.exe",
 		Version:       "2.4.4",
 		Component:     "bios",
@@ -406,7 +406,7 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 	// where its added into the firmware set.
 	FixtureDellR640CPLD = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
-		Model:         "R640",
+		Model:         types.StringArray{"R640"},
 		Filename:      "cpld.exe",
 		Version:       "1.0.1",
 		Component:     "cpld",
@@ -427,7 +427,7 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureDellR6515BIOS = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
-		Model:         "R6515",
+		Model:         types.StringArray{"R6515"},
 		Filename:      "BIOS_C4FT0_WN64_2.6.6.EXE",
 		Version:       "2.6.6",
 		Component:     "bios",
@@ -444,7 +444,7 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 
 	FixtureDellR6515BMC = &models.ComponentFirmwareVersion{
 		Vendor:        "Dell",
-		Model:         "R6515",
+		Model:         types.StringArray{"R6515"},
 		Filename:      "BMC-5.20.20.20.EXE",
 		Version:       "5.20.20.20",
 		Component:     "bmc",
@@ -465,7 +465,7 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
 	FixtureSuperMicro = &models.ComponentFirmwareVersion{
 		Vendor:        "SuperMicro",
-		Model:         "X11DPH-T",
+		Model:         types.StringArray{"X11DPH-T"},
 		Filename:      "SMT_X11AST2500_173_11.bin",
 		Version:       "1.73.11",
 		Component:     "bmc",
