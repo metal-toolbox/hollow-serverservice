@@ -452,7 +452,6 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 
 	currentValues, err := models.FindComponentFirmwareSet(ctx, tx, newValues.ID)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
