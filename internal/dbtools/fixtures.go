@@ -27,6 +27,16 @@ var (
 	// Server Component Types
 	FixtureFinType *models.ServerComponentType
 
+	// Server Condition Types
+	FixtureSwimConditionType *models.ServerConditionType
+
+	// Server Condition Type status
+	FixtureSwimConditionStatusTypeActive    *models.ServerConditionStatusType
+	FixtureSwimConditionStatusTypeSucceeded *models.ServerConditionStatusType
+
+	// Server Condition
+	FixtureNemoSwimCondition *models.ServerCondition
+
 	FixtureNemo                  *models.Server
 	FixtureNemoMetadata          *models.Attribute
 	FixtureNemoOtherdata         *models.Attribute
@@ -90,6 +100,25 @@ func addFixtures(t *testing.T) error {
 	}
 
 	if err := FixtureFinType.Insert(ctx, testDB, boil.Infer()); err != nil {
+		return err
+	}
+
+	// Add swim condition type
+	FixtureSwimConditionType = &models.ServerConditionType{Slug: "swim"}
+
+	if err := FixtureSwimConditionType.Insert(ctx, testDB, boil.Infer()); err != nil {
+		return err
+	}
+
+	// Ad swim condition statuses
+	FixtureSwimConditionStatusTypeActive = &models.ServerConditionStatusType{Slug: "active"}
+	FixtureSwimConditionStatusTypeSucceeded = &models.ServerConditionStatusType{Slug: "succeeded"}
+
+	if err := FixtureSwimConditionStatusTypeActive.Insert(ctx, testDB, boil.Infer()); err != nil {
+		return err
+	}
+
+	if err := FixtureSwimConditionStatusTypeSucceeded.Insert(ctx, testDB, boil.Infer()); err != nil {
 		return err
 	}
 
@@ -247,7 +276,29 @@ func setupNemo(ctx context.Context, db *sqlx.DB, t *testing.T) error {
 		return err
 	}
 
-	return FixtureNemo.AddVersionedAttributes(ctx, db, true, FixtureNemoVersionedNew)
+	if err := FixtureNemo.AddVersionedAttributes(ctx, db, true, FixtureNemoVersionedNew); err != nil {
+		return err
+	}
+
+	// Add swim condition
+	conditionTypeSwim, err := models.ServerConditionTypes(models.ServerConditionTypeWhere.Slug.EQ(FixtureSwimConditionType.Slug)).One(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	conditionStatusTypeActive, err := models.ServerConditionStatusTypes(models.ServerConditionStatusTypeWhere.Slug.EQ(FixtureSwimConditionStatusTypeActive.Slug)).One(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	FixtureNemoSwimCondition = &models.ServerCondition{
+		ServerConditionTypeID:       conditionTypeSwim.ID,
+		ServerConditionStatusTypeID: conditionStatusTypeActive.ID,
+		Parameters:                  []byte(`{"speed_knots": "2.5"}`),
+		StatusOutput:                []byte(`{}`),
+	}
+
+	return FixtureNemo.AddServerConditions(ctx, db, true, FixtureNemoSwimCondition)
 }
 
 func setupDory(ctx context.Context, db *sqlx.DB) error {
