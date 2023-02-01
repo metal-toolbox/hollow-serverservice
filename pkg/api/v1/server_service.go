@@ -18,6 +18,9 @@ const (
 	serverCredentialsEndpoint           = "credentials"
 	serverCredentialTypeEndpoint        = "server-credential-types"
 	serverComponentFirmwareSetsEndpoint = "server-component-firmware-sets"
+	serverConditionTypeEndpoint         = "server-condition-types"
+	serverConditionStatusTypeEndpoint   = "server-condition-status-types"
+	serverConditionsEndpoint            = "conditions"
 )
 
 // ClientInterface provides an interface for the expected calls to interact with a server service api
@@ -54,6 +57,17 @@ type ClientInterface interface {
 	SetCredential(context.Context, uuid.UUID, string, string) (*ServerResponse, error)
 	DeleteCredential(context.Context, uuid.UUID, string) (*ServerResponse, error)
 	ListServerCredentialTypes(context.Context) (*ServerResponse, error)
+	// Server condition type
+	CreateServerConditionType(context.Context, *ServerConditionType) (*uuid.UUID, *ServerResponse, error)
+	ListServerConditionTypes(context.Context) (*ServerResponse, error)
+	// Server condition status type
+	CreateServerConditionStatusType(context.Context, *ServerConditionStatusType) (*uuid.UUID, *ServerResponse, error)
+	ListServerConditionStatusTypes(context.Context) (*ServerResponse, error)
+	// Server conditions
+	ListServerConditions(ctx context.Context, serverUUID uuid.UUID) (ServerConditionSlice, *ServerResponse, error)
+	GetServerCondition(ctx context.Context, serverUUID uuid.UUID, serverConditionSlug string) (*ServerCondition, *ServerResponse, error)
+	SetServerCondition(ctx context.Context, serverUUID uuid.UUID, condition *ServerCondition) (*ServerResponse, error)
+	DeleteServerCondition(ctx context.Context, serverUUID uuid.UUID, serverConditionSlug string) (*ServerResponse, error)
 }
 
 // Create will attempt to create a server in Hollow and return the new server's UUID
@@ -381,4 +395,78 @@ func (c *Client) ListServerCredentialTypes(ctx context.Context, params *Paginati
 // CreateServerCredentialType will create a new server secret type
 func (c *Client) CreateServerCredentialType(ctx context.Context, sType *ServerCredentialType) (*ServerResponse, error) {
 	return c.post(ctx, serverCredentialTypeEndpoint, sType)
+}
+
+// CreateServerConditionType will create a new server condition type
+func (c *Client) CreateServerConditionType(ctx context.Context, serverConditionType *ServerConditionType) (*ServerResponse, error) {
+	return c.post(ctx, serverConditionTypeEndpoint, serverConditionType)
+}
+
+// ListServerConditionTypes will return all server condition types
+func (c *Client) ListServerConditionTypes(ctx context.Context, params *PaginationParams) ([]ServerConditionType, *ServerResponse, error) {
+	types := &[]ServerConditionType{}
+	r := ServerResponse{Records: types}
+
+	if err := c.list(ctx, serverConditionTypeEndpoint, params, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *types, &r, nil
+}
+
+// CreateServerConditionStatusType will create a new server condition status type
+func (c *Client) CreateServerConditionStatusType(ctx context.Context, serverConditionStatusType *ServerConditionStatusType) (*ServerResponse, error) {
+	return c.post(ctx, serverConditionStatusTypeEndpoint, serverConditionStatusType)
+}
+
+// ListServerConditionStatusTypes will return all server condition status types
+func (c *Client) ListServerConditionStatusTypes(ctx context.Context, params *PaginationParams) ([]ServerConditionStatusType, *ServerResponse, error) {
+	types := &[]ServerConditionStatusType{}
+	r := ServerResponse{Records: types}
+
+	if err := c.list(ctx, serverConditionStatusTypeEndpoint, params, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *types, &r, nil
+}
+
+// ListServerConditions will return all conditions associated with a server.
+func (c *Client) ListServerConditions(ctx context.Context, serverUUID uuid.UUID, params *PaginationParams) ([]ServerCondition, *ServerResponse, error) {
+	conditions := &[]ServerCondition{}
+	r := ServerResponse{Records: conditions}
+
+	path := fmt.Sprintf("%s/%s/%s", serversEndpoint, serverUUID, serverConditionsEndpoint)
+	if err := c.list(ctx, path, params, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return *conditions, &r, nil
+}
+
+// GetServerCondition will return a condition set on a server identified by the serverID and the conditionSlug
+func (c *Client) GetServerCondition(ctx context.Context, serverUUID uuid.UUID, conditionSlug string) (*ServerCondition, *ServerResponse, error) {
+	p := path.Join(serversEndpoint, serverUUID.String(), serverConditionsEndpoint, conditionSlug)
+
+	serverCondition := &ServerCondition{}
+	r := ServerResponse{Record: serverCondition}
+
+	if err := c.get(ctx, p, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return serverCondition, &r, nil
+}
+
+// SetServerCondition will create or update a server condition
+func (c *Client) SetServerCondition(ctx context.Context, serverUUID uuid.UUID, condition *ServerCondition) (*ServerResponse, error) {
+	p := path.Join(serversEndpoint, serverUUID.String(), serverConditionsEndpoint, condition.Slug)
+
+	return c.put(ctx, p, condition)
+}
+
+// DeleteServerCondition will remove an existing server condition matched by the server UUID and server condition slug
+func (c *Client) DeleteServerCondition(ctx context.Context, serverUUID uuid.UUID, serverConditionSlug string) (*ServerResponse, error) {
+	p := path.Join(serversEndpoint, serverUUID.String(), serverConditionsEndpoint, serverConditionSlug)
+	return c.delete(ctx, p)
 }
