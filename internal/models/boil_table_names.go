@@ -4,27 +4,33 @@
 package models
 
 var TableNames = struct {
-	Attributes               string
-	AttributesFirmwareSet    string
-	ComponentFirmwareSet     string
-	ComponentFirmwareSetMap  string
-	ComponentFirmwareVersion string
-	ServerComponentTypes     string
-	ServerComponents         string
-	ServerCredentialTypes    string
-	ServerCredentials        string
-	Servers                  string
-	VersionedAttributes      string
+	Attributes                 string
+	AttributesFirmwareSet      string
+	ComponentFirmwareSet       string
+	ComponentFirmwareSetMap    string
+	ComponentFirmwareVersion   string
+	ServerComponentTypes       string
+	ServerComponents           string
+	ServerConditionStatusTypes string
+	ServerConditionTypes       string
+	ServerConditions           string
+	ServerCredentialTypes      string
+	ServerCredentials          string
+	Servers                    string
+	VersionedAttributes        string
 }{
-	Attributes:               "attributes",
-	AttributesFirmwareSet:    "attributes_firmware_set",
-	ComponentFirmwareSet:     "component_firmware_set",
-	ComponentFirmwareSetMap:  "component_firmware_set_map",
-	ComponentFirmwareVersion: "component_firmware_version",
-	ServerComponentTypes:     "server_component_types",
-	ServerComponents:         "server_components",
-	ServerCredentialTypes:    "server_credential_types",
-	ServerCredentials:        "server_credentials",
-	Servers:                  "servers",
-	VersionedAttributes:      "versioned_attributes",
+	Attributes:                 "attributes",
+	AttributesFirmwareSet:      "attributes_firmware_set",
+	ComponentFirmwareSet:       "component_firmware_set",
+	ComponentFirmwareSetMap:    "component_firmware_set_map",
+	ComponentFirmwareVersion:   "component_firmware_version",
+	ServerComponentTypes:       "server_component_types",
+	ServerComponents:           "server_components",
+	ServerConditionStatusTypes: "server_condition_status_types",
+	ServerConditionTypes:       "server_condition_types",
+	ServerConditions:           "server_conditions",
+	ServerCredentialTypes:      "server_credential_types",
+	ServerCredentials:          "server_credentials",
+	Servers:                    "servers",
+	VersionedAttributes:        "versioned_attributes",
 }

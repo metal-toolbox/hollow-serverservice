@@ -89,11 +89,13 @@ var ServerWhere = struct {
 var ServerRels = struct {
 	Attributes          string
 	ServerComponents    string
+	ServerConditions    string
 	ServerCredentials   string
 	VersionedAttributes string
 }{
 	Attributes:          "Attributes",
 	ServerComponents:    "ServerComponents",
+	ServerConditions:    "ServerConditions",
 	ServerCredentials:   "ServerCredentials",
 	VersionedAttributes: "VersionedAttributes",
 }
@@ -102,6 +104,7 @@ var ServerRels = struct {
 type serverR struct {
 	Attributes          AttributeSlice          `boil:"Attributes" json:"Attributes" toml:"Attributes" yaml:"Attributes"`
 	ServerComponents    ServerComponentSlice    `boil:"ServerComponents" json:"ServerComponents" toml:"ServerComponents" yaml:"ServerComponents"`
+	ServerConditions    ServerConditionSlice    `boil:"ServerConditions" json:"ServerConditions" toml:"ServerConditions" yaml:"ServerConditions"`
 	ServerCredentials   ServerCredentialSlice   `boil:"ServerCredentials" json:"ServerCredentials" toml:"ServerCredentials" yaml:"ServerCredentials"`
 	VersionedAttributes VersionedAttributeSlice `boil:"VersionedAttributes" json:"VersionedAttributes" toml:"VersionedAttributes" yaml:"VersionedAttributes"`
 }
@@ -123,6 +126,13 @@ func (r *serverR) GetServerComponents() ServerComponentSlice {
 		return nil
 	}
 	return r.ServerComponents
+}
+
+func (r *serverR) GetServerConditions() ServerConditionSlice {
+	if r == nil {
+		return nil
+	}
+	return r.ServerConditions
 }
 
 func (r *serverR) GetServerCredentials() ServerCredentialSlice {
@@ -456,6 +466,20 @@ func (o *Server) ServerComponents(mods ...qm.QueryMod) serverComponentQuery {
 	return ServerComponents(queryMods...)
 }
 
+// ServerConditions retrieves all the server_condition's ServerConditions with an executor.
+func (o *Server) ServerConditions(mods ...qm.QueryMod) serverConditionQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"server_conditions\".\"server_id\"=?", o.ID),
+	)
+
+	return ServerConditions(queryMods...)
+}
+
 // ServerCredentials retrieves all the server_credential's ServerCredentials with an executor.
 func (o *Server) ServerCredentials(mods ...qm.QueryMod) serverCredentialQuery {
 	var queryMods []qm.QueryMod
@@ -670,6 +694,104 @@ func (serverL) LoadServerComponents(ctx context.Context, e boil.ContextExecutor,
 				local.R.ServerComponents = append(local.R.ServerComponents, foreign)
 				if foreign.R == nil {
 					foreign.R = &serverComponentR{}
+				}
+				foreign.R.Server = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadServerConditions allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (serverL) LoadServerConditions(ctx context.Context, e boil.ContextExecutor, singular bool, maybeServer interface{}, mods queries.Applicator) error {
+	var slice []*Server
+	var object *Server
+
+	if singular {
+		object = maybeServer.(*Server)
+	} else {
+		slice = *maybeServer.(*[]*Server)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &serverR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &serverR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`server_conditions`),
+		qm.WhereIn(`server_conditions.server_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load server_conditions")
+	}
+
+	var resultSlice []*ServerCondition
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice server_conditions")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on server_conditions")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for server_conditions")
+	}
+
+	if len(serverConditionAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.ServerConditions = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &serverConditionR{}
+			}
+			foreign.R.Server = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.ServerID {
+				local.R.ServerConditions = append(local.R.ServerConditions, foreign)
+				if foreign.R == nil {
+					foreign.R = &serverConditionR{}
 				}
 				foreign.R.Server = local
 				break
@@ -1047,6 +1169,59 @@ func (o *Server) AddServerComponents(ctx context.Context, exec boil.ContextExecu
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &serverComponentR{
+				Server: o,
+			}
+		} else {
+			rel.R.Server = o
+		}
+	}
+	return nil
+}
+
+// AddServerConditions adds the given related objects to the existing relationships
+// of the server, optionally inserting them as new records.
+// Appends related to o.R.ServerConditions.
+// Sets related.R.Server appropriately.
+func (o *Server) AddServerConditions(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*ServerCondition) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.ServerID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"server_conditions\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"server_id"}),
+				strmangle.WhereClause("\"", "\"", 2, serverConditionPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.ServerID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &serverR{
+			ServerConditions: related,
+		}
+	} else {
+		o.R.ServerConditions = append(o.R.ServerConditions, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &serverConditionR{
 				Server: o,
 			}
 		} else {
