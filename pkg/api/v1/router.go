@@ -78,6 +78,20 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 				srvVerAttrs.POST("", amw.RequiredScopes(createScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesCreate)
 				srvVerAttrs.GET("/:namespace", amw.RequiredScopes(readScopes("server", "server:versioned-attributes")), r.serverVersionedAttributesGet)
 			}
+
+			// /servers/:uuid/condition
+			srvCondition := srv.Group("/conditions")
+			{
+				srvCondition.GET("", amw.RequiredScopes(readScopes("server", "server:conditions")), r.serverConditionList)
+			}
+
+			// /servers/:uuid/conditions/:slug
+			srvConditionBySlug := srv.Group("/conditions/:slug")
+			{
+				srvConditionBySlug.GET("", amw.RequiredScopes(readScopes("server", "server:conditions")), r.serverConditionGet)
+				srvConditionBySlug.PUT("", amw.RequiredScopes(updateScopes("server", "server:conditions")), r.serverConditionUpsert)
+				srvConditionBySlug.DELETE("", amw.RequiredScopes(updateScopes("server", "server:conditions")), r.serverConditionDelete)
+			}
 		}
 	}
 
@@ -114,6 +128,20 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 		srvCmpntFwSets.PUT("/:uuid", amw.RequiredScopes(updateScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetUpdate)
 		srvCmpntFwSets.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetDelete)
 		srvCmpntFwSets.POST("/:uuid/remove-firmware", amw.RequiredScopes(deleteScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetRemoveFirmware)
+	}
+
+	// /server-condition-types
+	srvCondType := rg.Group("/server-condition-types")
+	{
+		srvCondType.GET("", amw.RequiredScopes(readScopes("server-condition-types")), r.serverConditionTypeList)
+		srvCondType.POST("", amw.RequiredScopes(updateScopes("server-condition-types")), r.serverConditionTypeCreate)
+	}
+
+	// /server-condition-status-types
+	srvCondStatusType := rg.Group("/server-condition-status-types")
+	{
+		srvCondStatusType.GET("", amw.RequiredScopes(readScopes("server-condition-status-types")), r.serverConditionStatusTypeList)
+		srvCondStatusType.POST("", amw.RequiredScopes(updateScopes("server-condition-status-types")), r.serverConditionStatusTypeCreate)
 	}
 }
 
