@@ -17,6 +17,7 @@ import (
 	"go.uber.org/zap"
 	"gocloud.dev/secrets"
 
+	"go.hollow.sh/serverservice/internal/events"
 	v1api "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
@@ -28,6 +29,7 @@ type Server struct {
 	DB            *sqlx.DB
 	AuthConfig    ginjwt.AuthConfig
 	SecretsKeeper *secrets.Keeper
+	EventStream   events.StreamBroker
 }
 
 var (
@@ -64,6 +66,8 @@ func (s *Server) setup() *gin.Engine {
 		DB:            s.DB,
 		AuthMW:        authMW,
 		SecretsKeeper: s.SecretsKeeper,
+		Logger:        s.Logger,
+		EventStream:   s.EventStream,
 	}
 
 	// Remove any params from the URL string to keep the number of labels down
