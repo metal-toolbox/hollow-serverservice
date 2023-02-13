@@ -11,6 +11,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
 
+	"go.hollow.sh/serverservice/internal/events"
 	"go.hollow.sh/serverservice/internal/models"
 )
 
@@ -90,6 +91,7 @@ func (r *Router) serverGet(c *gin.Context) {
 
 func (r *Router) serverCreate(c *gin.Context) {
 	var srv Server
+
 	if err := c.ShouldBindJSON(&srv); err != nil {
 		badRequestResponse(c, "invalid server", err)
 		return
@@ -105,6 +107,9 @@ func (r *Router) serverCreate(c *gin.Context) {
 		dbErrorResponse(c, err)
 		return
 	}
+
+	// publish event
+	r.publishEventAsync(c.Request.Context(), "servers", events.Create, dbSRV)
 
 	createdResponse(c, dbSRV.ID)
 }
