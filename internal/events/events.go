@@ -18,8 +18,10 @@ type (
 )
 
 const (
-	// URN is the uniform resource name, the last two fields are the ObjectType, ActionKind and the
-	URN = "urn:hollow:serverservice:%s:%s/"
+	// urnFormatString is the format for the uniform resource name.
+	//
+	// The string is to be formatted as "urn:<namespace>:<ObjectType>:<object UUID>"
+	urnFormatString = "urn:%s:%s:%s"
 
 	// Create action kind identifies objects that were created.
 	Create EventType = "create"
@@ -35,7 +37,7 @@ const (
 type StreamBroker interface {
 	Open() error
 	// PublishWithContext publishes the message to the message broker in an async manner.
-	PublishAsyncWithContext(ctx context.Context, objType ObjectType, eventType EventType, data interface{}) error
+	PublishAsyncWithContext(ctx context.Context, objType ObjectType, eventType EventType, objID string, obj interface{}) error
 	Close()
 }
 
@@ -47,6 +49,7 @@ func NewStreamBroker(
 	streamName,
 	streamPrefix string,
 	streamSubjects []string,
+	streamUrnNs,
 	basicAuthUser,
 	basicAuthPass string,
 	connectTimeout time.Duration,
@@ -58,20 +61,22 @@ func NewStreamBroker(
 		streamName:     streamName,
 		streamPrefix:   streamPrefix,
 		streamSubjects: streamSubjects,
+		streamUrnNs:    streamUrnNs,
 		basicAuthUser:  basicAuthUser,
 		basicAuthPass:  basicAuthPass,
 		connectTimeout: connectTimeout,
 	}
 }
 
-func newURN(eventType EventType, objType ObjectType) string {
-	return fmt.Sprintf(URN, eventType, objType)
+func newURN(namespace string, objType ObjectType, objID string) string {
+	return fmt.Sprintf(urnFormatString, namespace, objType, objID)
 }
 
-func newEventStreamMessage(appName string, eventType EventType, objType ObjectType) *pubsubx.Message {
+func newEventStreamMessage(appName, urnNamespace string, eventType EventType, objType ObjectType, objID string) *pubsubx.Message {
 	return &pubsubx.Message{
 		EventType:  string(eventType),
-		SubjectURN: newURN(eventType, objType),
+		ActorURN:   "", // To be filled in with the data from the client request JWT.
+		SubjectURN: newURN(urnNamespace, objType, objID),
 		Timestamp:  time.Now().UTC(),
 		Source:     appName,
 	}

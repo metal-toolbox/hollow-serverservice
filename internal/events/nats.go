@@ -29,6 +29,7 @@ type NatsJetStream struct {
 	streamName     string
 	streamPrefix   string
 	streamSubjects []string
+	streamUrnNs    string
 	basicAuthUser  string
 	basicAuthPass  string
 	connectTimeout time.Duration
