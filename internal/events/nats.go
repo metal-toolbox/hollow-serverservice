@@ -76,18 +76,18 @@ func (n *NatsJetStream) Open() error {
 }
 
 // PublishAsyncWithContext publishes an event onto the NATS Jetstream.
-func (n *NatsJetStream) PublishAsyncWithContext(ctx context.Context, objType ObjectType, eventType EventType, data interface{}) error {
-	b, err := json.Marshal(data)
+func (n *NatsJetStream) PublishAsyncWithContext(ctx context.Context, objType ObjectType, eventType EventType, objID string, obj interface{}) error {
+	msg := newEventStreamMessage(n.appName, n.streamUrnNs, eventType, objType, objID)
+	msg.AdditionalData = map[string]interface{}{"data": obj}
+	msg.EventType = string(eventType)
+
+	msgb, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
 
-	msg := newEventStreamMessage(n.appName, eventType, objType)
-	msg.AdditionalData = map[string]interface{}{"data": b}
-	msg.EventType = string(eventType)
-
 	subject := fmt.Sprintf("%s.%s.%s", n.streamPrefix, objType, eventType)
-	if _, err := n.PublishAsync(subject, b); err != nil {
+	if _, err := n.PublishAsync(subject, msgb); err != nil {
 		return err
 	}
 
