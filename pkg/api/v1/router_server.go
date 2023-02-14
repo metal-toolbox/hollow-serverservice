@@ -109,7 +109,7 @@ func (r *Router) serverCreate(c *gin.Context) {
 	}
 
 	// publish event
-	r.publishEventAsync(c.Request.Context(), "servers", events.Create, dbSRV)
+	r.publishEventAsync(c.Request.Context(), "servers", events.Create, dbSRV, dbSRV.ID)
 
 	createdResponse(c, dbSRV.ID)
 }

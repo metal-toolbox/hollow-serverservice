@@ -46,7 +46,7 @@ func (s *Server) setup() *gin.Engine {
 
 	authMW, err = ginjwt.NewAuthMiddleware(s.AuthConfig)
 	if err != nil {
-		s.Logger.Sugar().Fatal("failed to initialize auth middleware", "error", err)
+		s.Logger.Sugar().Fatal("failed to initialize auth middleware: ", "error", err)
 	}
 
 	// Setup default gin router

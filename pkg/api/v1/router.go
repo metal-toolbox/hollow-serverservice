@@ -223,14 +223,14 @@ func (r *Router) loadComponentFirmwareVersionFromParams(c *gin.Context) (*models
 	return firmware, nil
 }
 
-// publishEventAsync wraps publishing to the event stream to publish them if the eventream is available.
-func (r *Router) publishEventAsync(ctx context.Context, objType events.ObjectType, eventType events.EventType, data interface{}) {
+// publishEventAsync wraps publishing to the event stream to publish them if the event stream is available.
+func (r *Router) publishEventAsync(ctx context.Context, objType events.ObjectType, eventType events.EventType, obj interface{}, objID string) {
 	if r.EventStream == nil {
 		r.Logger.Warn("Event publish skipped, eventStream not connected")
 		return
 	}
 
-	if err := r.EventStream.PublishAsyncWithContext(ctx, objType, eventType, data); err != nil {
-		r.Logger.Warn("Error in event stream publish", zap.Error(err))
+	if err := r.EventStream.PublishAsyncWithContext(ctx, objType, eventType, objID, obj); err != nil {
+		r.Logger.Error("Error in event stream publish", zap.Error(err))
 	}
 }
