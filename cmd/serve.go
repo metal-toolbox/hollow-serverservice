@@ -65,26 +65,29 @@ func init() {
 	rootCmd.PersistentFlags().String("nats-url", "", "NATS server connection url")
 	viperx.MustBindFlag(viper.GetViper(), "nats.url", rootCmd.PersistentFlags().Lookup("nats-url"))
 
-	rootCmd.PersistentFlags().String("nats-stream-user", "serverservice", "NATS basic auth account user name")
-	viperx.MustBindFlag(viper.GetViper(), "nats.stream-user", rootCmd.PersistentFlags().Lookup("nats-stream-user"))
+	rootCmd.PersistentFlags().String("nats-stream-user", "", "NATS basic auth account user name")
+	viperx.MustBindFlag(viper.GetViper(), "nats.stream.user", rootCmd.PersistentFlags().Lookup("nats-stream-user"))
 
-	rootCmd.PersistentFlags().String("nats-stream-pass", "password", "NATS basic auth account password")
-	viperx.MustBindFlag(viper.GetViper(), "nats.stream-pass", rootCmd.PersistentFlags().Lookup("nats-stream-pass"))
+	rootCmd.PersistentFlags().String("nats-stream-pass", "", "NATS basic auth account password")
+	viperx.MustBindFlag(viper.GetViper(), "nats.stream.pass", rootCmd.PersistentFlags().Lookup("nats-stream-pass"))
 
 	rootCmd.PersistentFlags().String("nats-creds-file", "", "Path to the file containing the NATS nkey keypair")
-	viperx.MustBindFlag(viper.GetViper(), "nats.creds-file", rootCmd.PersistentFlags().Lookup("nats-creds-file"))
+	viperx.MustBindFlag(viper.GetViper(), "nats.creds.file", rootCmd.PersistentFlags().Lookup("nats-creds-file"))
 
 	rootCmd.PersistentFlags().String("nats-stream-name", appName, "prefix for NATS subjects")
-	viperx.MustBindFlag(viper.GetViper(), "nats.stream-name", rootCmd.PersistentFlags().Lookup("nats-stream-name"))
+	viperx.MustBindFlag(viper.GetViper(), "nats.stream.name", rootCmd.PersistentFlags().Lookup("nats-stream-name"))
 
 	rootCmd.PersistentFlags().String("nats-stream-prefix", "com.hollow.sh.events", "NATS stream prefix")
-	viperx.MustBindFlag(viper.GetViper(), "nats.stream-prefix", rootCmd.PersistentFlags().Lookup("nats-stream-prefix"))
+	viperx.MustBindFlag(viper.GetViper(), "nats.stream.prefix", rootCmd.PersistentFlags().Lookup("nats-stream-prefix"))
 
 	rootCmd.PersistentFlags().StringSlice("nats-stream-subjects", []string{"com.hollow.sh.events.>"}, "NATS stream subject(s)")
-	viperx.MustBindFlag(viper.GetViper(), "nats.stream-subjects", rootCmd.PersistentFlags().Lookup("nats-stream-subjects"))
+	viperx.MustBindFlag(viper.GetViper(), "nats.stream.subjects", rootCmd.PersistentFlags().Lookup("nats-stream-subjects"))
+
+	rootCmd.PersistentFlags().String("nats-stream-urn-ns", "hollow", "NATS stream URN namespace value")
+	viperx.MustBindFlag(viper.GetViper(), "nats.stream.urn.ns", rootCmd.PersistentFlags().Lookup("nats-stream-urn-ns"))
 
 	rootCmd.PersistentFlags().Duration("nats-connect-timeout", natsConnectTimeout, "Timeout when connecting to NATs")
-	viperx.MustBindFlag(viper.GetViper(), "nats.connect-timeout", rootCmd.PersistentFlags().Lookup("nats-connect-timeout"))
+	viperx.MustBindFlag(viper.GetViper(), "nats.connect.timeout", rootCmd.PersistentFlags().Lookup("nats-connect-timeout"))
 }
 
 func serve(ctx context.Context) {
@@ -129,15 +132,15 @@ func serve(ctx context.Context) {
 	if streamURL != "" {
 		eventStream := events.NewStreamBroker(
 			appName,
-			viper.GetString("nats.creds-file"),
+			viper.GetString("nats.creds.file"),
 			streamURL,
-			viper.GetString("nats.stream-name"),
-			viper.GetString("nats.stream-prefix"),
-			viper.GetStringSlice("nats.stream-subjects"),
-			// TODO(joel): fix these params are not being populated
-			viper.GetString("nats.stream-user"),
-			viper.GetString("nats.stream-pass"),
-			viper.GetDuration("nats.connect-timeout"),
+			viper.GetString("nats.stream.name"),
+			viper.GetString("nats.stream.prefix"),
+			viper.GetStringSlice("nats.stream.subjects"),
+			viper.GetString("nats.stream.urn.ns"),
+			viper.GetString("nats.stream.user"),
+			viper.GetString("nats.stream.pass"),
+			viper.GetDuration("nats.connect.timeout"),
 		)
 
 		if err := eventStream.Open(); err != nil {
