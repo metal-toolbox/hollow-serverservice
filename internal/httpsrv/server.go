@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
+	"go.hollow.sh/toolbox/events"
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.infratographer.com/x/versionx"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -17,7 +18,6 @@ import (
 	"go.uber.org/zap"
 	"gocloud.dev/secrets"
 
-	"go.hollow.sh/serverservice/internal/events"
 	v1api "go.hollow.sh/serverservice/pkg/api/v1"
 )
 
