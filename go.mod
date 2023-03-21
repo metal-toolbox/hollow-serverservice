@@ -39,7 +39,7 @@ require (
 	go.hollow.sh/toolbox v0.4.1
 	go.infratographer.com/x v0.0.1
 	gocloud.dev v0.27.0
-	golang.org/x/exp v0.0.0-20230116083435-1de6713980de
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
 require (
