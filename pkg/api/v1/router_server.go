@@ -10,9 +10,9 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
+	"go.hollow.sh/toolbox/events"
 
 	"go.hollow.sh/serverservice/internal/models"
-	"go.hollow.sh/toolbox/events"
 )
 
 func (r *Router) serverList(c *gin.Context) {
