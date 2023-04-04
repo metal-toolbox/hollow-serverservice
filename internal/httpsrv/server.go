@@ -29,7 +29,7 @@ type Server struct {
 	DB            *sqlx.DB
 	AuthConfig    ginjwt.AuthConfig
 	SecretsKeeper *secrets.Keeper
-	EventStream   events.StreamBroker
+	EventStream   events.Stream
 }
 
 var (

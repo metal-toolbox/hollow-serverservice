@@ -24,7 +24,7 @@ type Router struct {
 	DB            *sqlx.DB
 	SecretsKeeper *secrets.Keeper
 	Logger        *zap.Logger
-	EventStream   events.StreamBroker
+	EventStream   events.Stream
 }
 
 // Routes will add the routes for this API version to a router group

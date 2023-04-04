@@ -139,13 +139,13 @@ func serve(ctx context.Context) {
 	}
 }
 
-func initStream() events.StreamBroker {
+func initStream() events.Stream {
 	streamURL := viper.GetString("nats.url")
 	if streamURL == "" {
 		return nil
 	}
 
-	stream, err := events.NewStreamBroker(natsOptions(appName, streamURL))
+	stream, err := events.NewStream(natsOptions(appName, streamURL))
 	if err != nil {
 		logger.Warnw("error in event stream configuration", "error", err.Error())
 
