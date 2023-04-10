@@ -1,0 +1,90 @@
+version: "3.9"
+
+networks:
+  hollow:
+
+volumes:
+  crdb:
+    null
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VARIANT: 1.19-bullseye
+        NODE_VERSION: "none"
+    command: sleep infinity
+    env_file:
+      - .env
+      - .env.go
+    depends_on:
+      - crdb
+      - nats
+    volumes:
+      - ./nsc:/nsc
+      - ..:/workspace
+      - ~/.ssh/authorized_keys:/home/vscode/.ssh/authorized_keys:ro
+    networks:
+      - hollow
+    # Port forwarded for local development with emacs tramp
+    ports:
+      - "127.0.0.1:2222:2222"
+    # Use "forwardPorts" in **devcontainer.json** to forward a port locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+  # Environment setup
+  create_databases:
+    image: cockroachdb/cockroach:latest-v22.2
+    restart: on-failure:5
+    command: "sql --insecure -e 'CREATE DATABASE IF NOT EXISTS serverservice_test;'"
+    env_file:
+      - .env
+    depends_on:
+      - crdb
+    networks:
+      - hollow
+
+  # Required services (databases, etc)
+  crdb:
+    image: cockroachdb/cockroach:latest-v22.2
+    command: start-single-node --insecure
+    restart: unless-stopped
+    volumes:
+      - crdb:/cockroach/cockroach-data
+    env_file:
+      - .env
+    healthcheck:
+      test: "curl --fail http://localhost:8080/health?ready=1 || exit 1"
+      interval: "2s"
+      retries: 3
+      start_period: "15s"
+      timeout: "5s"
+    networks:
+      - hollow
+
+  nats-init:
+     image: natsio/nats-box
+     volumes:
+       - ./nsc:/nsc
+       - ./nats:/nats
+       - ./scripts:/scripts
+     command:
+       - "/scripts/nats_init.sh"
+
+  nats:
+    image: 'nats:alpine'
+    depends_on:
+      - nats-init
+    command:
+      - -c
+      - '/etc/nats/nats-server.conf'
+      - -D
+    volumes:
+      - ./nats/:/etc/nats
+    ports:
+      - "4222:4222"
+    restart: unless-stopped
+    networks:
+      - hollow
