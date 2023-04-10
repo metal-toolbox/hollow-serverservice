@@ -1,6 +1,7 @@
 package serverservice
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -9,7 +10,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"go.hollow.sh/toolbox/events"
 	"go.hollow.sh/toolbox/ginjwt"
+	"go.uber.org/zap"
 	"gocloud.dev/secrets"
 
 	"go.hollow.sh/serverservice/internal/models"
@@ -20,6 +23,8 @@ type Router struct {
 	AuthMW        *ginjwt.Middleware
 	DB            *sqlx.DB
 	SecretsKeeper *secrets.Keeper
+	Logger        *zap.Logger
+	EventStream   events.Stream
 }
 
 // Routes will add the routes for this API version to a router group
@@ -216,4 +221,19 @@ func (r *Router) loadComponentFirmwareVersionFromParams(c *gin.Context) (*models
 	}
 
 	return firmware, nil
+}
+
+// publishEventAsync wraps publishing to the event stream to publish them if the event stream is available.
+func (r *Router) publishEventAsync(ctx context.Context, resType events.ResourceType, eventType events.EventType, obj interface{}, objID string) {
+	if r.EventStream == nil {
+		r.Logger.Error("Event publish skipped, eventStream not connected")
+
+		return
+	}
+
+	if err := r.EventStream.PublishAsyncWithContext(ctx, resType, eventType, objID, obj); err != nil {
+		r.Logger.Error("Error in event stream publish", zap.Error(err))
+
+		return
+	}
 }

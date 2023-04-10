@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
+	"go.hollow.sh/toolbox/events"
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.infratographer.com/x/versionx"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -28,6 +29,7 @@ type Server struct {
 	DB            *sqlx.DB
 	AuthConfig    ginjwt.AuthConfig
 	SecretsKeeper *secrets.Keeper
+	EventStream   events.Stream
 }
 
 var (
@@ -44,7 +46,7 @@ func (s *Server) setup() *gin.Engine {
 
 	authMW, err = ginjwt.NewAuthMiddleware(s.AuthConfig)
 	if err != nil {
-		s.Logger.Sugar().Fatal("failed to initialize auth middleware", "error", err)
+		s.Logger.Sugar().Fatal("failed to initialize auth middleware: ", "error", err)
 	}
 
 	// Setup default gin router
@@ -64,6 +66,8 @@ func (s *Server) setup() *gin.Engine {
 		DB:            s.DB,
 		AuthMW:        authMW,
 		SecretsKeeper: s.SecretsKeeper,
+		Logger:        s.Logger,
+		EventStream:   s.EventStream,
 	}
 
 	// Remove any params from the URL string to keep the number of labels down
