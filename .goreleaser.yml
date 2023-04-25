@@ -73,6 +73,7 @@ signs:
       - "--output-certificate=${certificate}"
       - "--output-signature=${signature}"
       - "${artifact}"
+      - "--yes" # required on cosign 2.0.0+
     artifacts: all
     output: true
 
@@ -82,5 +83,6 @@ docker_signs:
       - "sign"
       - "--oidc-issuer=https://token.actions.githubusercontent.com"
       - "${artifact}"
+      - "--yes" # required on cosign 2.0.0+
     artifacts: all
     output: true
