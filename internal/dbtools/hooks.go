@@ -15,7 +15,7 @@ func RegisterHooks() {
 	models.AddServerCredentialTypeHook(boil.BeforeInsertHook, setServerCredentialTypeSlug)
 }
 
-func setServerComponentTypeSlug(ctx context.Context, exec boil.ContextExecutor, t *models.ServerComponentType) error {
+func setServerComponentTypeSlug(_ context.Context, _ boil.ContextExecutor, t *models.ServerComponentType) error {
 	if t.Slug == "" {
 		t.Slug = slug.Make(t.Name)
 	}
@@ -23,7 +23,7 @@ func setServerComponentTypeSlug(ctx context.Context, exec boil.ContextExecutor, 
 	return nil
 }
 
-func setServerCredentialTypeSlug(ctx context.Context, exec boil.ContextExecutor, t *models.ServerCredentialType) error {
+func setServerCredentialTypeSlug(_ context.Context, _ boil.ContextExecutor, t *models.ServerCredentialType) error {
 	if t.Slug == "" {
 		t.Slug = slug.Make(t.Name)
 	}

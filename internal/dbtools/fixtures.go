@@ -415,11 +415,7 @@ func setupFirmwareDellR640(ctx context.Context, db *sqlx.DB) error {
 		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/dell/r640/cpld/cpld.EXE",
 	}
 
-	if err := FixtureDellR640CPLD.Insert(ctx, db, boil.Infer()); err != nil {
-		return err
-	}
-
-	return nil
+	return FixtureDellR640CPLD.Insert(ctx, db, boil.Infer())
 }
 
 func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
@@ -474,11 +470,7 @@ func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
 		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin",
 	}
 
-	if err := FixtureSuperMicro.Insert(ctx, db, boil.Infer()); err != nil {
-		return err
-	}
-
-	return nil
+	return FixtureSuperMicro.Insert(ctx, db, boil.Infer())
 }
 
 func setupFirmwareSetR6515(ctx context.Context, db *sqlx.DB) error {

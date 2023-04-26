@@ -288,11 +288,7 @@ func (r *Router) firmwareSetCreateTx(ctx context.Context, dbFirmwareSet *models.
 	}
 
 	// commit
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
 
 func (r *Router) serverComponentFirmwareSetUpdate(c *gin.Context) {
@@ -493,11 +489,7 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 	}
 
 	// commit
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
 
 func (r *Router) serverComponentFirmwareSetRemoveFirmware(c *gin.Context) {
@@ -618,7 +610,7 @@ func (r *Router) componentFirmwareSetFromParams(c *gin.Context) (*models.Compone
 	return firmwareSet, nil
 }
 
-func (r *Router) firmwareSetDeleteMappingTx(ctx context.Context, firmwareSet *models.ComponentFirmwareSet, removeMappings []*models.ComponentFirmwareSetMap) error {
+func (r *Router) firmwareSetDeleteMappingTx(ctx context.Context, _ *models.ComponentFirmwareSet, removeMappings []*models.ComponentFirmwareSetMap) error {
 	// being transaction to insert a new firmware set and its mapping
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -634,9 +626,5 @@ func (r *Router) firmwareSetDeleteMappingTx(ctx context.Context, firmwareSet *mo
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
