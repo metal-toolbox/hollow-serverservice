@@ -10,7 +10,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
-	"go.hollow.sh/toolbox/events"
 
 	"go.hollow.sh/serverservice/internal/models"
 )
@@ -108,8 +107,8 @@ func (r *Router) serverCreate(c *gin.Context) {
 		return
 	}
 
-	// publish event
-	r.publishEventAsync(c.Request.Context(), "servers", events.Create, dbSRV, dbSRV.ID)
+	// publish event XXX: this should handle publish failures or otherwise take action if NATS is unavailable
+	r.publishCreateServerMessage(c.Request.Context(), dbSRV)
 
 	createdResponse(c, dbSRV.ID)
 }
