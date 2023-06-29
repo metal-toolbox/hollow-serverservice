@@ -11,9 +11,11 @@ import (
 
 // ComponentFirmwareVersionListParams allows you to filter the results
 type ComponentFirmwareVersionListParams struct {
-	Vendor  string   `form:"vendor"`
-	Model   []string `form:"model"`
-	Version string   `form:"version"`
+	Vendor   string   `form:"vendor"`
+	Model    []string `form:"model"`
+	Version  string   `form:"version"`
+	Filename string   `form:"filename"`
+	Checksum string   `form:"checksum"`
 }
 
 func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
@@ -34,6 +36,14 @@ func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
 	if p.Version != "" {
 		q.Set("version", p.Version)
 	}
+
+	if p.Filename != "" {
+		q.Set("filename", p.Filename)
+	}
+
+	if p.Checksum != "" {
+		q.Set("checksum", p.Checksum)
+	}
 }
 
 // queryMods converts the list params into sql conditions that can be added to sql queries
@@ -52,6 +62,16 @@ func (p *ComponentFirmwareVersionListParams) queryMods() []qm.QueryMod {
 
 	if p.Version != "" {
 		m := models.ComponentFirmwareVersionWhere.Version.EQ(p.Version)
+		mods = append(mods, m)
+	}
+
+	if p.Filename != "" {
+		m := models.ComponentFirmwareVersionWhere.Filename.EQ(p.Filename)
+		mods = append(mods, m)
+	}
+
+	if p.Checksum != "" {
+		m := models.ComponentFirmwareVersionWhere.Checksum.EQ(p.Checksum)
 		mods = append(mods, m)
 	}
 
