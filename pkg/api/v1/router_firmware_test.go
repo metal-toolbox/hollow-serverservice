@@ -80,6 +80,24 @@ func TestIntegrationFirmwareList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"search by filename",
+			&serverservice.ComponentFirmwareVersionListParams{
+				Filename: "BIOS_C4FT0_WN64_2.6.6.EXE",
+			},
+			[]string{dbtools.FixtureDellR6515BIOS.ID},
+			false,
+			"",
+		},
+		{
+			"search by checksum",
+			&serverservice.ComponentFirmwareVersionListParams{
+				Checksum: "1ddcb3c3d0fc5925ef03a3dde768e9e245c579039dd958fc0f3a9c6368b6c5f4",
+			},
+			[]string{dbtools.FixtureDellR6515BIOS.ID},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
