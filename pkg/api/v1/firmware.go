@@ -17,8 +17,8 @@ type ComponentFirmwareVersion struct {
 	Version       string    `json:"version" binding:"required"`
 	Component     string    `json:"component" binding:"required,lowercase"`
 	Checksum      string    `json:"checksum" binding:"required,lowercase"`
-	UpstreamURL   string    `json:"upstreamURL" binding:"required"`
-	RepositoryURL string    `json:"repositoryURL" binding:"required"`
+	UpstreamURL   string    `json:"upstream_url" binding:"required"`
+	RepositoryURL string    `json:"repository_url" binding:"required"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
