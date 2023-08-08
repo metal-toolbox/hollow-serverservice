@@ -67,13 +67,14 @@ func TestIntegrationServerCredentialsUpsert(t *testing.T) {
 		assert.NotEqual(t, "mynewSecret!", secret.Password)
 
 		// Update the secret
-		_, err = s.Client.SetCredential(ctx, uuid, slug, "postgre", "mynewSecret!")
+		_, err = s.Client.SetCredential(ctx, uuid, slug, "foobar", "mynewSecret!")
 		assert.NoError(t, err)
 
 		// Get the new secret
 		newSecret, _, err := s.Client.GetCredential(ctx, uuid, slug)
 		assert.NoError(t, err)
 		assert.Equal(t, "mynewSecret!", newSecret.Password)
+		assert.Equal(t, "foobar", newSecret.Username)
 		// ensure timestamps were updated correctly
 		assert.Equal(t, secret.CreatedAt, newSecret.CreatedAt)
 		assert.NotEqual(t, newSecret.UpdatedAt, secret.UpdatedAt)

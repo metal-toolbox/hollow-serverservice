@@ -133,7 +133,10 @@ func (r *Router) serverCredentialUpsert(c *gin.Context) {
 		// search for records by server id and type id to see if we need to update or insert
 		[]string{models.ServerCredentialColumns.ServerID, models.ServerCredentialColumns.ServerCredentialTypeID},
 		// For updates only set the new value and updated at
-		boil.Whitelist(models.ServerCredentialColumns.Password, models.ServerCredentialColumns.UpdatedAt),
+		boil.Whitelist(
+			models.ServerCredentialColumns.Username,
+			models.ServerCredentialColumns.Password,
+			models.ServerCredentialColumns.UpdatedAt),
 		// For inserts set server id, type id and value
 		boil.Whitelist(
 			models.ServerCredentialColumns.ServerID,
