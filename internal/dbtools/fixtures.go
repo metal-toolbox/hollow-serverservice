@@ -68,10 +68,14 @@ var (
 	FixtureDellR640CPLD     *models.ComponentFirmwareVersion
 	FixtureDellR6515BMC     *models.ComponentFirmwareVersion
 	FixtureDellR6515BIOS    *models.ComponentFirmwareVersion
-	FixtureSuperMicro       *models.ComponentFirmwareVersion
 	FixtureServerComponents models.ServerComponentSlice
 
 	// ComponentFirmwareSet fixtures
+	FixtureSuperMicroX11DPHTBMC        *models.ComponentFirmwareVersion
+	FixtureFirmwareUUIDsSuperMicro     []string
+	FixtureFirmwareSetX11DPHT          *models.ComponentFirmwareSet
+	FixtureFirmwareSetX11DPHTAttribute *models.AttributesFirmwareSet
+
 	FixtureFirmwareUUIDsR6515        []string
 	FixtureFirmwareSetR6515          *models.ComponentFirmwareSet
 	FixtureFirmwareSetR6515Attribute *models.AttributesFirmwareSet
@@ -126,6 +130,10 @@ func addFixtures(t *testing.T) error {
 	}
 
 	if err := setupFirmwareSetR640(ctx, testDB); err != nil {
+		return err
+	}
+
+	if err := setupFirmwareSetSupermicroX11DPHT(ctx, testDB); err != nil {
 		return err
 	}
 
@@ -459,7 +467,9 @@ func setupFirmwareDellR6515(ctx context.Context, db *sqlx.DB) error {
 }
 
 func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
-	FixtureSuperMicro = &models.ComponentFirmwareVersion{
+	FixtureFirmwareUUIDsSuperMicro = []string{}
+
+	FixtureSuperMicroX11DPHTBMC = &models.ComponentFirmwareVersion{
 		Vendor:        "SuperMicro",
 		Model:         types.StringArray{"X11DPH-T"},
 		Filename:      "SMT_X11AST2500_173_11.bin",
@@ -470,7 +480,51 @@ func setupFirmwareSuperMicro(ctx context.Context, db *sqlx.DB) error {
 		RepositoryURL: "https://example-firmware-bucket.s3.amazonaws.com/firmware/supermicro/X11DPH-T/bmc/SMT_X11AST2500_173_11.bin",
 	}
 
-	return FixtureSuperMicro.Insert(ctx, db, boil.Infer())
+	if err := FixtureSuperMicroX11DPHTBMC.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareUUIDsSuperMicro = append(FixtureFirmwareUUIDsSuperMicro, FixtureSuperMicroX11DPHTBMC.ID)
+
+	return nil
+}
+
+func setupFirmwareSetSupermicroX11DPHT(ctx context.Context, db *sqlx.DB) error {
+	// setup firmware fixtures if they haven't been
+	if len(FixtureFirmwareUUIDsSuperMicro) == 0 {
+		if err := setupFirmwareSuperMicro(ctx, db); err != nil {
+			return err
+		}
+	}
+
+	FixtureFirmwareSetX11DPHT = &models.ComponentFirmwareSet{Name: "x11dph-t"}
+
+	if err := FixtureFirmwareSetX11DPHT.Insert(ctx, db, boil.Infer()); err != nil {
+		return err
+	}
+
+	FixtureFirmwareSetX11DPHTAttribute = &models.AttributesFirmwareSet{
+		FirmwareSetID: null.StringFrom(FixtureFirmwareSetX11DPHT.ID),
+		Namespace:     "sh.hollow.firmware_set.labels",
+		Data:          types.JSON([]byte(`{"vendor": "supermicro", "model": "x11dph-t"}`)),
+	}
+
+	if err := FixtureFirmwareSetX11DPHT.AddFirmwareSetAttributesFirmwareSets(ctx, db, true, FixtureFirmwareSetX11DPHTAttribute); err != nil {
+		return err
+	}
+
+	for _, firmwareID := range FixtureFirmwareUUIDsSuperMicro {
+		m := &models.ComponentFirmwareSetMap{
+			FirmwareSetID: FixtureFirmwareSetX11DPHT.ID,
+			FirmwareID:    firmwareID,
+		}
+
+		if err := m.Insert(ctx, db, boil.Infer()); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func setupFirmwareSetR6515(ctx context.Context, db *sqlx.DB) error {

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
 	"go.hollow.sh/serverservice/internal/dbtools"
@@ -404,7 +405,8 @@ func TestIntegrationServerComponentFirmwareSetGet(t *testing.T) {
 			// assert firmware set attributes
 			assert.Equal(t, 1, len(got.Attributes))
 			assert.Equal(t, dbtools.FixtureFirmwareSetR640Attribute.Namespace, got.Attributes[0].Namespace)
-			assertAttributesEqual(t, []byte(dbtools.FixtureFirmwareSetR640Attribute.Data), got.Attributes[0].Data)
+			assertAttributesContains(t, got.Attributes, []byte(dbtools.FixtureFirmwareSetR640Attribute.Data))
+			assertAttributesContains(t, got.Attributes, []byte(dbtools.FixtureFirmwareSetX11DPHTAttribute.Data))
 
 			// assert component firmware
 			assert.Equal(t, 2, len(got.ComponentFirmware))
@@ -413,7 +415,17 @@ func TestIntegrationServerComponentFirmwareSetGet(t *testing.T) {
 	}
 }
 
-func assertAttributesEqual(t *testing.T, a, b []byte) {
+func assertAttributesContains(t *testing.T, attrs []serverservice.Attributes, a []byte) bool {
+	for _, attr := range attrs {
+		if assertAttributesEqual(t, a, attr.Data) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func assertAttributesEqual(t *testing.T, a, b []byte) bool {
 	t.Helper()
 
 	// unmarshal fixture attribute data
@@ -428,8 +440,7 @@ func assertAttributesEqual(t *testing.T, a, b []byte) {
 		t.Fatal(err)
 	}
 
-	// assert fixture data
-	assert.Equal(t, aData, bData)
+	return maps.Equal(aData, bData)
 }
 
 func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
@@ -449,9 +460,8 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 	testCases := []struct {
 		testName                     string
 		params                       *serverservice.ComponentFirmwareSetListParams
-		expectedFirmwareSetAttribute *models.AttributesFirmwareSet
-		expectedFirmwareModel        []string
-		expectedFirmwareCount        int
+		expectedFirmwareSetAttribute []*models.AttributesFirmwareSet
+		expectedFirmwareModels       []string
 		expectedTotalRecordCount     int
 		expectedPage                 int
 		expectedError                bool
@@ -461,9 +471,8 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 		{
 			"list firmware set by name - r640",
 			&serverservice.ComponentFirmwareSetListParams{Name: "r640"},
-			dbtools.FixtureFirmwareSetR640Attribute,
+			[]*models.AttributesFirmwareSet{dbtools.FixtureFirmwareSetR640Attribute},
 			[]string{"R640"},
-			2,
 			1,
 			1,
 			false,
@@ -472,9 +481,8 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 		{
 			"list firmware set by name - r6515",
 			&serverservice.ComponentFirmwareSetListParams{Name: "r6515"},
-			dbtools.FixtureFirmwareSetR6515Attribute,
+			[]*models.AttributesFirmwareSet{dbtools.FixtureFirmwareSetR6515Attribute},
 			[]string{"R6515"},
-			2,
 			1,
 			1,
 			false,
@@ -490,8 +498,7 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 			},
 			nil,
 			nil,
-			2,
-			2,
+			3,
 			2,
 			false,
 			"",
@@ -514,10 +521,38 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 					},
 				},
 			},
-			dbtools.FixtureFirmwareSetR640Attribute,
+			[]*models.AttributesFirmwareSet{dbtools.FixtureFirmwareSetR640Attribute},
 			[]string{"R640"},
-			2,
 			1,
+			1,
+			false,
+			"",
+		},
+		{
+			"list firmware set by attribute params with OR on attribute",
+			&serverservice.ComponentFirmwareSetListParams{
+				AttributeListParams: []serverservice.AttributeListParams{
+					{
+						Namespace: "sh.hollow.firmware_set.labels",
+						Keys:      []string{"model"},
+						Operator:  "eq",
+						Value:     "r640",
+					},
+					{
+						Namespace:         "sh.hollow.firmware_set.labels",
+						Keys:              []string{"model"},
+						Operator:          "eq",
+						Value:             "x11dph-t",
+						AttributeOperator: serverservice.AttributeLogicalOR,
+					},
+				},
+			},
+			[]*models.AttributesFirmwareSet{
+				dbtools.FixtureFirmwareSetR640Attribute,
+				dbtools.FixtureFirmwareSetX11DPHTAttribute,
+			},
+			[]string{"R640", "X11DPH-T"},
+			2,
 			1,
 			false,
 			"",
@@ -529,7 +564,6 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 			},
 			nil,
 			nil,
-			0,
 			0,
 			1,
 			false,
@@ -549,25 +583,68 @@ func TestIntegrationServerComponentFirmwareSetList(t *testing.T) {
 			assert.NotNil(t, resp)
 			assert.NotNil(t, got)
 
-			if tt.expectedFirmwareCount > 0 {
-				assert.Equal(t, tt.expectedFirmwareCount, len(got[0].ComponentFirmware))
-			}
-
 			if tt.expectedFirmwareSetAttribute != nil {
-				assert.Equal(t, 1, len(got[0].Attributes))
-				assert.Equal(t, tt.expectedFirmwareSetAttribute.Namespace, got[0].Attributes[0].Namespace)
-				assertAttributesEqual(t, []byte(tt.expectedFirmwareSetAttribute.Data), got[0].Attributes[0].Data)
+				assert.True(t, assertFirmwareSetAttributeNSEqual(t, tt.expectedFirmwareSetAttribute, got))
+				assert.True(t, assertContainsFirmwareSetAttributes(t, tt.expectedFirmwareSetAttribute, got))
 			}
 
-			if tt.expectedFirmwareModel != nil {
-				assert.Equal(t, tt.expectedFirmwareModel, got[0].ComponentFirmware[0].Model)
-				assert.Equal(t, tt.expectedFirmwareModel, got[0].ComponentFirmware[1].Model)
+			if tt.expectedFirmwareModels != nil {
+				assert.True(t, firmwareSetContainsModel(t, tt.expectedFirmwareModels, got))
 			}
 
 			assert.Equal(t, tt.expectedPage, resp.Page)
 			assert.Equal(t, tt.expectedTotalRecordCount, int(resp.TotalRecordCount))
 		})
 	}
+}
+
+func assertContainsFirmwareSetAttributes(t *testing.T, fwSetModelAttrs []*models.AttributesFirmwareSet, fwSets []serverservice.ComponentFirmwareSet) bool {
+	t.Helper()
+
+	expected := len(fwSetModelAttrs)
+
+	var got int
+
+	for _, fwSetModelAttr := range fwSetModelAttrs {
+		for _, fwSet := range fwSets {
+			if assertAttributesContains(t, fwSet.Attributes, fwSetModelAttr.Data) {
+				got++
+			}
+		}
+	}
+
+	return expected == got
+}
+
+func assertFirmwareSetAttributeNSEqual(t *testing.T, fwSetModelAttrs []*models.AttributesFirmwareSet, fwSets []serverservice.ComponentFirmwareSet) bool {
+	for _, fwSetModelAttr := range fwSetModelAttrs {
+		for _, fwSet := range fwSets {
+			for _, attr := range fwSet.Attributes {
+				if fwSetModelAttr.Namespace != attr.Namespace {
+					t.Errorf("attr namespace %s != %s", fwSetModelAttr.Namespace, attr.Namespace)
+					return false
+				}
+			}
+		}
+	}
+
+	return true
+}
+
+func firmwareSetContainsModel(t *testing.T, models []string, set []serverservice.ComponentFirmwareSet) bool {
+	t.Helper()
+
+	for _, model := range models {
+		for _, f := range set {
+			for _, firmware := range f.ComponentFirmware {
+				if slices.Contains(firmware.Model, model) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 func TestIntegrationServerComponentFirmwareSetDelete(t *testing.T) {
