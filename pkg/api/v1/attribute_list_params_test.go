@@ -142,3 +142,108 @@ func Test_parseQueryAttributesListParams(t *testing.T) {
 		})
 	}
 }
+
+func TestSetJSONBWhereClause(t *testing.T) {
+	tblName := "foo"
+
+	testCases := []struct {
+		jsonPath         string
+		param            AttributeListParams
+		expectedValues   []interface{}
+		expectedWhereStr string
+		testName         string
+	}{
+		{
+			"?",
+			AttributeListParams{
+				Namespace: "hollow.versioned",
+				Keys: []string{
+					"a",
+					"b",
+				},
+				Operator: "lt",
+				Value:    "5",
+			},
+			[]interface{}{"5"},
+			"json_extract_path_text(foo.data::JSONB, ?)::int < ?",
+			"where less than",
+		},
+		{
+			"?",
+			AttributeListParams{
+				Namespace: "hollow.versioned",
+				Keys: []string{
+					"a",
+					"b",
+				},
+				Operator: "gt",
+				Value:    "5",
+			},
+			[]interface{}{"5"},
+			"json_extract_path_text(foo.data::JSONB, ?)::int > ?",
+			"where greater than",
+		},
+		{
+			"?",
+			AttributeListParams{
+				Namespace: "hollow.versioned",
+				Keys: []string{
+					"a",
+					"b",
+				},
+				Operator: "like",
+				Value:    "foobar",
+			},
+			[]interface{}{"foobar"},
+			"json_extract_path_text(foo.data::JSONB, ?) LIKE ?",
+			"like",
+		},
+		{
+			"?",
+			AttributeListParams{
+				Namespace: "hollow.versioned",
+				Keys: []string{
+					"a",
+					"b",
+				},
+				Operator: "eq",
+				Value:    "10",
+			},
+			[]interface{}{"10"},
+			"json_extract_path_text(foo.data::JSONB, ?) = ?",
+			"equal",
+		},
+		{
+			"",
+			AttributeListParams{
+				Namespace: "hollow.versioned",
+				Keys: []string{
+					"a",
+					"b",
+				},
+			},
+			[]interface{}{},
+			`foo.data::JSONB -> ? \? ?`,
+			"default - keys specified with no operator",
+		},
+		{
+			"?",
+			AttributeListParams{
+				Namespace: "hollow.versioned",
+			},
+			[]interface{}{},
+			"foo.data::JSONB",
+			"default - no keys",
+		},
+	}
+
+	values := []interface{}{}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			gotWhereStr, gotValues := tc.param.setJSONBWhereClause(tblName, tc.jsonPath, values)
+			assert.Equal(t, tc.expectedValues, gotValues, "values")
+			assert.Equal(t, tc.expectedWhereStr, gotWhereStr, "where stmt")
+		})
+	}
+}
