@@ -11,11 +11,12 @@ import (
 
 // ComponentFirmwareVersionListParams allows you to filter the results
 type ComponentFirmwareVersionListParams struct {
-	Vendor   string   `form:"vendor"`
-	Model    []string `form:"model"`
-	Version  string   `form:"version"`
-	Filename string   `form:"filename"`
-	Checksum string   `form:"checksum"`
+	Vendor     string   `form:"vendor"`
+	Model      []string `form:"model"`
+	Version    string   `form:"version"`
+	Filename   string   `form:"filename"`
+	Checksum   string   `form:"checksum"`
+	Pagination *PaginationParams
 }
 
 func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
@@ -44,6 +45,8 @@ func (p *ComponentFirmwareVersionListParams) setQuery(q url.Values) {
 	if p.Checksum != "" {
 		q.Set("checksum", p.Checksum)
 	}
+
+	p.Pagination.setQuery(q)
 }
 
 // queryMods converts the list params into sql conditions that can be added to sql queries
