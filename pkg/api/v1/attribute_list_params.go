@@ -90,7 +90,7 @@ func parseQueryAttributesListParams(c *gin.Context, key string) []AttributeListP
 func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
 	nsMod := qm.Where(fmt.Sprintf("%s.namespace = ?", tblName), p.Namespace)
 
-	sqlValues := []interface{}{}
+	values := []interface{}{}
 	jsonPath := ""
 
 	// If we only have a namespace and no keys we are limiting by namespace only
@@ -106,23 +106,35 @@ func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
 		// injection since these strings are passed in by the user.
 		jsonPath += "?"
 
-		sqlValues = append(sqlValues, k)
+		values = append(values, k)
 	}
 
+	where, values := p.setJSONBWhereClause(tblName, jsonPath, values)
+
+	queryMods := []qm.QueryMod{nsMod, qm.And(where, values...)}
+
+	if p.AttributeOperator == AttributeLogicalOR {
+		return qm.Or2(qm.Expr(queryMods...))
+	}
+
+	return qm.Expr(queryMods...)
+}
+
+func (p *AttributeListParams) setJSONBWhereClause(tblName, jsonPath string, values []interface{}) (string, []interface{}) {
 	where := ""
 
 	switch p.Operator {
 	case OperatorLessThan:
-		sqlValues = append(sqlValues, p.Value)
+		values = append(values, p.Value)
 		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s)::int < ?", tblName, jsonPath)
 	case OperatorGreaterThan:
-		sqlValues = append(sqlValues, p.Value)
+		values = append(values, p.Value)
 		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s)::int > ?", tblName, jsonPath)
 	case OperatorLike:
-		sqlValues = append(sqlValues, p.Value)
+		values = append(values, p.Value)
 		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s) LIKE ?", tblName, jsonPath)
 	case OperatorEqual:
-		sqlValues = append(sqlValues, p.Value)
+		values = append(values, p.Value)
 		where = fmt.Sprintf("json_extract_path_text(%s.data::JSONB, %s) = ?", tblName, jsonPath)
 	default:
 		// we only have keys so we just want to ensure the key is there
@@ -138,8 +150,5 @@ func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
 		}
 	}
 
-	return qm.Expr(
-		nsMod,
-		qm.And(where, sqlValues...),
-	)
+	return where, values
 }
