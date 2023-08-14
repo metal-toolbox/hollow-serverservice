@@ -142,12 +142,15 @@ func (p *AttributeListParams) queryMods(tblName string) qm.QueryMod {
 
 	where, values := p.setJSONBWhereClause(tblName, jsonPath, values)
 
+	// namespace AND JSONB query as a query mod
 	queryMods := []qm.QueryMod{nsMod, qm.And(where, values...)}
 
+	// OR ( namespace AND JSONB query )
 	if p.AttributeOperator == AttributeLogicalOR {
 		return qm.Or2(qm.Expr(queryMods...))
 	}
 
+	// AND ( namespace AND JSONB query )
 	return qm.Expr(queryMods...)
 }
 
