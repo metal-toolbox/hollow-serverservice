@@ -12,6 +12,16 @@ import (
 // OperatorType is used to control what kind of search is performed for an AttributeListParams value.
 type OperatorType string
 
+// AttributeOperatorType is used to define how one or more AttributeListParam values should be SQL queried.
+type AttributeOperatorType string
+
+const (
+	// AttributeLogicalOR can be passed into a AttributeListParam to SQL select the attribute an OR clause.
+	AttributeLogicalOR AttributeOperatorType = "or"
+	// AttributeLogicalAND is the default attribute operator, it can be passed into a AttributeListParam to SQL select the attribute a AND clause.
+	AttributeLogicalAND AttributeOperatorType = "and"
+)
+
 const (
 	// OperatorEqual means the value has to match the keys exactly
 	OperatorEqual OperatorType = "eq"
@@ -29,6 +39,9 @@ type AttributeListParams struct {
 	Keys      []string
 	Operator  OperatorType
 	Value     string
+	// AttributeOperatorType is used to define how this AttributeListParam value should be SQL queried
+	// this value defaults to AttributeLogicalAND.
+	AttributeOperator AttributeOperatorType
 }
 
 func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Values) {
@@ -43,6 +56,10 @@ func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Val
 			}
 		}
 
+		if ap.AttributeOperator != "" {
+			value += "~" + string(ap.AttributeOperator)
+		}
+
 		q.Add(key, value)
 	}
 }
@@ -50,8 +67,13 @@ func encodeAttributesListParams(alp []AttributeListParams, key string, q url.Val
 func parseQueryAttributesListParams(c *gin.Context, key string) []AttributeListParams {
 	alp := []AttributeListParams{}
 
-	for _, p := range c.QueryArray(key) {
-		// format is "ns~keys.dot.seperated~operation~value"
+	attrQueryParams := c.QueryArray(key)
+
+	for _, p := range attrQueryParams {
+		// format accepted
+		// "ns~keys.dot.seperated~operation~value"
+		// With attr OR operator: "ns~keys.dot.seperated~operation~value~or"
+		// With attr AND operator: "ns~keys.dot.seperated~operation~value~and"
 		parts := strings.Split(p, "~")
 
 		param := AttributeListParams{
@@ -65,12 +87,21 @@ func parseQueryAttributesListParams(c *gin.Context, key string) []AttributeListP
 
 		param.Keys = strings.Split(parts[1], ".")
 
-		if len(parts) == 4 { // nolint
-
+		if len(parts) == 4 || len(parts) == 5 { // nolint
 			switch o := (*OperatorType)(&parts[2]); *o {
 			case OperatorEqual, OperatorLike, OperatorGreaterThan, OperatorLessThan:
 				param.Operator = *o
 				param.Value = parts[3]
+			}
+
+			// An attribute operator is only applicable when,
+			// - Theres 5 parts in the attr param string when split on `~`.
+			// - Theres multiple attribute query parameters defined.
+			if len(parts) == 5 && len(attrQueryParams) > 1 {
+				switch o := (*AttributeOperatorType)(&parts[4]); *o {
+				case AttributeLogicalAND, AttributeLogicalOR:
+					param.AttributeOperator = *o
+				}
 			}
 
 			// if the like search doesn't contain any % add one at the end

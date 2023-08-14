@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_encodeAttributesListParams(t *testing.T) {
+func TestEncodeAttributesListParams(t *testing.T) {
 	testCases := []struct {
 		alp         []AttributeListParams
 		key         string
@@ -32,7 +32,7 @@ func Test_encodeAttributesListParams(t *testing.T) {
 					"hollow.versioned",
 				},
 			},
-			"query with",
+			"query with namespace",
 		},
 		{
 			[]AttributeListParams{
@@ -68,6 +68,25 @@ func Test_encodeAttributesListParams(t *testing.T) {
 			},
 			"query with namespace, keys and operator, value",
 		},
+		{
+			[]AttributeListParams{
+				{
+					Namespace:         "hollow.versioned",
+					Keys:              []string{"a", "b"},
+					Operator:          "lt",
+					Value:             "5",
+					AttributeOperator: AttributeLogicalOR,
+				},
+			},
+			"key",
+			make(url.Values),
+			url.Values{
+				"key": []string{
+					"hollow.versioned~a.b~lt~5~or",
+				},
+			},
+			"query with namespace, keys and operator, value, OR Attribute Operator",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -78,7 +97,7 @@ func Test_encodeAttributesListParams(t *testing.T) {
 	}
 }
 
-func Test_parseQueryAttributesListParams(t *testing.T) {
+func TestParseQueryAttributesListParams(t *testing.T) {
 	testCases := []struct {
 		key      string
 		query    string
@@ -117,6 +136,57 @@ func Test_parseQueryAttributesListParams(t *testing.T) {
 				},
 			},
 			"query with namespace, attribute list params and 'like' operator",
+		},
+		{
+			"attr",
+			"attr=hollow.versioned~a.name~like~nemo&attr=hollow.versioned~a.name~like~bluefin~or",
+			[]AttributeListParams{
+				{
+					Namespace: "hollow.versioned",
+					Keys: []string{
+						"a",
+						"name",
+					},
+					Operator: "like",
+					Value:    "nemo%",
+				},
+				{
+					Namespace: "hollow.versioned",
+					Keys: []string{
+						"a",
+						"name",
+					},
+					Operator:          "like",
+					Value:             "bluefin%",
+					AttributeOperator: AttributeLogicalOR,
+				},
+			},
+			"query with Attribute Operator - OR",
+		},
+		{
+			"attr",
+			"attr=hollow.versioned~a.name~like~nemo&attr=hollow.versioned~a.name~like~bluefin~wtfbbq",
+			[]AttributeListParams{
+				{
+					Namespace: "hollow.versioned",
+					Keys: []string{
+						"a",
+						"name",
+					},
+					Operator: "like",
+					Value:    "nemo%",
+				},
+				{
+					Namespace: "hollow.versioned",
+					Keys: []string{
+						"a",
+						"name",
+					},
+					Operator: "like",
+					Value:    "bluefin%",
+				},
+			},
+			"query with invalid attribute operator defaults to Attribute operator - AND",
 		},
 	}
 
