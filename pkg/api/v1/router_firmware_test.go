@@ -67,7 +67,7 @@ func TestIntegrationFirmwareList(t *testing.T) {
 			&serverservice.ComponentFirmwareVersionListParams{
 				Model: []string{"X11DPH-T"},
 			},
-			[]string{dbtools.FixtureSuperMicro.ID},
+			[]string{dbtools.FixtureSuperMicroX11DPHTBMC.ID},
 			false,
 			"",
 		},
