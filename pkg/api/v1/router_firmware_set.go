@@ -436,7 +436,7 @@ func (r *Router) firmwareSetMap(ctx context.Context, firmwareSet *models.Compone
 	return m, nil
 }
 
-func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.ComponentFirmwareSet, attributes models.AttributesFirmwareSetSlice, firmwareUUIDs []uuid.UUID) error {
+func (r *Router) firmwareSetUpdateTx(ctx context.Context, fwSetUpdate *models.ComponentFirmwareSet, attrsUpdate models.AttributesFirmwareSetSlice, firmwareUUIDs []uuid.UUID) error {
 	// being transaction to update a firmware set and its references
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -446,41 +446,30 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 	// nolint:errcheck // TODO(joel): log error
 	defer tx.Rollback()
 
-	currentValues, err := models.FindComponentFirmwareSet(ctx, tx, newValues.ID)
+	fwSetCurrent, err := models.FindComponentFirmwareSet(ctx, tx, fwSetUpdate.ID)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
 	// update name column
-	if newValues.Name != "" && newValues.Name != currentValues.Name {
-		currentValues.Name = newValues.Name
+	if fwSetUpdate.Name != "" && fwSetUpdate.Name != fwSetCurrent.Name {
+		fwSetCurrent.Name = fwSetUpdate.Name
 	}
 
-	if _, err := currentValues.Update(ctx, tx, boil.Infer()); err != nil {
+	if _, err := fwSetCurrent.Update(ctx, tx, boil.Infer()); err != nil {
 		return err
 	}
 
-	// retrieve referenced firmware set attributes
-	attrs, err := currentValues.FirmwareSetAttributesFirmwareSets().All(ctx, tx)
-	if err != nil {
-		return err
+	// update attributes if newer attributes were given
+	if len(attrsUpdate) > 0 {
+		if err := r.firmwareSetAttributesUpdate(ctx, tx, fwSetCurrent, attrsUpdate); err != nil {
+			return err
+		}
 	}
 
-	// remove current referenced firmware set attributes
-	_, err = attrs.DeleteAll(ctx, tx)
-	if err != nil {
-		return err
-	}
-
-	// add new firmware set attributes
-	if err := newValues.AddFirmwareSetAttributesFirmwareSets(ctx, tx, true, attributes...); err != nil {
-		return err
-	}
-
-	// add new firmware references
+	// add new firmware references into map
 	for _, id := range firmwareUUIDs {
-		m := models.ComponentFirmwareSetMap{FirmwareSetID: newValues.ID, FirmwareID: id.String()}
+		m := models.ComponentFirmwareSetMap{FirmwareSetID: fwSetUpdate.ID, FirmwareID: id.String()}
 
 		err := m.Insert(ctx, tx, boil.Infer())
 		if err != nil {
@@ -490,6 +479,34 @@ func (r *Router) firmwareSetUpdateTx(ctx context.Context, newValues *models.Comp
 
 	// commit
 	return tx.Commit()
+}
+
+func (r *Router) firmwareSetAttributesUpdate(ctx context.Context, tx *sql.Tx, fwSet *models.ComponentFirmwareSet, attrsUpdate models.AttributesFirmwareSetSlice) error {
+	// retrieve current firmware set attributes
+	attrsCurrent, err := fwSet.FirmwareSetAttributesFirmwareSets().All(ctx, tx)
+	if err != nil {
+		return err
+	}
+
+	// In all cases a single *models.AttributesFirmwareSet obj holds all the firmware set attributes in the Data field,
+	//
+	// here we make sure that data is not overwritten by a 'null' or is set to empty.
+	//
+	// If the client needs to overwrite this data to be empty, Data should be set to an empty JSON - `{}`
+	if len(attrsCurrent) == 1 && len(attrsUpdate) == 1 && len(attrsCurrent[0].Data) > 0 {
+		if string(attrsUpdate[0].Data) == "null" || len(attrsUpdate[0].Data) == 0 {
+			attrsUpdate[0].Data = attrsCurrent[0].Data
+		}
+	}
+
+	// remove current referenced firmware set attributes
+	_, err = attrsCurrent.DeleteAll(ctx, tx)
+	if err != nil {
+		return err
+	}
+
+	// add new firmware set attributes
+	return fwSet.AddFirmwareSetAttributesFirmwareSets(ctx, tx, true, attrsUpdate...)
 }
 
 func (r *Router) serverComponentFirmwareSetRemoveFirmware(c *gin.Context) {
