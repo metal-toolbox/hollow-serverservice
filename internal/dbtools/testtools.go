@@ -5,14 +5,18 @@ package dbtools
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"reflect"
 	"testing"
 
 	// import the crdbpgx for automatic retries of errors for crdb that support retry
 	_ "github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Register the Postgres driver.
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"gocloud.dev/secrets"
 
@@ -45,7 +49,7 @@ func testDatastore(t *testing.T) error {
 
 	testDB = db
 
-	cleanDB()
+	cleanDB(t)
 
 	return addFixtures(t)
 }
@@ -74,7 +78,7 @@ func DatabaseTest(t *testing.T) *sqlx.DB {
 	}
 
 	t.Cleanup(func() {
-		cleanDB()
+		cleanDB(t)
 		err := addFixtures(t)
 		require.NoError(t, err, "Unexpected error setting up fixture data")
 	})
@@ -85,21 +89,41 @@ func DatabaseTest(t *testing.T) *sqlx.DB {
 	return testDB
 }
 
+type deleteable interface {
+	DeleteAll(context.Context, boil.ContextExecutor) (int64, error)
+}
+
 // nolint
-func cleanDB() {
+func cleanDB(t *testing.T) {
+	t.Helper()
+
 	ctx := context.TODO()
 	// Make sure the deletion goes in order so you don't break the databases foreign key constraints
 	testDB.Exec("SET sql_safe_updates = false;")
-	models.Attributes().DeleteAll(ctx, testDB)
-	models.VersionedAttributes().DeleteAll(ctx, testDB)
-	models.ServerComponents().DeleteAll(ctx, testDB)
-	models.ServerComponentTypes().DeleteAll(ctx, testDB)
-	models.ServerCredentials().DeleteAll(ctx, testDB)
-	models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true)
-	models.ComponentFirmwareVersions().DeleteAll(ctx, testDB)
-	models.ComponentFirmwareSets().DeleteAll(ctx, testDB)
-	models.ComponentFirmwareSetMaps().DeleteAll(ctx, testDB)
+
+	deleteFixture(ctx, t, models.Attributes())
+	deleteFixture(ctx, t, models.VersionedAttributes())
+	deleteFixture(ctx, t, models.ServerComponents())
+	deleteFixture(ctx, t, models.ServerComponentTypes())
+	deleteFixture(ctx, t, models.ServerCredentials())
+	if _, err := models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true); err != nil {
+		t.Error(errors.Wrap(err, "table: model.Servers"))
+	}
+	deleteFixture(ctx, t, models.AttributesFirmwareSets())
+	deleteFixture(ctx, t, models.ComponentFirmwareSets())
+	deleteFixture(ctx, t, models.ComponentFirmwareSetMaps())
+	deleteFixture(ctx, t, models.ComponentFirmwareVersions())
+
 	// don't delete the builtin ServerCredentialTypes. Those are expected to exist for the application to work
-	models.ServerCredentialTypes(models.ServerCredentialTypeWhere.Builtin.EQ(false)).DeleteAll(ctx, testDB)
+	deleteFixture(ctx, t, models.ServerCredentialTypes(models.ServerCredentialTypeWhere.Builtin.EQ(false)))
+
 	testDB.Exec("SET sql_safe_updates = true;")
+}
+
+func deleteFixture(ctx context.Context, t *testing.T, fixture deleteable) {
+	t.Helper()
+
+	if _, err := fixture.DeleteAll(ctx, testDB); err != nil {
+		t.Error(errors.Wrap(err, fmt.Sprintf("table: %s", reflect.TypeOf(fixture))))
+	}
 }
