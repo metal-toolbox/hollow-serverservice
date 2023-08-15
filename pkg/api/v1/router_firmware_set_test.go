@@ -209,17 +209,21 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 	r640FirmwareIDs := r640FirmwareFixtureUUIDs(t, firmware.ComponentFirmware)
 
 	var testCases = []struct {
-		testName           string
-		firmwareSetPayload *serverservice.ComponentFirmwareSetRequest
-		expectedError      bool
-		expectedResponse   string
-		errorMsg           string
+		testName                    string
+		firmwareSetPayload          *serverservice.ComponentFirmwareSetRequest
+		expectFirmwareSetAttributes []serverservice.Attributes
+		expectedFirmwareCount       int
+		expectedError               bool
+		expectedResponse            string
+		errorMsg                    string
 	}{
 		{
 			"component firmware set UUID required",
 			&serverservice.ComponentFirmwareSetRequest{
 				Name: "foobar",
 			},
+			nil,
+			0,
 			true,
 			"400",
 			"expected a valid firmware set ID, got none",
@@ -233,6 +237,8 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 					"d825bbeb-20fb-452e-9fe4-invalid",
 				},
 			},
+			nil,
+			0,
 			true,
 			"400",
 			"invalid firmware UUID",
@@ -247,6 +253,8 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 					r640FirmwareIDs[0],
 				},
 			},
+			nil,
+			0,
 			true,
 			"400",
 			"exists in firmware set",
@@ -260,6 +268,8 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 					"d825bbeb-20fb-452e-9fe4-cdedacb2ca1f",
 				},
 			},
+			nil,
+			0,
 			true,
 			"400",
 			"firmware object with given UUID does not exist",
@@ -271,6 +281,8 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 				ID:                     firmwareSetID,
 				ComponentFirmwareUUIDs: []string{dbtools.FixtureDellR640CPLD.ID},
 			},
+			nil,
+			3,
 			false,
 			"200",
 			"",
@@ -287,6 +299,98 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 					},
 				},
 			},
+			[]serverservice.Attributes{
+				{
+					Namespace: "sh.hollow.firmware_set.labels",
+					Data:      json.RawMessage(`{"created by": "foobar"}`),
+				},
+			},
+			3,
+			false,
+			"200",
+			"",
+		},
+		{
+			"update a firmware set with no attributes data does overwrite existing attributes",
+			&serverservice.ComponentFirmwareSetRequest{
+				Name: "foobar-updated",
+				ID:   firmwareSetID,
+				Attributes: []serverservice.Attributes{
+					{
+						Namespace: "sh.hollow.firmware_set.labels",
+					},
+				},
+			},
+			[]serverservice.Attributes{
+				{
+					Namespace: "sh.hollow.firmware_set.labels",
+					Data:      json.RawMessage(`{"created by": "foobar"}`),
+				},
+			},
+			3,
+			false,
+			"200",
+			"",
+		},
+		{
+			"update a firmware set with new attributes updates existing attributes",
+			&serverservice.ComponentFirmwareSetRequest{
+				Name: "foobar-updated",
+				ID:   firmwareSetID,
+				Attributes: []serverservice.Attributes{
+					{
+						Namespace: "sh.hollow.firmware_set.labels",
+						Data:      json.RawMessage(`{"updated by": "foo"}`),
+					},
+				},
+			},
+			[]serverservice.Attributes{
+				{
+					Namespace: "sh.hollow.firmware_set.labels",
+					Data:      json.RawMessage(`{"updated by": "foo"}`),
+				},
+			},
+			3,
+			false,
+			"200",
+			"",
+		},
+		{
+			"update an existing firmware set with empty attributes does not purge existing attributes",
+			&serverservice.ComponentFirmwareSetRequest{
+				Name: "foobar-updated-again",
+				ID:   firmwareSetID,
+			},
+			[]serverservice.Attributes{
+				{
+					Namespace: "sh.hollow.firmware_set.labels",
+					Data:      json.RawMessage(`{"updated by": "foo"}`),
+				},
+			},
+			3,
+			false,
+			"200",
+			"",
+		},
+		{
+			"update a firmware set attributes to be empty",
+			&serverservice.ComponentFirmwareSetRequest{
+				Name: "foobar-updated",
+				ID:   firmwareSetID,
+				Attributes: []serverservice.Attributes{
+					{
+						Namespace: "sh.hollow.firmware_set.labels",
+						Data:      json.RawMessage(`{}`),
+					},
+				},
+			},
+			[]serverservice.Attributes{
+				{
+					Namespace: "sh.hollow.firmware_set.labels",
+					Data:      json.RawMessage(`{}`),
+				},
+			},
+			3,
 			false,
 			"200",
 			"",
@@ -315,13 +419,17 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 			assert.NotNil(t, got)
 			assert.Equal(t, got.UUID.String(), firmwareSetID.String())
 			assert.Equal(t, tt.firmwareSetPayload.Name, got.Name)
-			assert.Equal(t, 3, len(got.ComponentFirmware))
+			assert.Equal(t, tt.expectedFirmwareCount, len(got.ComponentFirmware))
 
 			// assert firmware set attributes
 			if len(tt.firmwareSetPayload.Attributes) > 0 {
 				assert.Equal(t, 1, len(got.Attributes))
 				assert.Equal(t, tt.firmwareSetPayload.Attributes[0].Namespace, got.Attributes[0].Namespace)
-				assertAttributesEqual(t, tt.firmwareSetPayload.Attributes[0].Data, got.Attributes[0].Data)
+			}
+
+			if tt.expectFirmwareSetAttributes != nil {
+				assert.NotNil(t, got.Attributes, "Attributes nil")
+				assertAttributesEqual(t, tt.expectFirmwareSetAttributes[0].Data, got.Attributes[0].Data)
 			}
 
 			if tt.expectedError {
@@ -431,13 +539,13 @@ func assertAttributesEqual(t *testing.T, a, b []byte) bool {
 	// unmarshal fixture attribute data
 	aData := map[string]string{}
 	if err := json.Unmarshal(a, &aData); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	// unmarshal got attribute data
 	bData := map[string]string{}
 	if err := json.Unmarshal(b, &bData); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	return maps.Equal(aData, bData)
