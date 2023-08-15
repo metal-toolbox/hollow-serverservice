@@ -261,10 +261,13 @@ func TestIntegrationServerComponentFirmwareDelete(t *testing.T) {
 
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
-		_, err := s.Client.DeleteServerComponentFirmware(ctx, serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640BMC.ID)})
+		_, err := s.Client.DeleteServerComponentFirmware(ctx, serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640CPLD.ID)})
 
 		return err
 	})
+
+	_, err := s.Client.DeleteServerComponentFirmware(context.TODO(), serverservice.ComponentFirmwareVersion{UUID: uuid.MustParse(dbtools.FixtureDellR640BMC.ID)})
+	assert.Contains(t, err.Error(), "violates foreign key constraint \"fk_firmware_id_ref_component_firmware_version\"")
 }
 
 func TestIntegrationServerComponentFirmwareUpdate(t *testing.T) {
