@@ -98,6 +98,16 @@ func TestIntegrationFirmwareList(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"limit results",
+			&serverservice.ComponentFirmwareVersionListParams{
+				Vendor:     "Dell",
+				Pagination: &serverservice.PaginationParams{Limit: 1},
+			},
+			[]string{dbtools.FixtureDellR640BIOS.ID},
+			false,
+			"",
+		},
 	}
 
 	for _, tt := range testCases {
