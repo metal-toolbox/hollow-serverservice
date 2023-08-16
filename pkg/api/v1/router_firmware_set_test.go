@@ -310,7 +310,7 @@ func TestIntegrationServerComponentFirmwareSetUpdate(t *testing.T) {
 			"",
 		},
 		{
-			"update a firmware set with no attributes data does overwrite existing attributes",
+			"update a firmware set with no attributes data does not overwrite existing attributes",
 			&serverservice.ComponentFirmwareSetRequest{
 				Name: "foobar-updated",
 				ID:   firmwareSetID,
