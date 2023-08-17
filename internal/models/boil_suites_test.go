@@ -12,8 +12,11 @@ import "testing"
 // It does NOT run each operation group in parallel.
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddresses)
 	t.Run("Attributes", testAttributes)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSets)
+	t.Run("BMCMacAddresses", testBMCMacAddresses)
+	t.Run("BomInfos", testBomInfos)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSets)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersions)
@@ -38,8 +41,11 @@ func TestSliceSoftDeleteAll(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesDelete)
 	t.Run("Attributes", testAttributesDelete)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsDelete)
+	t.Run("BMCMacAddresses", testBMCMacAddressesDelete)
+	t.Run("BomInfos", testBomInfosDelete)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsDelete)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsDelete)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsDelete)
@@ -52,8 +58,11 @@ func TestDelete(t *testing.T) {
 }
 
 func TestQueryDeleteAll(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesQueryDeleteAll)
 	t.Run("Attributes", testAttributesQueryDeleteAll)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsQueryDeleteAll)
+	t.Run("BMCMacAddresses", testBMCMacAddressesQueryDeleteAll)
+	t.Run("BomInfos", testBomInfosQueryDeleteAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsQueryDeleteAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsQueryDeleteAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsQueryDeleteAll)
@@ -66,8 +75,11 @@ func TestQueryDeleteAll(t *testing.T) {
 }
 
 func TestSliceDeleteAll(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesSliceDeleteAll)
 	t.Run("Attributes", testAttributesSliceDeleteAll)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsSliceDeleteAll)
+	t.Run("BMCMacAddresses", testBMCMacAddressesSliceDeleteAll)
+	t.Run("BomInfos", testBomInfosSliceDeleteAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsSliceDeleteAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsSliceDeleteAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSliceDeleteAll)
@@ -80,8 +92,11 @@ func TestSliceDeleteAll(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesExists)
 	t.Run("Attributes", testAttributesExists)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsExists)
+	t.Run("BMCMacAddresses", testBMCMacAddressesExists)
+	t.Run("BomInfos", testBomInfosExists)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsExists)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsExists)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsExists)
@@ -94,8 +109,11 @@ func TestExists(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesFind)
 	t.Run("Attributes", testAttributesFind)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsFind)
+	t.Run("BMCMacAddresses", testBMCMacAddressesFind)
+	t.Run("BomInfos", testBomInfosFind)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsFind)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsFind)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsFind)
@@ -108,8 +126,11 @@ func TestFind(t *testing.T) {
 }
 
 func TestBind(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesBind)
 	t.Run("Attributes", testAttributesBind)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsBind)
+	t.Run("BMCMacAddresses", testBMCMacAddressesBind)
+	t.Run("BomInfos", testBomInfosBind)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsBind)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsBind)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsBind)
@@ -122,8 +143,11 @@ func TestBind(t *testing.T) {
 }
 
 func TestOne(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesOne)
 	t.Run("Attributes", testAttributesOne)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsOne)
+	t.Run("BMCMacAddresses", testBMCMacAddressesOne)
+	t.Run("BomInfos", testBomInfosOne)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsOne)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsOne)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsOne)
@@ -136,8 +160,11 @@ func TestOne(t *testing.T) {
 }
 
 func TestAll(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesAll)
 	t.Run("Attributes", testAttributesAll)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsAll)
+	t.Run("BMCMacAddresses", testBMCMacAddressesAll)
+	t.Run("BomInfos", testBomInfosAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsAll)
@@ -150,8 +177,11 @@ func TestAll(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesCount)
 	t.Run("Attributes", testAttributesCount)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsCount)
+	t.Run("BMCMacAddresses", testBMCMacAddressesCount)
+	t.Run("BomInfos", testBomInfosCount)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsCount)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsCount)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsCount)
@@ -164,8 +194,11 @@ func TestCount(t *testing.T) {
 }
 
 func TestHooks(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesHooks)
 	t.Run("Attributes", testAttributesHooks)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsHooks)
+	t.Run("BMCMacAddresses", testBMCMacAddressesHooks)
+	t.Run("BomInfos", testBomInfosHooks)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsHooks)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsHooks)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsHooks)
@@ -178,10 +211,16 @@ func TestHooks(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesInsert)
+	t.Run("AocMacAddresses", testAocMacAddressesInsertWhitelist)
 	t.Run("Attributes", testAttributesInsert)
 	t.Run("Attributes", testAttributesInsertWhitelist)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsInsert)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsInsertWhitelist)
+	t.Run("BMCMacAddresses", testBMCMacAddressesInsert)
+	t.Run("BMCMacAddresses", testBMCMacAddressesInsertWhitelist)
+	t.Run("BomInfos", testBomInfosInsert)
+	t.Run("BomInfos", testBomInfosInsertWhitelist)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsInsert)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsInsertWhitelist)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsInsert)
@@ -205,9 +244,11 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("AocMacAddressToBomInfoUsingSerialNumBomInfo", testAocMacAddressToOneBomInfoUsingSerialNumBomInfo)
 	t.Run("AttributeToServerUsingServer", testAttributeToOneServerUsingServer)
 	t.Run("AttributeToServerComponentUsingServerComponent", testAttributeToOneServerComponentUsingServerComponent)
 	t.Run("AttributesFirmwareSetToComponentFirmwareSetUsingFirmwareSet", testAttributesFirmwareSetToOneComponentFirmwareSetUsingFirmwareSet)
+	t.Run("BMCMacAddressToBomInfoUsingSerialNumBomInfo", testBMCMacAddressToOneBomInfoUsingSerialNumBomInfo)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareSetUsingFirmwareSet", testComponentFirmwareSetMapToOneComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareVersionUsingFirmware", testComponentFirmwareSetMapToOneComponentFirmwareVersionUsingFirmware)
 	t.Run("ServerComponentToServerUsingServer", testServerComponentToOneServerUsingServer)
@@ -225,6 +266,8 @@ func TestOneToOne(t *testing.T) {}
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
+	t.Run("BomInfoToSerialNumAocMacAddresses", testBomInfoToManySerialNumAocMacAddresses)
+	t.Run("BomInfoToSerialNumBMCMacAddresses", testBomInfoToManySerialNumBMCMacAddresses)
 	t.Run("ComponentFirmwareSetToFirmwareSetAttributesFirmwareSets", testComponentFirmwareSetToManyFirmwareSetAttributesFirmwareSets)
 	t.Run("ComponentFirmwareSetToFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetToManyFirmwareSetComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersionToFirmwareComponentFirmwareSetMaps", testComponentFirmwareVersionToManyFirmwareComponentFirmwareSetMaps)
@@ -241,9 +284,11 @@ func TestToMany(t *testing.T) {
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("AocMacAddressToBomInfoUsingSerialNumAocMacAddresses", testAocMacAddressToOneSetOpBomInfoUsingSerialNumBomInfo)
 	t.Run("AttributeToServerUsingAttributes", testAttributeToOneSetOpServerUsingServer)
 	t.Run("AttributeToServerComponentUsingAttributes", testAttributeToOneSetOpServerComponentUsingServerComponent)
 	t.Run("AttributesFirmwareSetToComponentFirmwareSetUsingFirmwareSetAttributesFirmwareSets", testAttributesFirmwareSetToOneSetOpComponentFirmwareSetUsingFirmwareSet)
+	t.Run("BMCMacAddressToBomInfoUsingSerialNumBMCMacAddresses", testBMCMacAddressToOneSetOpBomInfoUsingSerialNumBomInfo)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareSetUsingFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetMapToOneSetOpComponentFirmwareSetUsingFirmwareSet)
 	t.Run("ComponentFirmwareSetMapToComponentFirmwareVersionUsingFirmwareComponentFirmwareSetMaps", testComponentFirmwareSetMapToOneSetOpComponentFirmwareVersionUsingFirmware)
 	t.Run("ServerComponentToServerUsingServerComponents", testServerComponentToOneSetOpServerUsingServer)
@@ -275,6 +320,8 @@ func TestOneToOneRemove(t *testing.T) {}
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
+	t.Run("BomInfoToSerialNumAocMacAddresses", testBomInfoToManyAddOpSerialNumAocMacAddresses)
+	t.Run("BomInfoToSerialNumBMCMacAddresses", testBomInfoToManyAddOpSerialNumBMCMacAddresses)
 	t.Run("ComponentFirmwareSetToFirmwareSetAttributesFirmwareSets", testComponentFirmwareSetToManyAddOpFirmwareSetAttributesFirmwareSets)
 	t.Run("ComponentFirmwareSetToFirmwareSetComponentFirmwareSetMaps", testComponentFirmwareSetToManyAddOpFirmwareSetComponentFirmwareSetMaps)
 	t.Run("ComponentFirmwareVersionToFirmwareComponentFirmwareSetMaps", testComponentFirmwareVersionToManyAddOpFirmwareComponentFirmwareSetMaps)
@@ -309,8 +356,11 @@ func TestToManyRemove(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesReload)
 	t.Run("Attributes", testAttributesReload)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsReload)
+	t.Run("BMCMacAddresses", testBMCMacAddressesReload)
+	t.Run("BomInfos", testBomInfosReload)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsReload)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsReload)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsReload)
@@ -323,8 +373,11 @@ func TestReload(t *testing.T) {
 }
 
 func TestReloadAll(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesReloadAll)
 	t.Run("Attributes", testAttributesReloadAll)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsReloadAll)
+	t.Run("BMCMacAddresses", testBMCMacAddressesReloadAll)
+	t.Run("BomInfos", testBomInfosReloadAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsReloadAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsReloadAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsReloadAll)
@@ -337,8 +390,11 @@ func TestReloadAll(t *testing.T) {
 }
 
 func TestSelect(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesSelect)
 	t.Run("Attributes", testAttributesSelect)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsSelect)
+	t.Run("BMCMacAddresses", testBMCMacAddressesSelect)
+	t.Run("BomInfos", testBomInfosSelect)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsSelect)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsSelect)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSelect)
@@ -351,8 +407,11 @@ func TestSelect(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesUpdate)
 	t.Run("Attributes", testAttributesUpdate)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsUpdate)
+	t.Run("BMCMacAddresses", testBMCMacAddressesUpdate)
+	t.Run("BomInfos", testBomInfosUpdate)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsUpdate)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsUpdate)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsUpdate)
@@ -365,8 +424,11 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestSliceUpdateAll(t *testing.T) {
+	t.Run("AocMacAddresses", testAocMacAddressesSliceUpdateAll)
 	t.Run("Attributes", testAttributesSliceUpdateAll)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsSliceUpdateAll)
+	t.Run("BMCMacAddresses", testBMCMacAddressesSliceUpdateAll)
+	t.Run("BomInfos", testBomInfosSliceUpdateAll)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsSliceUpdateAll)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsSliceUpdateAll)
 	t.Run("ComponentFirmwareVersions", testComponentFirmwareVersionsSliceUpdateAll)
