@@ -7,6 +7,12 @@ The server service is a microservice within the Hollow eco-system. Server servic
 
 ## Quickstart to running locally
 
+### Install cockroachdb
+
+The cockroachdb client is required to create and drop the test database.
+
+Follow the instructions to install the cockroachdb dependency https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html
+
 ### Running server service
 
 To run the server service locally you can bring it up with docker-compose. This will run with released images from the hollow container registry.
