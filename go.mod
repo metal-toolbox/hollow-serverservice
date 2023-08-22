@@ -35,6 +35,7 @@ require (
 )
 
 require (
+	github.com/tealeg/xlsx v1.0.5
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	go.hollow.sh/toolbox v0.6.1
 	go.infratographer.com/x v0.3.7
