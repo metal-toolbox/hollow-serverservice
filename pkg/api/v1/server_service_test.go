@@ -342,3 +342,42 @@ func TestServerServiceServerComponentFirmwareUpdate(t *testing.T) {
 		return err
 	})
 }
+
+func TestBillOfMaterialsBatchUpload(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		bom := []hollow.Bom{{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress1"}}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: bom})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		res, err := c.BillOfMaterialsBatchUpload(ctx, bom)
+		if !expectError {
+			assert.Equal(t, []interface{}([]interface{}{
+				map[string]interface{}{
+					"aoc_mac_address": "fakeAocMacAddress1",
+					"bmc_mac_address": "fakeBmcMacAddress1",
+					"metro":           "",
+					"num_def_pwd":     "",
+					"num_defi_pmi":    "",
+					"serial_num":      "fakeSerialNum1"}}), res.Record)
+		}
+
+		return err
+	})
+}
+
+func TestGetBomInfoByAOCMacAddr(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		bom := hollow.Bom{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress"}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: bom})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		respBom, _, err := c.GetBomInfoByAOCMacAddr(ctx, "fakeAocMacAddress1")
+		if !expectError {
+			assert.Equal(t, &bom, respBom)
+		}
+
+		return err
+	})
+}

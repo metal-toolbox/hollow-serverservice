@@ -121,6 +121,24 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 		srvCmpntFwSets.DELETE("/:uuid", amw.RequiredScopes(deleteScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetDelete)
 		srvCmpntFwSets.POST("/:uuid/remove-firmware", amw.RequiredScopes(deleteScopes("server-component-firmware-sets")), r.serverComponentFirmwareSetRemoveFirmware)
 	}
+
+	// /bill-of-materials
+	srvBoms := rg.Group("/bill-of-materials")
+	{
+		// /bill-of-materials/batch-boms-upload
+		uploadFile := srvBoms.Group("/batch-upload")
+		{
+			uploadFile.POST("", amw.RequiredScopes(createScopes("batch-upload")), r.bomsUpload)
+		}
+
+		// /bill-of-materials/aoc-mac-address
+		srvBomByAocMacAddress := srvBoms.Group("/aoc-mac-address")
+		{
+			srvBomByAocMacAddress.GET("/:aoc_mac_address", amw.RequiredScopes(readScopes("aoc-mac-address")), r.getBomFromAocMacAddress)
+		}
+
+		// TODO: support query by bmc-mac-address
+	}
 }
 
 func createScopes(items ...string) []string {
