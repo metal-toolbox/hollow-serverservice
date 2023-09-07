@@ -381,3 +381,19 @@ func TestGetBomInfoByAOCMacAddr(t *testing.T) {
 		return err
 	})
 }
+
+func TestGetBomInfoByBMCMacAddr(t *testing.T) {
+	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
+		bom := hollow.Bom{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress1"}
+		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: bom})
+		require.Nil(t, err)
+
+		c := mockClient(string(jsonResponse), respCode)
+		respBom, _, err := c.GetBomInfoByBMCMacAddr(ctx, "fakeBmcMacAddress1")
+		if !expectError {
+			assert.Equal(t, &bom, respBom)
+		}
+
+		return err
+	})
+}

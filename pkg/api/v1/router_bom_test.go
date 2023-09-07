@@ -111,6 +111,31 @@ func TestIntegrationBomUpload(t *testing.T) {
 			expectedAocMacAddressError: false,
 		},
 		{
+			testName: "upload duplicate BmcMacAddress",
+			uploadBoms: []serverservice.Bom{
+				{
+					SerialNum:     "fakeSerialNum1",
+					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
+					BmcMacAddress: "fakeBmcMacAddress1,fakeBmcMacAddress2",
+					NumDefiPmi:    "fakeNumDefipmi1",
+					NumDefPWD:     "fakeNumDefpwd1",
+					Metro:         "fakeMetro1",
+				},
+				{
+					SerialNum:     "fakeSerialNum2",
+					AocMacAddress: "fakeAocMacAddress3,fakeAocMacAddress4",
+					BmcMacAddress: "fakeBmcMacAddress1,fakeBmcMacAddress3",
+					NumDefiPmi:    "fakeNumDefipmi2",
+					NumDefPWD:     "fakeNumDefpwd2",
+					Metro:         "fakeMetro2",
+				},
+			},
+			expectedUploadErr:          true,
+			expectedUploadErrorMsg:     "unable to insert into bmc_mac_address: pq: duplicate key value violates unique constraint",
+			aocMacAddress:              "fakeBmcMacAddress3",
+			expectedAocMacAddressError: false,
+		},
+		{
 			testName: "upload empty serial number",
 			uploadBoms: []serverservice.Bom{
 				{
@@ -141,6 +166,23 @@ func TestIntegrationBomUpload(t *testing.T) {
 			},
 			expectedUploadErr:          true,
 			expectedUploadErrorMsg:     "the primary key aoc-mac-address can not be blank",
+			aocMacAddress:              "fakeAocMacAddress3",
+			expectedAocMacAddressError: false,
+		},
+		{
+			testName: "upload empty BmcMacAddress",
+			uploadBoms: []serverservice.Bom{
+				{
+					SerialNum:     "fakeSerialNum1",
+					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
+					BmcMacAddress: "",
+					NumDefiPmi:    "fakeNumDefipmi1",
+					NumDefPWD:     "fakeNumDefpwd1",
+					Metro:         "fakeMetro1",
+				},
+			},
+			expectedUploadErr:          true,
+			expectedUploadErrorMsg:     "the primary key bmc-mac-address can not be blank",
 			aocMacAddress:              "fakeAocMacAddress3",
 			expectedAocMacAddressError: false,
 		},
@@ -316,6 +358,111 @@ func TestIntegrationGetBomByAocMacAddr(t *testing.T) {
 			}
 			if err != nil {
 				t.Fatalf("GetBomInfoByAOCMacAddr(%v) failed to upload, err %v", tc.aocMacAddress, err)
+				return
+			}
+
+			if !reflect.DeepEqual(bom, &tc.expectedBom) {
+				t.Fatalf("got incorrect bom %v, expect %v", bom, tc.expectedBom)
+			}
+		})
+	}
+}
+
+func TestIntegrationGetBomByBmcMacAddr(t *testing.T) {
+	s := serverTest(t)
+
+	uploadBoms := []serverservice.Bom{
+		{
+			SerialNum:     "fakeSerialNum1",
+			AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
+			BmcMacAddress: "fakeBmcMacAddress1,fakeBmcMacAddress2",
+			NumDefiPmi:    "fakeNumDefipmi1",
+			NumDefPWD:     "fakeNumDefpwd1",
+			Metro:         "fakeMetro1",
+		},
+		{
+			SerialNum:     "fakeSerialNum2",
+			AocMacAddress: "fakeAocMacAddress3,fakeAocMacAddress4",
+			BmcMacAddress: "fakeBmcMacAddress3,fakeBmcMacAddress4",
+			NumDefiPmi:    "fakeNumDefipmi2",
+			NumDefPWD:     "fakeNumDefpwd2",
+			Metro:         "fakeMetro2",
+		},
+	}
+	authToken := validToken(adminScopes)
+	s.Client.SetToken(authToken)
+
+	_, err := s.Client.BillOfMaterialsBatchUpload(context.TODO(), uploadBoms)
+	if err != nil {
+		t.Fatalf("s.Client.BillOfMaterialsBatchUpload(%v) failed to upload, err %v", uploadBoms, err)
+		return
+	}
+
+	var testCases = []struct {
+		testName                      string
+		bmcMacAddress                 string
+		expectedBom                   serverservice.Bom
+		expectedBmcMacAddressError    bool
+		expectedBmcMacAddressErrorMsg string
+	}{
+		{
+			testName:                      "get first bom by first bmc mac address",
+			bmcMacAddress:                 "fakeBmcMacAddress1",
+			expectedBom:                   uploadBoms[0],
+			expectedBmcMacAddressError:    false,
+			expectedBmcMacAddressErrorMsg: "",
+		},
+		{
+			testName:                      "get first bom by second bmc mac address",
+			bmcMacAddress:                 "fakeBmcMacAddress2",
+			expectedBom:                   uploadBoms[0],
+			expectedBmcMacAddressError:    false,
+			expectedBmcMacAddressErrorMsg: "",
+		},
+		{
+			testName:                      "get second bom by first bmc mac address",
+			bmcMacAddress:                 "fakeBmcMacAddress3",
+			expectedBom:                   uploadBoms[1],
+			expectedBmcMacAddressError:    false,
+			expectedBmcMacAddressErrorMsg: "",
+		},
+		{
+			testName:                      "get second bom by second bmc mac address",
+			bmcMacAddress:                 "fakeBmcMacAddress3",
+			expectedBom:                   uploadBoms[1],
+			expectedBmcMacAddressError:    false,
+			expectedBmcMacAddressErrorMsg: "",
+		},
+		{
+			testName:                      "non-exist bmc mac address",
+			bmcMacAddress:                 "random",
+			expectedBom:                   uploadBoms[1],
+			expectedBmcMacAddressError:    true,
+			expectedBmcMacAddressErrorMsg: "sql: no rows in result set",
+		},
+		{
+			testName:                      "empty bmc mac address",
+			bmcMacAddress:                 "",
+			expectedBom:                   uploadBoms[1],
+			expectedBmcMacAddressError:    true,
+			expectedBmcMacAddressErrorMsg: "route not found",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			bom, _, err := s.Client.GetBomInfoByBMCMacAddr(context.TODO(), tc.bmcMacAddress)
+			if tc.expectedBmcMacAddressError {
+				if err == nil {
+					t.Fatalf("GetBomInfoByBMCMacAddr(%v) expect error, got nil", tc.bmcMacAddress)
+				}
+				if !strings.Contains(err.Error(), tc.expectedBmcMacAddressErrorMsg) {
+					t.Fatalf("GetBomInfoByBMCMacAddr(%v) expect error %v, got %v", tc.bmcMacAddress, tc.expectedBmcMacAddressErrorMsg, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("GetBomInfoByBMCMacAddr(%v) failed to upload, err %v", tc.bmcMacAddress, err)
 				return
 			}
 
