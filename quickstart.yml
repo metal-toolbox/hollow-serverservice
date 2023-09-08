@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   serverservice:
-    image: ghcr.io/metal-toolbox/hollow-serverservice:v0.16.0
+    image: ghcr.io/metal-toolbox/hollow-serverservice:v0.16.1
     depends_on:
       - crdb
       - serverservice-migrate
@@ -17,7 +17,7 @@ services:
       - hollow
 
   serverservice-migrate:
-    image: ghcr.io/metal-toolbox/hollow-serverservice:v0.16.0
+    image: ghcr.io/metal-toolbox/hollow-serverservice:v0.16.1
     command:
       migrate up
     depends_on:
