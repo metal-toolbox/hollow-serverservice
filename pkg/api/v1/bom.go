@@ -27,6 +27,12 @@ type AocMacAddressBom struct {
 	SerialNum     string `json:"serial_num"`
 }
 
+// BmcMacAddressBom provides a struct to map the bmc_mac_address table.
+type BmcMacAddressBom struct {
+	BmcMacAddress string `json:"bmc_mac_address"`
+	SerialNum     string `json:"serial_num"`
+}
+
 // toDBModel converts Bom to BomInfo.
 func (b *Bom) toDBModel() (*models.BomInfo, error) {
 	if b.SerialNum == "" {
@@ -75,4 +81,24 @@ func (b *Bom) toAocMacAddressDBModels() ([]*models.AocMacAddress, error) {
 	}
 
 	return dbAs, nil
+}
+
+// toBmcMacAddressDBModels converts Bom to one or multiple BmcMacAddress.
+func (b *Bom) toBmcMacAddressDBModels() ([]*models.BMCMacAddress, error) {
+	if b.BmcMacAddress == "" {
+		return nil, errors.Errorf("the primary key bmc-mac-address can not be blank")
+	}
+
+	dbBs := []*models.BMCMacAddress{}
+
+	BmcMacAddrs := strings.Split(b.BmcMacAddress, ",")
+	for _, bmcMacAddr := range BmcMacAddrs {
+		dbB := &models.BMCMacAddress{
+			SerialNum:     b.SerialNum,
+			BMCMacAddress: bmcMacAddr,
+		}
+		dbBs = append(dbBs, dbB)
+	}
+
+	return dbBs, nil
 }

@@ -39,6 +39,17 @@ func (r *Router) bomsUpload(c *gin.Context) {
 					return err
 				}
 			}
+
+			dbBmcMacAddrsBoms, err := (bom).toBmcMacAddressDBModels()
+			if err != nil {
+				return err
+			}
+
+			for _, dbBmcMacAddrsBom := range dbBmcMacAddrsBoms {
+				if err := dbBmcMacAddrsBom.Insert(c.Request.Context(), r.DB, boil.Infer()); err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	})
@@ -63,6 +74,36 @@ func (r *Router) getBomFromAocMacAddress(c *gin.Context) {
 
 	mods = []qm.QueryMod{
 		qm.Where("serial_num=?", aocMacAddr.SerialNum),
+	}
+
+	bomInfo, err := models.BomInfos(mods...).One(c.Request.Context(), r.DB)
+	if err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	bom := Bom{}
+	if err = bom.fromDBModel(bomInfo); err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	itemResponse(c, bom)
+}
+
+func (r *Router) getBomFromBmcMacAddress(c *gin.Context) {
+	mods := []qm.QueryMod{
+		qm.Where("bmc_mac_address=?", c.Param("bmc_mac_address")),
+	}
+
+	bmcMacAddr, err := models.BMCMacAddresses(mods...).One(c.Request.Context(), r.DB)
+	if err != nil {
+		dbErrorResponse(c, err)
+		return
+	}
+
+	mods = []qm.QueryMod{
+		qm.Where("serial_num=?", bmcMacAddr.SerialNum),
 	}
 
 	bomInfo, err := models.BomInfos(mods...).One(c.Request.Context(), r.DB)

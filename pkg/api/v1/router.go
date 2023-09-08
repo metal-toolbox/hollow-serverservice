@@ -137,7 +137,11 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 			srvBomByAocMacAddress.GET("/:aoc_mac_address", amw.RequiredScopes(readScopes("aoc-mac-address")), r.getBomFromAocMacAddress)
 		}
 
-		// TODO: support query by bmc-mac-address
+		// /bill-of-materials/bmc-mac-address
+		srvBomByBmcMacAddress := srvBoms.Group("/bmc-mac-address")
+		{
+			srvBomByBmcMacAddress.GET("/:bmc_mac_address", amw.RequiredScopes(readScopes("bmc-mac-address")), r.getBomFromBmcMacAddress)
+		}
 	}
 }
 

@@ -21,6 +21,7 @@ const (
 	bomInfoEndpoint                     = "bill-of-materials"
 	uploadFileEndpoint                  = "batch-upload"
 	bomByMacAOCAddressEndpoint          = "aoc-mac-address"
+	bomByMacBMCAddressEndpoint          = "bmc-mac-address"
 )
 
 // ClientInterface provides an interface for the expected calls to interact with a server service api
@@ -59,6 +60,7 @@ type ClientInterface interface {
 	ListServerCredentialTypes(context.Context) (*ServerResponse, error)
 	BillOfMaterialsBatchUpload(context.Context, []Bom) (*ServerResponse, error)
 	GetBomInfoByAOCMacAddr(context.Context, string) (*Bom, *ServerResponse, error)
+	GetBomInfoByBMCMacAddr(context.Context, string) (*Bom, *ServerResponse, error)
 }
 
 // Create will attempt to create a server in Hollow and return the new server's UUID
@@ -403,6 +405,19 @@ func (c *Client) BillOfMaterialsBatchUpload(ctx context.Context, boms []Bom) (*S
 // GetBomInfoByAOCMacAddr will return the bom info object by the aoc mac address.
 func (c *Client) GetBomInfoByAOCMacAddr(ctx context.Context, aocMacAddr string) (*Bom, *ServerResponse, error) {
 	path := fmt.Sprintf("%s/%s/%s", bomInfoEndpoint, bomByMacAOCAddressEndpoint, aocMacAddr)
+	bom := &Bom{}
+	r := ServerResponse{Record: bom}
+
+	if err := c.get(ctx, path, &r); err != nil {
+		return nil, nil, err
+	}
+
+	return bom, &r, nil
+}
+
+// GetBomInfoByBMCMacAddr will return the bom info object by the bmc mac address.
+func (c *Client) GetBomInfoByBMCMacAddr(ctx context.Context, bmcMacAddr string) (*Bom, *ServerResponse, error) {
+	path := fmt.Sprintf("%s/%s/%s", bomInfoEndpoint, bomByMacBMCAddressEndpoint, bmcMacAddr)
 	bom := &Bom{}
 	r := ServerResponse{Record: bom}
 
