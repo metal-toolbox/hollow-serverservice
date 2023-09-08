@@ -21,7 +21,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	github.com/volatiletech/null/v8 v8.1.2
+	github.com/volatiletech/null/v9 v9.0.0
 	github.com/volatiletech/randomize v0.0.1
 	github.com/volatiletech/sqlboiler/v4 v4.15.0
 	github.com/volatiletech/strmangle v0.0.5
@@ -35,6 +35,7 @@ require (
 )
 
 require (
+	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	go.hollow.sh/toolbox v0.6.1
 	go.infratographer.com/x v0.3.7
