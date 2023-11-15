@@ -28,6 +28,7 @@ const (
 type ClientInterface interface {
 	Create(context.Context, Server) (*uuid.UUID, *ServerResponse, error)
 	Delete(context.Context, Server) (*ServerResponse, error)
+	DeleteNow(context.Context, Server) (*ServerResponse, error)
 	Get(context.Context, uuid.UUID) (*Server, *ServerResponse, error)
 	List(context.Context, *ServerListParams) ([]Server, *ServerResponse, error)
 	Update(context.Context, uuid.UUID, Server) (*ServerResponse, error)
@@ -78,9 +79,14 @@ func (c *Client) Create(ctx context.Context, srv Server) (*uuid.UUID, *ServerRes
 	return &u, resp, nil
 }
 
-// Delete will attempt to delete a server in Hollow and return an error on failure
+// Delete will attempt to soft delete a server in Hollow and return an error on failure
 func (c *Client) Delete(ctx context.Context, srv Server) (*ServerResponse, error) {
 	return c.delete(ctx, fmt.Sprintf("%s/%s", serversEndpoint, srv.UUID))
+}
+
+// DeleteNow will attempt to hard delete a server in Hollow and return an error on failure
+func (c *Client) DeleteNow(ctx context.Context, srv Server) (*ServerResponse, error) {
+	return c.delete(ctx, fmt.Sprintf("%s/%s/true", serversEndpoint, srv.UUID))
 }
 
 // Get will return a server by it's UUID
