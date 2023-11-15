@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/null/v8"
@@ -126,7 +127,8 @@ func (r *Router) serverDelete(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbSRV.Delete(c.Request.Context(), r.DB, false); err != nil {
+	hardDelete, _ := strconv.ParseBool(c.Param("hard-delete"))
+	if _, err = dbSRV.Delete(c.Request.Context(), r.DB, hardDelete); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}

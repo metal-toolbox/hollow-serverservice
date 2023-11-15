@@ -49,6 +49,7 @@ func (r *Router) Routes(rg *gin.RouterGroup) {
 			srv.GET("", amw.RequiredScopes(readScopes("server")), r.serverGet)
 			srv.PUT("", amw.RequiredScopes(updateScopes("server")), r.serverUpdate)
 			srv.DELETE("", amw.RequiredScopes(deleteScopes("server")), r.serverDelete)
+			srv.DELETE("/:hard-delete", amw.RequiredScopes(deleteScopes("server")), r.serverDelete)
 
 			// /servers/:uuid/attributes
 			srvAttrs := srv.Group("/attributes")
