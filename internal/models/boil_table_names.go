@@ -7,7 +7,6 @@ var TableNames = struct {
 	AocMacAddress            string
 	Attributes               string
 	AttributesFirmwareSet    string
-	BMCMacAddress            string
 	BomInfo                  string
 	ComponentFirmwareSet     string
 	ComponentFirmwareSetMap  string
@@ -22,7 +21,6 @@ var TableNames = struct {
 	AocMacAddress:            "aoc_mac_address",
 	Attributes:               "attributes",
 	AttributesFirmwareSet:    "attributes_firmware_set",
-	BMCMacAddress:            "bmc_mac_address",
 	BomInfo:                  "bom_info",
 	ComponentFirmwareSet:     "component_firmware_set",
 	ComponentFirmwareSetMap:  "component_firmware_set_map",

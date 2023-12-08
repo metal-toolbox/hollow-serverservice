@@ -9,7 +9,6 @@ func TestUpsert(t *testing.T) {
 	t.Run("AocMacAddresses", testAocMacAddressesUpsert)
 	t.Run("Attributes", testAttributesUpsert)
 	t.Run("AttributesFirmwareSets", testAttributesFirmwareSetsUpsert)
-	t.Run("BMCMacAddresses", testBMCMacAddressesUpsert)
 	t.Run("BomInfos", testBomInfosUpsert)
 	t.Run("ComponentFirmwareSets", testComponentFirmwareSetsUpsert)
 	t.Run("ComponentFirmwareSetMaps", testComponentFirmwareSetMapsUpsert)
