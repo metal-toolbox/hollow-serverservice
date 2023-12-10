@@ -193,6 +193,9 @@ CREATE TABLE public.bmc_mac_address (
     FAMILY "primary" (bmc_mac_address, serial_num)
 );
 
+INSERT INTO server_credential_types(name, slug, builtin, created_at, updated_at)
+  VALUES ('BMC', 'bmc', true, now(), now());
+
 ALTER TABLE public.server_components ADD CONSTRAINT fk_server_component_type_id_ref_server_component_types FOREIGN KEY (server_component_type_id) REFERENCES public.server_component_types(id);
 ALTER TABLE public.server_components ADD CONSTRAINT fk_server_id_ref_servers FOREIGN KEY (server_id) REFERENCES public.servers(id) ON DELETE CASCADE;
 ALTER TABLE public.versioned_attributes ADD CONSTRAINT fk_server_id_ref_servers FOREIGN KEY (server_id) REFERENCES public.servers(id) ON DELETE CASCADE;
