@@ -4,7 +4,7 @@ GOOS=linux
 DB_STRING=host=localhost port=26257 user=root sslmode=disable
 DEV_DB=${DB_STRING} dbname=serverservice
 TEST_DB=${DB_STRING} dbname=serverservice_test
-DOCKER_IMAGE  := "ghcr.io/metal-toolbox/hollow-serverservice"
+DOCKER_IMAGE  := "ghcr.io/metal-toolbox/fleetdb"
 
 ## run all tests
 test: | unit-test integration-test
@@ -72,9 +72,9 @@ test-database: | vendor
 
 ## Build linux bin
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o serverservice
+	GOOS=linux GOARCH=amd64 go build -o fleetdb
 
-## build docker image and tag as ghcr.io/metal-toolbox/hollow-serverservice:latest
+## build docker image and tag as ghcr.io/metal-toolbox/fleetdb:latest
 build-image: build-linux
 	docker build --rm=true -f Dockerfile -t ${DOCKER_IMAGE}:latest  . \
 							 --label org.label-schema.schema-version=1.0 \
@@ -83,9 +83,9 @@ build-image: build-linux
 
 ## build and push devel docker image to KIND image repo used by the sandbox - https://github.com/metal-toolbox/sandbox
 push-image-devel: build-image
-	docker tag ${DOCKER_IMAGE}:latest localhost:5001/serverservice:latest
-	docker push localhost:5001/serverservice:latest
-	kind load docker-image localhost:5001/serverservice:latest
+	docker tag ${DOCKER_IMAGE}:latest localhost:5001/fleetdb:latest
+	docker push localhost:5001/fleetdb:latest
+	kind load docker-image localhost:5001/fleetdb:latest
 
 
 # https://gist.github.com/prwhite/8168133

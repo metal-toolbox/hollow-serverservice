@@ -1,8 +1,8 @@
 FROM gcr.io/distroless/static
 
 # Copy the binary that goreleaser built
-COPY serverservice /serverservice
+COPY fleetdb /fleetdb
 
 # Run the web service on container startup.
-ENTRYPOINT ["/serverservice"]
+ENTRYPOINT ["/fleetdb"]
 CMD ["serve"]

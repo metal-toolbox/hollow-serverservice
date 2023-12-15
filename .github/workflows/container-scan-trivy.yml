@@ -25,7 +25,7 @@ jobs:
 
       - name: Build go binary
         run: |
-          go build -o serverservice .
+          go build -o fleetdb .
 
       - name: Build
         uses: docker/build-push-action@v4

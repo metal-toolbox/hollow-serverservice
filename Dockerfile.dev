@@ -16,7 +16,7 @@ RUN go mod tidy
 # Build the binary.
 # -mod=readonly ensures immutable go.mod and go.sum in container builds.
 RUN export LDFLAG_LOCATION="go.infratographer.com/x/versionx" && \
-    CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o serverservice \
+    CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o fleetdb \
 	-ldflags \
             "-X ${LDFLAG_LOCATION}.appName=serverservice \
              -X ${LDFLAG_LOCATION}.commit=$(git rev-parse --short HEAD) \
@@ -30,8 +30,8 @@ FROM alpine:3.18.3
 RUN apk add --no-cache ca-certificates
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/serverservice /serverservice
+COPY --from=builder /app/fleetdb /fleetdb
 
 # Run the web service on container startup.
-ENTRYPOINT ["/serverservice"]
+ENTRYPOINT ["/fleetdb"]
 CMD ["serve"]
