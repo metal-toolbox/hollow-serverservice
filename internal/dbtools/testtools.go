@@ -47,6 +47,8 @@ func testDatastore(t *testing.T) error {
 		return err
 	}
 
+	boil.SetDB(db)
+
 	testDB = db
 
 	cleanDB(t)
@@ -106,7 +108,7 @@ func cleanDB(t *testing.T) {
 	deleteFixture(ctx, t, models.ServerComponents())
 	deleteFixture(ctx, t, models.ServerComponentTypes())
 	deleteFixture(ctx, t, models.ServerCredentials())
-	if _, err := models.Servers(qm.WithDeleted()).DeleteAll(ctx, testDB, true); err != nil {
+	if _, err := models.Servers(qm.WithDeleted()).DeleteAll(ctx, boil.GetContextDB()); err != nil {
 		t.Error(errors.Wrap(err, "table: model.Servers"))
 	}
 	deleteFixture(ctx, t, models.AttributesFirmwareSets())

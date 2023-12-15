@@ -126,7 +126,7 @@ func (r *Router) serverDelete(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbSRV.Delete(c.Request.Context(), r.DB, false); err != nil {
+	if _, err = dbSRV.Delete(c.Request.Context(), boil.GetContextDB()); err != nil {
 		dbErrorResponse(c, err)
 		return
 	}
