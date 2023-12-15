@@ -195,6 +195,7 @@ func (f *showCreateFilter) Read(b []byte) (int, error) {
 		all = bytes.Replace(all, []byte("create_statement"), []byte{}, -1)
 		all = bytes.Replace(all, []byte("\"CREATE"), []byte("CREATE"), -1)
 		all = bytes.Replace(all, []byte(";\""), []byte(";"), -1)
+		all = bytes.Replace(all, []byte(`""`), []byte(`"`), -1)
 		f.buf = bytes.NewBuffer(all)
 	}
 
