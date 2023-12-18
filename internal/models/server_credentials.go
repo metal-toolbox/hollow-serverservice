@@ -616,6 +616,7 @@ func (serverCredentialL) LoadServer(ctx context.Context, e boil.ContextExecutor,
 	query := NewQuery(
 		qm.From(`servers`),
 		qm.WhereIn(`servers.id in ?`, args...),
+		qmhelper.WhereIsNull(`servers.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)

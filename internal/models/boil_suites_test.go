@@ -28,6 +28,18 @@ func TestParent(t *testing.T) {
 	t.Run("VersionedAttributes", testVersionedAttributes)
 }
 
+func TestSoftDelete(t *testing.T) {
+	t.Run("Servers", testServersSoftDelete)
+}
+
+func TestQuerySoftDeleteAll(t *testing.T) {
+	t.Run("Servers", testServersQuerySoftDeleteAll)
+}
+
+func TestSliceSoftDeleteAll(t *testing.T) {
+	t.Run("Servers", testServersSliceSoftDeleteAll)
+}
+
 func TestDelete(t *testing.T) {
 	t.Run("AocMacAddresses", testAocMacAddressesDelete)
 	t.Run("Attributes", testAttributesDelete)

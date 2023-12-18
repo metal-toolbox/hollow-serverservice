@@ -532,6 +532,7 @@ func (versionedAttributeL) LoadServer(ctx context.Context, e boil.ContextExecuto
 	query := NewQuery(
 		qm.From(`servers`),
 		qm.WhereIn(`servers.id in ?`, args...),
+		qmhelper.WhereIsNull(`servers.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
