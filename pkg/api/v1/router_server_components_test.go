@@ -289,15 +289,15 @@ func TestIntegrationServerGetComponents(t *testing.T) {
 				got,
 			)
 
-			if gotc == nil {
+			if gotc != nil {
+				// zero variable values before comparison
+				gotc.UUID = uuid.Nil
+				zeroTimeValues(gotc)
+
+				assert.Equal(t, tt.expectedInSlice, *gotc)
+			} else {
 				t.Fatal("expected component, got nil")
 			}
-
-			// zero variable values before comparison
-			gotc.UUID = uuid.Nil
-			zeroTimeValues(gotc)
-
-			assert.Equal(t, tt.expectedInSlice, *gotc)
 		})
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/volatiletech/sqlboiler/boil"
 	"go.hollow.sh/toolbox/events"
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.infratographer.com/x/crdbx"
@@ -185,6 +186,8 @@ func initDB() *sqlx.DB {
 	if err != nil {
 		logger.Fatalw("failed to initialize database connection", "error", err)
 	}
+
+	boil.SetDB(sqldb)
 
 	db := sqlx.NewDb(sqldb, dbDriverName)
 
