@@ -18,10 +18,10 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.19'
+          go-version: '1.21.0'
 
       - name: Install cockroach binary
-        run: curl https://binaries.cockroachdb.com/cockroach-v21.1.7.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.1.7.linux-amd64/cockroach /usr/local/bin/
+        run: curl https://binaries.cockroachdb.com/cockroach-v23.1.11.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v23.1.11.linux-amd64/cockroach /usr/local/bin/
 
       - name: Start test database
         run: cockroach start-single-node --insecure --background
@@ -36,10 +36,10 @@ jobs:
           args: --timeout=5m
 
       - name: Run go tests and generate coverage report
-        run: SERVERSERVICE_CRDB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test" go test -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 ./...
+        run: SERVERSERVICE_CRDB_URI="host=localhost port=26257 user=root sslmode=disable dbname=serverservice_test" go test -test.v -race -coverprofile=coverage.txt -covermode=atomic -tags testtools -p 1 ./...
 
       - name: Stop test database
-        run: cockroach quit --insecure --host=localhost:26257
+        run: cockroach node drain --insecure --host=localhost:26257
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
