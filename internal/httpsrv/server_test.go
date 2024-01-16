@@ -15,12 +15,14 @@ import (
 	"go.hollow.sh/serverservice/internal/httpsrv"
 )
 
-var serverAuthConfig = ginjwt.AuthConfig{
-	Enabled: false,
+var serverAuthConfig = []ginjwt.AuthConfig{
+	{
+		Enabled: false,
+	},
 }
 
 func TestUnknownRoute(t *testing.T) {
-	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfigs: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -33,7 +35,7 @@ func TestUnknownRoute(t *testing.T) {
 }
 
 func TestHealthzRoute(t *testing.T) {
-	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfigs: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -46,7 +48,7 @@ func TestHealthzRoute(t *testing.T) {
 }
 
 func TestLivenessRoute(t *testing.T) {
-	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfigs: serverAuthConfig}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -61,7 +63,7 @@ func TestLivenessRoute(t *testing.T) {
 func TestReadinessRouteDown(t *testing.T) {
 	db, _ := sqlx.Open("postgres", "localhost:12341")
 
-	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfigs: serverAuthConfig, DB: db}
 	s := hs.NewServer()
 	router := s.Handler
 
@@ -76,7 +78,7 @@ func TestReadinessRouteDown(t *testing.T) {
 func TestReadinessRouteUp(t *testing.T) {
 	db := dbtools.DatabaseTest(t)
 
-	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfig: serverAuthConfig, DB: db}
+	hs := httpsrv.Server{Logger: zap.NewNop(), AuthConfigs: serverAuthConfig, DB: db}
 	s := hs.NewServer()
 	router := s.Handler
 

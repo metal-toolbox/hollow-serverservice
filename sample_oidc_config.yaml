@@ -1,0 +1,15 @@
+oidc:
+  - audience: "https://audience1"
+    issuer: "https://issuer1"
+    jwksuri: "https://jwkuri1"
+    enabled: true
+    claims: 
+      roles: "role1"
+      username: "user1"
+  - audience: "https://audience2"
+    issuer: "https://issuer2"
+    jwksuri: "https://jwkuri2"
+    enabled: true
+    claims: 
+      roles: "role2"
+      username: "user2"

@@ -11,6 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.hollow.sh/toolbox/events"
+	"go.hollow.sh/toolbox/ginauth"
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.infratographer.com/x/versionx"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -27,7 +28,7 @@ type Server struct {
 	Listen        string
 	Debug         bool
 	DB            *sqlx.DB
-	AuthConfig    ginjwt.AuthConfig
+	AuthConfigs   []ginjwt.AuthConfig
 	SecretsKeeper *secrets.Keeper
 	EventStream   events.Stream
 }
@@ -40,11 +41,11 @@ var (
 
 func (s *Server) setup() *gin.Engine {
 	var (
-		authMW *ginjwt.Middleware
+		authMW *ginauth.MultiTokenMiddleware
 		err    error
 	)
 
-	authMW, err = ginjwt.NewAuthMiddleware(s.AuthConfig)
+	authMW, err = ginjwt.NewMultiTokenMiddlewareFromConfigs(s.AuthConfigs...)
 	if err != nil {
 		s.Logger.Sugar().Fatal("failed to initialize auth middleware: ", "error", err)
 	}

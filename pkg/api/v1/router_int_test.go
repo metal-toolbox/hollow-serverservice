@@ -33,12 +33,14 @@ func serverTest(t *testing.T) *integrationServer {
 	hs := httpsrv.Server{
 		Logger: l,
 		DB:     db,
-		AuthConfig: ginjwt.AuthConfig{
-			Enabled:    true,
-			Audience:   "hollow.test",
-			Issuer:     "hollow.test.issuer",
-			JWKSURI:    jwksURI,
-			RolesClaim: "userPerms",
+		AuthConfigs: []ginjwt.AuthConfig{
+			{
+				Enabled:    true,
+				Audience:   "hollow.test",
+				Issuer:     "hollow.test.issuer",
+				JWKSURI:    jwksURI,
+				RolesClaim: "userPerms",
+			},
 		},
 		SecretsKeeper: dbtools.TestSecretKeeper(t),
 	}
