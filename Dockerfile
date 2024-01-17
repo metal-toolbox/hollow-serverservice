@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/static
+FROM gcr.io/distroless/static:debug
 
 # Copy the binary that goreleaser built
 COPY fleetdb /fleetdb
