@@ -1,7 +1,7 @@
 package serverservice
 
 import (
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // ServerComponentType provides a way to group server components by the type

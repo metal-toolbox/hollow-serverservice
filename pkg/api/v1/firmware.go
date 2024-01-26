@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // ComponentFirmwareVersion represents a firmware file

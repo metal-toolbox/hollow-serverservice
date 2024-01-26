@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestIntegrationServerCredentialTypesList(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	serverservice "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 // MockHTTPRequestDoer implements the standard http.Client interface.

@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/volatiletech/null/v8"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	serverservice "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestIntegrationServerList(t *testing.T) {

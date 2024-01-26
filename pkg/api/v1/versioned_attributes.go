@@ -6,7 +6,7 @@ import (
 
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // VersionedAttributes represents a set of attributes of an entity at a given time

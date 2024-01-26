@@ -11,9 +11,9 @@ import (
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
-	"go.hollow.sh/serverservice/internal/models"
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	"github.com/metal-toolbox/fleetdb/internal/models"
+	serverservice "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 // r640FirmwareFixtureUUIDs returns firmware  uuids based on the firmware hardware model attribute

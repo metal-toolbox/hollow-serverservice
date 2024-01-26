@@ -1,11 +1,11 @@
 version: "3.9"
 
 services:
-  serverservice:
-    image: ghcr.io/metal-toolbox/fleetdb:v0.16.0
+  fleetdb:
+    image: ghcr.io/metal-toolbox/fleetdb:v0.16.6
     depends_on:
       - crdb
-      - serverservice-migrate
+      - fleetdb-migrate
     environment:
       - SERVERSERVICE_OIDC_ENABLED=false
       - SERVERSERVICE_CRDB_URI=postgresql://root@crdb:26257/defaultdb?sslmode=disable
@@ -16,8 +16,8 @@ services:
     networks:
       - hollow
 
-  serverservice-migrate:
-    image: ghcr.io/metal-toolbox/fleetdb:v0.16.0
+  fleetdb-migrate:
+    image: ghcr.io/metal-toolbox/fleetdb:v0.16.6
     command:
       migrate up
     depends_on:

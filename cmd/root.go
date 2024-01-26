@@ -13,8 +13,8 @@ import (
 	"go.infratographer.com/x/versionx"
 	"go.uber.org/zap"
 
-	dbm "go.hollow.sh/serverservice/db"
-	"go.hollow.sh/serverservice/internal/config"
+	dbm "github.com/metal-toolbox/fleetdb/db"
+	"github.com/metal-toolbox/fleetdb/internal/config"
 )
 
 var (

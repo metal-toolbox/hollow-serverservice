@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // ComponentFirmwareSet represents a group of firmwares

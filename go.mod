@@ -1,6 +1,6 @@
-module go.hollow.sh/serverservice
+module github.com/metal-toolbox/fleetdb
 
-go 1.19
+go 1.20
 
 require (
 	github.com/XSAM/otelsql v0.23.0 // indirect
@@ -122,7 +122,6 @@ require (
 	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/api v0.137.0 // indirect
-	google.golang.org/genproto v0.0.0-20230815205213-6bfd019c3878 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230815205213-6bfd019c3878 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230815205213-6bfd019c3878 // indirect
 	google.golang.org/grpc v1.57.0 // indirect

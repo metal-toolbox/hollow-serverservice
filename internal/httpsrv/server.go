@@ -19,7 +19,7 @@ import (
 	"go.uber.org/zap"
 	"gocloud.dev/secrets"
 
-	v1api "go.hollow.sh/serverservice/pkg/api/v1"
+	v1api "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 // Server implements the HTTP Server

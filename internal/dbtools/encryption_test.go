@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
 )
 
 func TestEncryptandDecrypt(t *testing.T) {

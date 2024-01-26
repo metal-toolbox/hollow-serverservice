@@ -3,7 +3,7 @@ package serverservice
 import (
 	"time"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 const (

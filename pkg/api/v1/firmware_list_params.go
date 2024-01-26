@@ -6,7 +6,7 @@ import (
 	"github.com/volatiletech/sqlboiler/types"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // ComponentFirmwareVersionListParams allows you to filter the results

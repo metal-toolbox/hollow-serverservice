@@ -11,8 +11,8 @@ import (
 	"go.hollow.sh/toolbox/ginjwt"
 	"go.uber.org/zap"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
-	"go.hollow.sh/serverservice/internal/httpsrv"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	"github.com/metal-toolbox/fleetdb/internal/httpsrv"
 )
 
 var serverAuthConfig = []ginjwt.AuthConfig{
