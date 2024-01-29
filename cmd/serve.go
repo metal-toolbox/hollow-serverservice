@@ -113,11 +113,12 @@ func serve(ctx context.Context) {
 	}
 
 	hs := &httpsrv.Server{
-		Logger:      logger.Desugar(),
-		Listen:      viper.GetString("listen"),
-		Debug:       config.AppConfig.Logging.Debug,
-		DB:          db,
-		AuthConfigs: authCfgs,
+		Logger:        logger.Desugar(),
+		Listen:        viper.GetString("listen"),
+		Debug:         config.AppConfig.Logging.Debug,
+		DB:            db,
+		SecretsKeeper: keeper,
+		AuthConfigs:   authCfgs,
 	}
 
 	// init event stream - for now, only when nats.url is specified
