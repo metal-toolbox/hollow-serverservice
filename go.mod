@@ -1,4 +1,4 @@
-module go.hollow.sh/serverservice
+module github.com/metal-toolbox/fleetdb
 
 go 1.19
 

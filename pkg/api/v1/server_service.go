@@ -1,4 +1,4 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"context"
@@ -24,7 +24,7 @@ const (
 	bomByMacBMCAddressEndpoint          = "bmc-mac-address"
 )
 
-// ClientInterface provides an interface for the expected calls to interact with a server service api
+// ClientInterface provides an interface for the expected calls to interact with a fleetdb api
 type ClientInterface interface {
 	Create(context.Context, Server) (*uuid.UUID, *ServerResponse, error)
 	Delete(context.Context, Server) (*ServerResponse, error)

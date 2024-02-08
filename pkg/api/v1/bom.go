@@ -1,4 +1,4 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"strings"
@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // Bom provides a struct to map the bom_info table.

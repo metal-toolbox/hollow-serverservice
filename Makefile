@@ -4,7 +4,9 @@ GOOS=linux
 DB_STRING=host=localhost port=26257 user=root sslmode=disable
 DEV_DB=${DB_STRING} dbname=serverservice
 TEST_DB=${DB_STRING} dbname=serverservice_test
-DOCKER_IMAGE  := "ghcr.io/metal-toolbox/fleetdb"
+DOCKER_IMAGE := "ghcr.io/metal-toolbox/fleetdb"
+PROJECT_NAME := fleetdb
+REPO := "https://github.com/metal-toolbox/fleetdb.git"
 
 ## run all tests
 test: | unit-test integration-test
@@ -69,24 +71,22 @@ test-database: | vendor
 	@SERVERSERVICE_CRDB_URI="${TEST_DB}" go run main.go migrate up
 	@cockroach sql --insecure -e "use serverservice_test; ALTER TABLE attributes DROP CONSTRAINT check_server_id_server_component_id; ALTER TABLE versioned_attributes DROP CONSTRAINT check_server_id_server_component_id;"
 
-
 ## Build linux bin
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o fleetdb
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ${PROJECT_NAME}
 
 ## build docker image and tag as ghcr.io/metal-toolbox/fleetdb:latest
 build-image: build-linux
-	docker build --rm=true -f Dockerfile -t ${DOCKER_IMAGE}:latest  . \
-							 --label org.label-schema.schema-version=1.0 \
-							 --label org.label-schema.vcs-ref=$(GIT_COMMIT_FULL) \
-							 --label org.label-schema.vcs-url=$(REPO)
+	docker build --rm=true -f Dockerfile -t ${DOCKER_IMAGE}:latest . \
+		--label org.label-schema.schema-version=1.0 \
+		--label org.label-schema.vcs-ref=${GIT_COMMIT_FULL} \
+		--label org.label-schema.vcs-url=${REPO}
 
 ## build and push devel docker image to KIND image repo used by the sandbox - https://github.com/metal-toolbox/sandbox
 push-image-devel: build-image
-	docker tag ${DOCKER_IMAGE}:latest localhost:5001/fleetdb:latest
-	docker push localhost:5001/fleetdb:latest
-	kind load docker-image localhost:5001/fleetdb:latest
-
+	docker tag ${DOCKER_IMAGE}:latest localhost:5001/${PROJECT_NAME}:latest
+	docker push localhost:5001/${PROJECT_NAME}:latest
+	kind load docker-image localhost:5001/${PROJECT_NAME}:latest
 
 # https://gist.github.com/prwhite/8168133
 # COLORS
@@ -95,8 +95,8 @@ YELLOW := $(shell tput -Txterm setaf 3)
 WHITE  := $(shell tput -Txterm setaf 7)
 RESET  := $(shell tput -Txterm sgr0)
 
-
 TARGET_MAX_CHAR_NUM=20
+
 ## Show help
 help:
 	@echo ''
@@ -109,7 +109,7 @@ help:
 		if (helpMessage) { \
 			helpCommand = substr($$1, 0, index($$1, ":")-1); \
 			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
-			printf "  ${YELLOW}%-$(TARGET_MAX_CHAR_NUM)s${RESET} ${GREEN}%s${RESET}\n", helpCommand, helpMessage; \
+			printf "  ${YELLOW}%-${TARGET_MAX_CHAR_NUM}s${RESET} ${GREEN}%s${RESET}\n", helpCommand, helpMessage; \
 		} \
 	} \
-	{ lastLine = $$0 }' $(MAKEFILE_LIST)
+	{ lastLine = $$0 }' ${MAKEFILE_LIST}

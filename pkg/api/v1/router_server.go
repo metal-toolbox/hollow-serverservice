@@ -1,4 +1,4 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/types"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 func (r *Router) serverList(c *gin.Context) {

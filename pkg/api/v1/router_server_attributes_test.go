@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestIntegrationServerCreateAttributes(t *testing.T) {
@@ -20,7 +20,7 @@ func TestIntegrationServerCreateAttributes(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		attrs := serverservice.Attributes{
+		attrs := fleetdbapi.Attributes{
 			Namespace: "integration.tests",
 			Data:      json.RawMessage([]byte(`{"setting":"enabled"}`)),
 		}

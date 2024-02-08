@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 var (
@@ -48,7 +48,7 @@ func TestNewClientWithToken(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		c, err := serverservice.NewClientWithToken(tt.authToken, tt.url, nil)
+		c, err := fleetdbapi.NewClientWithToken(tt.authToken, tt.url, nil)
 
 		if tt.expectError {
 			assert.Error(t, err, tt.testName)

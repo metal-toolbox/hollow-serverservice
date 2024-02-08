@@ -1,11 +1,11 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 func (r *Router) serverComponentFirmwareList(c *gin.Context) {

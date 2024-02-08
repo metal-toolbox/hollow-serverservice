@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"context"
@@ -9,12 +9,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	hollow "go.hollow.sh/serverservice/pkg/api/v1"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestServerServiceCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		srv := hollow.Server{UUID: uuid.New(), FacilityCode: "Test1"}
+		srv := fleetdbapi.Server{UUID: uuid.New(), FacilityCode: "Test1"}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"00000000-0000-0000-0000-000000001234"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -31,15 +31,15 @@ func TestServerServiceDelete(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource deleted"}`))
 		c := mockClient(string(jsonResponse), respCode)
-		_, err := c.Delete(ctx, hollow.Server{UUID: uuid.New()})
+		_, err := c.Delete(ctx, fleetdbapi.Server{UUID: uuid.New()})
 
 		return err
 	})
 }
 func TestServerServiceGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		srv := hollow.Server{UUID: uuid.New(), FacilityCode: "Test1"}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: srv})
+		srv := fleetdbapi.Server{UUID: uuid.New(), FacilityCode: "Test1"}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Record: srv})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -55,8 +55,8 @@ func TestServerServiceGet(t *testing.T) {
 
 func TestServerServiceList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		srv := []hollow.Server{{UUID: uuid.New(), FacilityCode: "Test1"}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: srv})
+		srv := []fleetdbapi.Server{{UUID: uuid.New(), FacilityCode: "Test1"}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: srv})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -71,11 +71,11 @@ func TestServerServiceList(t *testing.T) {
 
 func TestServerServiceUpdate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource updated"})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Message: "resource updated"})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		_, err = c.Update(ctx, uuid.UUID{}, hollow.Server{Name: "new-name"})
+		_, err = c.Update(ctx, uuid.UUID{}, fleetdbapi.Server{Name: "new-name"})
 
 		return err
 	})
@@ -83,7 +83,7 @@ func TestServerServiceUpdate(t *testing.T) {
 
 func TestServerServiceCreateAttributes(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		attr := hollow.Attributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
+		attr := fleetdbapi.Attributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -94,8 +94,8 @@ func TestServerServiceCreateAttributes(t *testing.T) {
 }
 func TestServerServiceGetAttributes(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		attr := &hollow.Attributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: attr})
+		attr := &fleetdbapi.Attributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Record: attr})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -110,7 +110,7 @@ func TestServerServiceGetAttributes(t *testing.T) {
 
 func TestServerServiceDeleteAttributes(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource deleted"})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Message: "resource deleted"})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -122,8 +122,8 @@ func TestServerServiceDeleteAttributes(t *testing.T) {
 
 func TestServerServiceListAttributes(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		attrs := []hollow.Attributes{{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: attrs})
+		attrs := []fleetdbapi.Attributes{{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: attrs})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -138,7 +138,7 @@ func TestServerServiceListAttributes(t *testing.T) {
 
 func TestServerServiceUpdateAttributes(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource updated"})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Message: "resource updated"})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -150,8 +150,8 @@ func TestServerServiceUpdateAttributes(t *testing.T) {
 
 func TestServerServiceComponentsGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		sc := []hollow.ServerComponent{{Name: "unit-test", Serial: "1234"}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: sc})
+		sc := []fleetdbapi.ServerComponent{{Name: "unit-test", Serial: "1234"}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: sc})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -166,12 +166,12 @@ func TestServerServiceComponentsGet(t *testing.T) {
 
 func TestServerServiceComponentsList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		sc := []hollow.ServerComponent{{Name: "unit-test", Serial: "1234"}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: sc})
+		sc := []fleetdbapi.ServerComponent{{Name: "unit-test", Serial: "1234"}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: sc})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, _, err := c.ListComponents(ctx, &hollow.ServerComponentListParams{Name: "unit-test", Serial: "1234"})
+		res, _, err := c.ListComponents(ctx, &fleetdbapi.ServerComponentListParams{Name: "unit-test", Serial: "1234"})
 		if !expectError {
 			assert.ElementsMatch(t, sc, res)
 		}
@@ -182,11 +182,11 @@ func TestServerServiceComponentsList(t *testing.T) {
 
 func TestServerServiceComponentsCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource created"})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Message: "resource created"})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.CreateComponents(ctx, uuid.New(), hollow.ServerComponentSlice{{Name: "unit-test"}})
+		res, err := c.CreateComponents(ctx, uuid.New(), fleetdbapi.ServerComponentSlice{{Name: "unit-test"}})
 		if !expectError {
 			assert.Contains(t, res.Message, "resource created")
 		}
@@ -197,11 +197,11 @@ func TestServerServiceComponentsCreate(t *testing.T) {
 
 func TestServerServiceComponentsUpdate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource updated"})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Message: "resource updated"})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		res, err := c.UpdateComponents(ctx, uuid.New(), hollow.ServerComponentSlice{{Name: "unit-test"}})
+		res, err := c.UpdateComponents(ctx, uuid.New(), fleetdbapi.ServerComponentSlice{{Name: "unit-test"}})
 		if !expectError {
 			assert.Contains(t, res.Message, "resource updated")
 		}
@@ -212,7 +212,7 @@ func TestServerServiceComponentsUpdate(t *testing.T) {
 
 func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		va := hollow.VersionedAttributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
+		va := fleetdbapi.VersionedAttributes{Namespace: "unit-test", Data: json.RawMessage([]byte(`{"test":"unit"}`))}
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource created", "slug":"the-namespace"}`))
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -227,8 +227,8 @@ func TestServerServiceVersionedAttributeCreate(t *testing.T) {
 
 func TestServerServiceGetVersionedAttributess(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		va := []hollow.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: va})
+		va := []fleetdbapi.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: va})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -243,8 +243,8 @@ func TestServerServiceGetVersionedAttributess(t *testing.T) {
 
 func TestServerServiceListVersionedAttributess(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		va := []hollow.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: va})
+		va := []fleetdbapi.VersionedAttributes{{Namespace: "test", Data: json.RawMessage([]byte(`{}`))}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: va})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -259,7 +259,7 @@ func TestServerServiceListVersionedAttributess(t *testing.T) {
 
 func TestServerServiceCreateServerComponentFirmware(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		firmware := hollow.ComponentFirmwareVersion{
+		firmware := fleetdbapi.ComponentFirmwareVersion{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
 			Model:   []string{"R615"},
@@ -281,20 +281,20 @@ func TestServerServiceServerComponentFirmwareDelete(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
 		jsonResponse := json.RawMessage([]byte(`{"message": "resource deleted"}`))
 		c := mockClient(string(jsonResponse), respCode)
-		_, err := c.DeleteServerComponentFirmware(ctx, hollow.ComponentFirmwareVersion{UUID: uuid.New()})
+		_, err := c.DeleteServerComponentFirmware(ctx, fleetdbapi.ComponentFirmwareVersion{UUID: uuid.New()})
 
 		return err
 	})
 }
 func TestServerServiceServerComponentFirmwareGet(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		firmware := hollow.ComponentFirmwareVersion{
+		firmware := fleetdbapi.ComponentFirmwareVersion{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
 			Model:   []string{"R615"},
 			Version: "21.07.00",
 		}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: firmware})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Record: firmware})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -312,13 +312,13 @@ func TestServerServiceServerComponentFirmwareGet(t *testing.T) {
 
 func TestServerServiceServerComponentFirmwareList(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		firmware := []hollow.ComponentFirmwareVersion{{
+		firmware := []fleetdbapi.ComponentFirmwareVersion{{
 			UUID:    uuid.New(),
 			Vendor:  "Dell",
 			Model:   []string{"R615"},
 			Version: "21.07.00",
 		}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Records: firmware})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Records: firmware})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -333,11 +333,11 @@ func TestServerServiceServerComponentFirmwareList(t *testing.T) {
 
 func TestServerServiceServerComponentFirmwareUpdate(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Message: "resource updated"})
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Message: "resource updated"})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
-		_, err = c.UpdateServerComponentFirmware(ctx, uuid.UUID{}, hollow.ComponentFirmwareVersion{UUID: uuid.New()})
+		_, err = c.UpdateServerComponentFirmware(ctx, uuid.UUID{}, fleetdbapi.ComponentFirmwareVersion{UUID: uuid.New()})
 
 		return err
 	})
@@ -345,8 +345,8 @@ func TestServerServiceServerComponentFirmwareUpdate(t *testing.T) {
 
 func TestBillOfMaterialsBatchUpload(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		bom := []hollow.Bom{{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress1"}}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: bom})
+		bom := []fleetdbapi.Bom{{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress1"}}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Record: bom})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -368,8 +368,8 @@ func TestBillOfMaterialsBatchUpload(t *testing.T) {
 
 func TestGetBomInfoByAOCMacAddr(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		bom := hollow.Bom{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress"}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: bom})
+		bom := fleetdbapi.Bom{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress"}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Record: bom})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)
@@ -384,8 +384,8 @@ func TestGetBomInfoByAOCMacAddr(t *testing.T) {
 
 func TestGetBomInfoByBMCMacAddr(t *testing.T) {
 	mockClientTests(t, func(ctx context.Context, respCode int, expectError bool) error {
-		bom := hollow.Bom{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress1"}
-		jsonResponse, err := json.Marshal(hollow.ServerResponse{Record: bom})
+		bom := fleetdbapi.Bom{SerialNum: "fakeSerialNum1", AocMacAddress: "fakeAocMacAddress1", BmcMacAddress: "fakeBmcMacAddress1"}
+		jsonResponse, err := json.Marshal(fleetdbapi.ServerResponse{Record: bom})
 		require.Nil(t, err)
 
 		c := mockClient(string(jsonResponse), respCode)

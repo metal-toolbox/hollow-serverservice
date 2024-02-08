@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestIntegrationServerCredentialsUpsert(t *testing.T) {
@@ -21,7 +21,7 @@ func TestIntegrationServerCredentialsUpsert(t *testing.T) {
 		s.Client.SetToken(authToken)
 
 		id := uuid.MustParse(dbtools.FixtureDory.ID)
-		slug := serverservice.ServerCredentialTypeBMC
+		slug := fleetdbapi.ServerCredentialTypeBMC
 		path := fmt.Sprintf("http://test.hollow.com/api/v1/servers/%s/credentials/%s", id, slug)
 
 		resp, err := s.Client.SetCredential(ctx, id, slug, "postgre", "something")
@@ -38,7 +38,7 @@ func TestIntegrationServerCredentialsUpsert(t *testing.T) {
 
 	t.Run("inserts when secret doesn't exist", func(t *testing.T) {
 		uuid := uuid.MustParse(dbtools.FixtureMarlin.ID)
-		slug := serverservice.ServerCredentialTypeBMC
+		slug := fleetdbapi.ServerCredentialTypeBMC
 
 		// Make sure our server doesn't already have a BMC secret
 		secret, _, err := s.Client.GetCredential(ctx, uuid, slug)
@@ -59,7 +59,7 @@ func TestIntegrationServerCredentialsUpsert(t *testing.T) {
 
 	t.Run("updates when secret already exist", func(t *testing.T) {
 		uuid := uuid.MustParse(dbtools.FixtureNemo.ID)
-		slug := serverservice.ServerCredentialTypeBMC
+		slug := fleetdbapi.ServerCredentialTypeBMC
 
 		// Get the existing secret
 		secret, _, err := s.Client.GetCredential(ctx, uuid, slug)
@@ -83,7 +83,7 @@ func TestIntegrationServerCredentialsUpsert(t *testing.T) {
 
 	t.Run("fails if server uuid not found", func(t *testing.T) {
 		uuid := uuid.New()
-		slug := serverservice.ServerCredentialTypeBMC
+		slug := fleetdbapi.ServerCredentialTypeBMC
 
 		// Make sure our server doesn't already have a BMC secret
 		_, err := s.Client.SetCredential(ctx, uuid, slug, "postgre", "secret")
@@ -108,7 +108,7 @@ func TestIntegrationServerSecretsDelete(t *testing.T) {
 		s.Client.SetToken(authToken)
 
 		id := uuid.MustParse(dbtools.FixtureNemo.ID)
-		slug := serverservice.ServerCredentialTypeBMC
+		slug := fleetdbapi.ServerCredentialTypeBMC
 
 		_, err := s.Client.DeleteCredential(ctx, id, slug)
 		if !expectError {

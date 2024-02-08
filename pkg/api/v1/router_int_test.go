@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"net/http"
@@ -13,14 +13,14 @@ import (
 	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
-	"go.hollow.sh/serverservice/internal/dbtools"
-	"go.hollow.sh/serverservice/internal/httpsrv"
-	hollow "go.hollow.sh/serverservice/pkg/api/v1"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	"github.com/metal-toolbox/fleetdb/internal/httpsrv"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 type integrationServer struct {
 	h      http.Handler
-	Client *hollow.Client
+	Client *fleetdbapi.Client
 }
 
 func serverTest(t *testing.T) *integrationServer {
@@ -50,7 +50,7 @@ func serverTest(t *testing.T) *integrationServer {
 		h: s.Handler,
 	}
 
-	c, err := hollow.NewClientWithToken("testToken", "http://test.hollow.com", ts)
+	c, err := fleetdbapi.NewClientWithToken("testToken", "http://test.hollow.com", ts)
 	require.NoError(t, err)
 
 	ts.Client = c

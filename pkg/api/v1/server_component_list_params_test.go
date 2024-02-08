@@ -1,4 +1,4 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"net/http"

@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 // MockHTTPRequestDoer implements the standard http.Client interface.
@@ -35,7 +35,7 @@ func (md *MockHTTPRequestDoer) Do(req *http.Request) (*http.Response, error) {
 }
 
 // mockClient that can be used for testing
-func mockClient(body string, status int) *serverservice.Client {
+func mockClient(body string, status int) *fleetdbapi.Client {
 	mockDoer := &MockHTTPRequestDoer{
 		Response: &http.Response{
 			StatusCode: status,
@@ -44,7 +44,7 @@ func mockClient(body string, status int) *serverservice.Client {
 		Error: nil,
 	}
 
-	c, err := serverservice.NewClientWithToken("mocked", "mocked", mockDoer)
+	c, err := fleetdbapi.NewClientWithToken("mocked", "mocked", mockDoer)
 	if err != nil {
 		return nil
 	}

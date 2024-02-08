@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"context"
@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestIntegrationBomUpload(t *testing.T) {
 	testCases := []struct {
 		testName                   string
-		uploadBoms                 []serverservice.Bom
+		uploadBoms                 []fleetdbapi.Bom
 		expectedUploadErrorMsg     string
 		expectedUploadErr          bool
 		aocMacAddress              string
@@ -20,7 +20,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 	}{
 		{
 			testName: "upload 1 bom and get by aoc mac address",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -37,7 +37,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload 2 boms and get by aoc mac address",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -62,7 +62,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload duplicate serial number",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -87,7 +87,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload duplicate AocMacAddress",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -112,7 +112,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload duplicate BmcMacAddress",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -137,7 +137,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload empty serial number",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -154,7 +154,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload empty AocMacAddress",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "",
@@ -171,7 +171,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 		},
 		{
 			testName: "upload empty BmcMacAddress",
-			uploadBoms: []serverservice.Bom{
+			uploadBoms: []fleetdbapi.Bom{
 				{
 					SerialNum:     "fakeSerialNum1",
 					AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -227,7 +227,7 @@ func TestIntegrationBomUpload(t *testing.T) {
 
 func TestUploadInOneTransaction(t *testing.T) {
 	uploadBoms :=
-		[]serverservice.Bom{
+		[]fleetdbapi.Bom{
 			{
 				SerialNum:     "fakeSerialNum1",
 				AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -266,7 +266,7 @@ func TestUploadInOneTransaction(t *testing.T) {
 func TestIntegrationGetBomByAocMacAddr(t *testing.T) {
 	s := serverTest(t)
 
-	uploadBoms := []serverservice.Bom{
+	uploadBoms := []fleetdbapi.Bom{
 		{
 			SerialNum:     "fakeSerialNum1",
 			AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -296,7 +296,7 @@ func TestIntegrationGetBomByAocMacAddr(t *testing.T) {
 	var testCases = []struct {
 		testName                      string
 		aocMacAddress                 string
-		expectedBom                   serverservice.Bom
+		expectedBom                   fleetdbapi.Bom
 		expectedAocMacAddressError    bool
 		expectedAocMacAddressErrorMsg string
 	}{
@@ -371,7 +371,7 @@ func TestIntegrationGetBomByAocMacAddr(t *testing.T) {
 func TestIntegrationGetBomByBmcMacAddr(t *testing.T) {
 	s := serverTest(t)
 
-	uploadBoms := []serverservice.Bom{
+	uploadBoms := []fleetdbapi.Bom{
 		{
 			SerialNum:     "fakeSerialNum1",
 			AocMacAddress: "fakeAocMacAddress1,fakeAocMacAddress2",
@@ -401,7 +401,7 @@ func TestIntegrationGetBomByBmcMacAddr(t *testing.T) {
 	var testCases = []struct {
 		testName                      string
 		bmcMacAddress                 string
-		expectedBom                   serverservice.Bom
+		expectedBom                   fleetdbapi.Bom
 		expectedBmcMacAddressError    bool
 		expectedBmcMacAddressErrorMsg string
 	}{

@@ -1,5 +1,5 @@
 //nolint:wsl,revive
-package serverservice
+package fleetdbapi
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 var (

@@ -13,8 +13,8 @@ import (
 	"go.infratographer.com/x/versionx"
 	"go.uber.org/zap"
 
-	dbm "go.hollow.sh/serverservice/db"
-	"go.hollow.sh/serverservice/internal/config"
+	"github.com/metal-toolbox/fleetdb/db"
+	"github.com/metal-toolbox/fleetdb/internal/config"
 )
 
 var (
@@ -47,7 +47,7 @@ func init() {
 
 	// Setup migrate command
 	goosex.RegisterCobraCommand(rootCmd, func() {
-		goosex.SetBaseFS(dbm.Migrations)
+		goosex.SetBaseFS(db.Migrations)
 		goosex.SetDBURI(config.AppConfig.CRDB.URI)
 		goosex.SetLogger(logger)
 	})

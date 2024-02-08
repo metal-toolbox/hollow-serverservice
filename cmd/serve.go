@@ -18,9 +18,9 @@ import (
 	// import gocdk secret drivers
 	_ "gocloud.dev/secrets/localsecrets"
 
-	"go.hollow.sh/serverservice/internal/config"
-	"go.hollow.sh/serverservice/internal/dbtools"
-	"go.hollow.sh/serverservice/internal/httpsrv"
+	"github.com/metal-toolbox/fleetdb/internal/config"
+	"github.com/metal-toolbox/fleetdb/internal/dbtools"
+	"github.com/metal-toolbox/fleetdb/internal/httpsrv"
 )
 
 var (

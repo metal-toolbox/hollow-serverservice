@@ -1,4 +1,4 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 var apiVersion = "v1"
 
-// Client has the ability to talk to a hollow server service api server running at the given URI
+// Client has the ability to talk to a fleetdb api server running at the given URI
 type Client struct {
 	url        string
 	authToken  string
@@ -37,7 +37,7 @@ func NewClientWithToken(authToken, url string, doerClient Doer) (*Client, error)
 	return c, nil
 }
 
-// NewClient will return a server service client configured to talk to the given URL.
+// NewClient will return a fleetdb client configured to talk to the given URL.
 // This client will not set the authorization header for you automatically and is left to be handled by the Doer that is provided.
 //
 // Example:
@@ -53,7 +53,7 @@ func NewClientWithToken(authToken, url string, doerClient Doer) (*Client, error)
 //		EndpointParams: url.Values{"audience": []string{"HOLLOW_AUDIENCE_VALUE"}},
 //	}
 //
-//	c, _ := serverservice.NewClient("HOLLOW_URI", oauthConfig.Client(ctx))
+//	c, _ := fleetdbapi.NewClient("HOLLOW_URI", oauthConfig.Client(ctx))
 func NewClient(url string, doerClient Doer) (*Client, error) {
 	if url == "" {
 		return nil, newClientError("failed to initialize: no hollow api url provided")

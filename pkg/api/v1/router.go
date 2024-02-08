@@ -1,4 +1,4 @@
-package serverservice
+package fleetdbapi
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 	"gocloud.dev/secrets"
 
-	"go.hollow.sh/serverservice/internal/models"
+	"github.com/metal-toolbox/fleetdb/internal/models"
 )
 
 // Router provides a router for the v1 API

@@ -1,4 +1,4 @@
-package serverservice_test
+package fleetdbapi_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	serverservice "go.hollow.sh/serverservice/pkg/api/v1"
+	fleetdbapi "github.com/metal-toolbox/fleetdb/pkg/api/v1"
 )
 
 func TestIntegrationServerCredentialTypesList(t *testing.T) {
@@ -40,7 +40,7 @@ func TestIntegrationServerCredentialTypesCreate(t *testing.T) {
 	realClientTests(t, func(ctx context.Context, authToken string, respCode int, expectError bool) error {
 		s.Client.SetToken(authToken)
 
-		resp, err := s.Client.CreateServerCredentialType(ctx, &serverservice.ServerCredentialType{Name: "Test Type"})
+		resp, err := s.Client.CreateServerCredentialType(ctx, &fleetdbapi.ServerCredentialType{Name: "Test Type"})
 		if !expectError {
 			require.NoError(t, err)
 			assert.NotNil(t, resp.Links.Self)
@@ -53,10 +53,10 @@ func TestIntegrationServerCredentialTypesCreate(t *testing.T) {
 	s.Client.SetToken(validToken(adminScopes))
 
 	t.Run("creating a duplicate type fails", func(t *testing.T) {
-		slug := serverservice.ServerCredentialTypeBMC
+		slug := fleetdbapi.ServerCredentialTypeBMC
 
 		// Make sure our server doesn't already have a BMC secret
-		_, err := s.Client.CreateServerCredentialType(ctx, &serverservice.ServerCredentialType{Name: "Test Type", Slug: slug})
+		_, err := s.Client.CreateServerCredentialType(ctx, &fleetdbapi.ServerCredentialType{Name: "Test Type", Slug: slug})
 		assert.Error(t, err)
 		require.Contains(t, err.Error(), "duplicate key")
 	})

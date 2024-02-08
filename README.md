@@ -60,5 +60,5 @@ export SERVERSERVICE_CRDB_URI="host=localhost port=26257 user=root sslmode=disab
 Run test.
 
 ```bash
-go test -timeout 30s -tags testtools -run ^TestIntegrationServerListComponents$ go.hollow.sh/serverservice/pkg/api/v1 -v
+go test -timeout 30s -tags testtools -run ^TestIntegrationServerListComponents$ github.com/metal-toolbox/fleetdb/pkg/api/v1 -v
 ```
