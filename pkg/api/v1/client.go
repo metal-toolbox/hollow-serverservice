@@ -2,6 +2,7 @@ package serverservice
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,6 +15,8 @@ type Client struct {
 	url        string
 	authToken  string
 	httpClient Doer
+	// dumper writes http request, responses when set.
+	dumper io.Writer
 }
 
 // Doer is an interface for an HTTP client that can make requests
@@ -77,6 +80,11 @@ func NewClient(url string, doerClient Doer) (*Client, error) {
 // SetToken allows you to change the token of a client
 func (c *Client) SetToken(token string) {
 	c.authToken = token
+}
+
+// SetDumper sets requests and responses to be written to the given writer for debugging.
+func (c *Client) SetDumper(w io.Writer) {
+	c.dumper = w
 }
 
 // NextPage will update the server response with the next page of results

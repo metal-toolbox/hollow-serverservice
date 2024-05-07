@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 
 	"go.hollow.sh/toolbox/version"
@@ -78,9 +79,21 @@ func (c *Client) do(req *http.Request, result interface{}) error {
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", c.authToken))
 	req.Header.Set("User-Agent", userAgentString())
 
+	if c.dumper != nil {
+		if err := c.dumpRequest(req); err != nil {
+			return err
+		}
+	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
+	}
+
+	if c.dumper != nil {
+		if err := c.dumpResponse(resp); err != nil {
+			return err
+		}
 	}
 
 	if err := ensureValidServerResponse(resp); err != nil {
@@ -95,4 +108,38 @@ func (c *Client) do(req *http.Request, result interface{}) error {
 	}
 
 	return json.Unmarshal(data, result)
+}
+
+// dumpRequest writes outgoing client requests to dumper
+func (c *Client) dumpRequest(req *http.Request) error {
+	d, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		return err
+	}
+
+	d = append(d, '\n')
+
+	_, err = c.dumper.Write(d)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// dumpRequest writes incoming responses to dumper
+func (c *Client) dumpResponse(resp *http.Response) error {
+	d, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		return err
+	}
+
+	d = append(d, '\n')
+
+	_, err = c.dumper.Write(d)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
