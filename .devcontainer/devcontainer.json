@@ -1,0 +1,81 @@
+// Config reference, https://containers.dev/implementors/json_reference/
+{
+	"name": "hollow-serverservice",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"shutdownAction": "stopCompose",
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"editor.tabCompletion": "on",
+				"workbench.sideBar.location": "left",
+				"workbench.colorTheme": "Dark Atom Dark",
+				"go.toolsManagement.checkForUpdates": "local",
+				"go.useLanguageServer": true,
+				"go.gopath": "/go",
+				"files.trimTrailingWhitespace": true,
+				"files.autoSave": "afterDelay",
+				"editor.fontFamily": "Source Code Pro",
+				"files.autoSaveDelay": 10000,
+				"terminal.external.linuxExec": "terminator",
+				"terminal.integrated.fontSize": 16,
+				"editor.fontSize": 14,
+				"go.lintTool": "golangci-lint",
+				"go.formatTool": "goimports",
+				"go.lintFlags": [
+					"--config=${workspaceFolder}/.golangci.yml",
+					"--fast"
+				],
+				"editor.formatOnSaveTimeout": 5000,
+				"editor.codeActionsOnSaveTimeout": 10000,
+				"editor.formatOnSave": true,
+				"go.vetOnSave": "package",
+				"go.vetFlags": [
+					"-all",
+					"-mod=vendor"
+				],
+				"go.testFlags": [
+					"-v"
+				],
+				"semgrep.metrics": "off",
+				"semgrep.scan.configuration": [
+					"p/trailofbits",
+					"p/golang",
+					"https://semgrep.dev/r/dgryski.semgrep-go",
+					"p/r2c-security-audit",
+					"p/insecure-transport"
+				],
+				"go.autocompleteUnimportedPackages": true,
+				"editor.codeActionsOnSave": {
+					"source.organizeImports": true
+				},
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"golang.go",
+				"vscodevim.vim",
+				"ahmadawais.shades-of-purple",
+				"semgrep.semgrep"
+			]
+		}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": ".devcontainer/scripts/nats_account.sh",
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode",
+	"remoteEnv": {
+		"PATH": "${containerEnv:PATH}:/home/vscode/.nsccli/bin",
+		"NKEYS_PATH": "/nsc/nkeys",
+		"NSC_HOME": "/nsc/.config/nats/nsc"
+	},
+	"features": {
+		"git": "latest",
+		"ghcr.io/devcontainers/features/sshd:1": {}
+	}
+}
